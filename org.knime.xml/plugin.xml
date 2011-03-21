@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/io/read"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.reader.XMLReaderNodeFactory"
+            id="org.knime.xml.node.reader.XMLReaderNodeFactory">
+      </node>
+      <node
+            category-path="/io/write"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.writer.XMLWriterNodeFactory"
+            id="org.knime.xml.node.writer.XMLWriterNodeFactory">
+      </node> 
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
+            id="org.knime.xml.node.xpath.XPathNodeFactory">
+      </node>            
+   </extension>
+   <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="Nodes for processing XML"
+            icon="icons/category_xml.png"
+            level-id="xml"
+            name="XML"
+            path="/misc">
+      </category>
+   </extension>   
+
+</plugin>
