@@ -48,7 +48,7 @@
  * History
  *   11.02.2011 (hofer): created
  */
-package org.knime.xml.node.writer;
+package org.knime.xml.node.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -69,24 +69,26 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 
 /**
+ * A visual component to define key - value pairs.
  *
  * @author Heiko Hofer
  */
-public class AttributesPanel extends JPanel {
-    private NamespaceTableModel m_model;
+@SuppressWarnings("serial")
+public class KeyValuePanel extends JPanel {
+    private KeyValueTableModel m_model;
     private JTable m_table;
     private JButton m_addButton;
     private JButton m_removeButton;
 
     /**
-     *
+     * Create a new instance.
      */
-    public AttributesPanel() {
+    public KeyValuePanel() {
         super(new GridBagLayout());
-        m_model = new NamespaceTableModel();
+        m_model = new KeyValueTableModel();
 
         GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.insets = new Insets(0, 0, 0, 5);
         c.gridx = 0;
@@ -109,13 +111,10 @@ public class AttributesPanel extends JPanel {
         m_table.setGridColor(new Color((gridColor.getRed() + 255) / 2
             , (gridColor.getGreen() + 255) / 2
             , (gridColor.getBlue() + 255) / 2));
-        m_table.setMinimumSize(new Dimension(50, 50));
-        // Disable auto resizing
-        //m_table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         m_table.getColumnModel().getColumn(0).setPreferredWidth(50);
         m_table.getColumnModel().getColumn(1).setPreferredWidth(200);
-
+        m_table.setPreferredScrollableViewportSize(null);
         JScrollPane scroll = new JScrollPane(m_table);
         add(scroll, c);
 
@@ -123,15 +122,13 @@ public class AttributesPanel extends JPanel {
         c.weightx = 0;
         c.insets = new Insets(0, 0, 0, 0);
         add(createButtonPanel(), c);
-
-
-
     }
 
+    /** The button panel at the right. */
     private JPanel createButtonPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.insets = new Insets(0, 0, 5, 0);
         c.gridx = 0;
@@ -142,6 +139,7 @@ public class AttributesPanel extends JPanel {
 
         m_addButton = new JButton("Add");
         m_addButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(final ActionEvent arg0) {
                 m_model.addRow();
             }
@@ -152,6 +150,7 @@ public class AttributesPanel extends JPanel {
         c.insets = new Insets(0, 0, 0, 0);
         m_removeButton = new JButton("Remove");
         m_removeButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(final ActionEvent arg0) {
                 int[] rows = m_table.getSelectedRows();
                 if (rows.length > 0) {
@@ -160,20 +159,67 @@ public class AttributesPanel extends JPanel {
             }
         });
         p.add(m_removeButton, c);
+
+        c.gridy++;
+        c.weighty = 1;
+        p.add(new JPanel(), c);
         return p;
     }
 
-    public void setTableData(final String[] nsPrefixes,
-            final String[] namespaces) {
-        m_model.setTableData(nsPrefixes, namespaces);
+
+    /**
+     * Update the data.
+     *
+     * @param keys the elements of the first column
+     * @param values the elements of the second column
+     */
+    public void setTableData(final String[] keys,
+            final String[] values) {
+        m_model.setTableData(keys, values);
     }
 
-    public String[] getAttributeNames() {
-        return m_model.getNameSpacePrefixes();
+    /**
+     * Get the elements of the first column.
+     *
+     * @return the elements of the first column
+     */
+    public String[] getKeys() {
+        commitOpenEditor();
+        return m_model.getKeys();
     }
 
-    public String[] getAttributeValues() {
-        return m_model.getNamespaces();
+    /**
+     * Get the elements of the second column.
+     *
+     * @return the elements of the second column
+     */
+    public String[] getValues() {
+        commitOpenEditor();
+        return m_model.getValues();
+    }
+
+    private void commitOpenEditor() {
+        if (null != m_table.getCellEditor()) {
+            m_table.getCellEditor().stopCellEditing();
+        }
+    }
+
+    /**
+     * Set the label of the first column.
+     *
+     * @param label the label to set
+     */
+    public void setKeyColumnLabel(final String label) {
+        m_model.setKeyColumnLabel(label);
+    }
+
+    /**
+     * Set the label of the second column.
+     *
+     * @param label the label to set
+     */
+    public void setValueColumnLabel(final String label) {
+        m_model.setValueColumnLabel(label);
     }
 
     /**
@@ -187,58 +233,95 @@ public class AttributesPanel extends JPanel {
         m_removeButton.setEnabled(enabled);
     }
 
-    private static class NamespaceTableModel extends AbstractTableModel {
-        private List<String> m_nsPrefixes;
-        private List<String> m_namespaces;
+    private static class KeyValueTableModel extends AbstractTableModel {
+        private List<String> m_keys;
+        private List<String> m_values;
+        private String m_keyColumnLabel;
+        private String m_valueColumnLabel;
 
-        public NamespaceTableModel() {
-            m_nsPrefixes = new ArrayList<String>();
-            m_namespaces = new ArrayList<String>();
+        public KeyValueTableModel() {
+            m_keys = new ArrayList<String>();
+            m_values = new ArrayList<String>();
+            m_keyColumnLabel = "key";
+            m_valueColumnLabel = "value";
         }
 
         /**
-         *
+         * Append a row to the table.
          */
         public void addRow() {
-            int row = m_namespaces.size();
-            m_nsPrefixes.add("");
-            m_namespaces.add("");
+            int row = m_values.size();
+            m_keys.add("");
+            m_values.add("");
             fireTableRowsInserted(row, row);
         }
 
 
         /**
-         * @param row
+         * Remove given rows.
+         *
+         * @param rows the rows to be removed
          */
         public void removeRows(final int[] rows) {
             Arrays.sort(rows);
             for (int i = rows.length - 1; i >= 0; i--) {
-                m_nsPrefixes.remove(rows[i]);
-                m_namespaces.remove(rows[i]);
+                m_keys.remove(rows[i]);
+                m_values.remove(rows[i]);
                 fireTableRowsDeleted(rows[i], rows[i]);
             }
         }
 
 
         /**
-         * @param nsPrefixes
-         * @param namespaces
+         * Update the data.
+         *
+         * @param keys the elements of the first column
+         * @param values the elements of the second column
          */
-        public void setTableData(final String[] nsPrefixes, final String[] namespaces) {
-            m_nsPrefixes.clear();
-            m_nsPrefixes.addAll(Arrays.asList(nsPrefixes));
-            m_namespaces.clear();
-            m_namespaces.addAll(Arrays.asList(namespaces));
+        public void setTableData(final String[] keys, final String[] values) {
+            m_keys.clear();
+            m_keys.addAll(Arrays.asList(keys));
+            m_values.clear();
+            m_values.addAll(Arrays.asList(values));
             fireTableDataChanged();
         }
 
 
-        public String[] getNameSpacePrefixes() {
-            return m_nsPrefixes.toArray(new String[m_namespaces.size()]);
+        /**
+         * Get the elements of the first column.
+         * @return the elements of the first column
+         */
+        public String[] getKeys() {
+            return m_keys.toArray(new String[m_values.size()]);
         }
 
-        public String[] getNamespaces() {
-            return m_namespaces.toArray(new String[m_namespaces.size()]);
+        /**
+         * Get the elements of the second column.
+         *
+         * @return the elements of the second column
+         */
+        public String[] getValues() {
+            return m_values.toArray(new String[m_values.size()]);
+        }
+
+        /**
+         * Set the label of the first column.
+         *
+         * @param label the label to set
+         */
+        void setKeyColumnLabel(final String label) {
+            m_keyColumnLabel = label;
+            fireTableStructureChanged();
+        }
+
+        /**
+         * Set the label of the second column.
+         *
+         * @param label the label to set
+         */
+        void setValueColumnLabel(final String label) {
+            m_valueColumnLabel = label;
+            fireTableStructureChanged();
         }
 
         /**
@@ -256,9 +339,9 @@ public class AttributesPanel extends JPanel {
         public String getColumnName(final int column) {
             switch (column) {
             case 0:
-                return "Name";
+                return m_keyColumnLabel;
             case 1:
-                return "Value";
+                return m_valueColumnLabel;
 
             default:
                 return "Unknown";
@@ -270,7 +353,7 @@ public class AttributesPanel extends JPanel {
          */
         @Override
         public int getRowCount() {
-            return m_namespaces.size();
+            return m_values.size();
         }
 
         /**
@@ -280,9 +363,9 @@ public class AttributesPanel extends JPanel {
         public Object getValueAt(final int row, final int col) {
             switch (col) {
             case 0:
-                return m_nsPrefixes.get(row);
+                return m_keys.get(row);
             case 1:
-                return m_namespaces.get(row);
+                return m_values.get(row);
 
             default:
                 throw new IllegalStateException("This is a programming error.");
@@ -304,11 +387,11 @@ public class AttributesPanel extends JPanel {
         public void setValueAt(final Object aValue, final int row, final int col) {
             switch (col) {
             case 0:
-                m_nsPrefixes.set(row, aValue.toString());
+                m_keys.set(row, aValue.toString());
                 fireTableRowsUpdated(row, row);
                 break;
             case 1:
-                m_namespaces.set(row, aValue.toString());
+                m_values.set(row, aValue.toString());
                 fireTableRowsUpdated(row, row);
                 break;
             default:

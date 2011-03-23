@@ -69,6 +69,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.xml.node.ui.KeyValuePanel;
 
 /**
  * This is the dialog for the XML reader;
@@ -79,7 +80,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
     private FilesHistoryPanel m_url;
     private JCheckBox m_useXPathFilter;
     private JTextField m_xpath;
-    private NamespacesPanel m_nsPanel;
+    private KeyValuePanel m_nsPanel;
 
 
     /**
@@ -139,7 +140,9 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
 
         c.gridy++;
         c.weighty = 1;
-        m_nsPanel = new NamespacesPanel();
+        m_nsPanel = new KeyValuePanel();
+        m_nsPanel.setKeyColumnLabel("Prefix");
+        m_nsPanel.setValueColumnLabel("Namespace");
         m_nsPanel.setBorder(BorderFactory.createTitledBorder("Namespaces"));
         p.add(m_nsPanel, c);
 
@@ -164,8 +167,8 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         s.setFileURL(m_url.getSelectedFile());
         s.setUseXPathFilter(m_useXPathFilter.isSelected());
         s.setXpath(m_xpath.getText());
-        s.setNsPrefixes(m_nsPanel.getNameSpacePrefixes());
-        s.setNamespaces(m_nsPanel.getNamespaces());
+        s.setNsPrefixes(m_nsPanel.getKeys());
+        s.setNamespaces(m_nsPanel.getValues());
         s.saveSettings(settings);
     }
 

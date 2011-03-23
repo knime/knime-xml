@@ -50,6 +50,7 @@
  */
 package org.knime.xml.node.writer;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -69,6 +70,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.xml.node.ui.KeyValuePanel;
 import org.knime.xml.type.XMLValue;
 
 /**
@@ -82,7 +84,7 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
     private JCheckBox m_overwriteExisting;
     private JCheckBox m_combineRows;
     private JTextField m_rootElement;
-    private AttributesPanel m_attributesPanel;
+    private KeyValuePanel m_attributesPanel;
 
     /**
      * Creates a new dialog.
@@ -91,14 +93,16 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
     public XMLWriterNodeDialog() {
         super();
 
-        addTab("Settings", createSettingsPanel());
+        JPanel settings = createSettingsPanel();
+        settings.setPreferredSize(new Dimension(600, 400));
+        addTab("Settings", settings);
     }
 
     private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(4, 4, 4, 4);
         c.gridx = 0;
@@ -152,7 +156,9 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridy++;
         c.gridwidth = 2;
         c.weighty = 1;
-        m_attributesPanel = new AttributesPanel();
+        m_attributesPanel = new KeyValuePanel();
+        m_attributesPanel.setKeyColumnLabel("Name");
+        m_attributesPanel.setValueColumnLabel("Value");
         m_attributesPanel.setBorder(BorderFactory.createTitledBorder(
                 "Attributes of the root element."));
         p.add(m_attributesPanel, c);
@@ -172,8 +178,8 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         s.setOverwriteExisting(m_overwriteExisting.isSelected());
         s.setCombineRows(m_combineRows.isSelected());
         s.setRootElement(m_rootElement.getText());
-        s.setAttributeNames(m_attributesPanel.getAttributeNames());
-        s.setAttributeValues(m_attributesPanel.getAttributeValues());
+        s.setAttributeNames(m_attributesPanel.getKeys());
+        s.setAttributeValues(m_attributesPanel.getValues());
         s.saveSettings(settings);
     }
 

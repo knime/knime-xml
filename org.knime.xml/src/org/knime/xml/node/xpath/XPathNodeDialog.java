@@ -50,6 +50,7 @@
  */
 package org.knime.xml.node.xpath;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -60,6 +61,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.knime.core.data.DataTableSpec;
@@ -69,7 +72,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
-import org.knime.xml.node.reader.NamespacesPanel;
+import org.knime.xml.node.ui.KeyValuePanel;
 import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
 import org.knime.xml.type.XMLValue;
 
@@ -82,13 +85,13 @@ public class XPathNodeDialog extends NodeDialogPane {
     private ColumnSelectionComboxBox m_inputColumn;
     private JTextField m_newColumn;
     private JCheckBox m_removeInputColumn;
-    private JTextField m_xpath;
+    private JTextArea m_xpath;
     private JRadioButton m_returnBoolean;
     private JRadioButton m_returnNumber;
     private JRadioButton m_returnString;
     private JRadioButton m_returnNode;
     private JRadioButton m_returnNodeSet;
-    private NamespacesPanel m_nsPanel;
+    private KeyValuePanel m_nsPanel;
 
     /**
      * Creates a new dialog.
@@ -96,14 +99,16 @@ public class XPathNodeDialog extends NodeDialogPane {
     public XPathNodeDialog() {
         super();
 
-        addTab("Settings", createSettingsPanel());
+        JPanel settings = createSettingsPanel();
+        settings.setPreferredSize(new Dimension(600, 500));
+        addTab("Settings", settings);
     }
 
     private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(2, 4, 2, 4);
         c.gridx = 0;
@@ -141,12 +146,20 @@ public class XPathNodeDialog extends NodeDialogPane {
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
-        p.add(new JLabel("XPath query:"), c);
-        c.gridx++;
-        c.weightx = 1;
-        m_xpath = new JTextField();
-        p.add(m_xpath, c);
+        c.gridwidth = 2;
+
+        m_xpath = new JTextArea();
+
+
+        JScrollPane xpathScrollPane = new JScrollPane(m_xpath);
+        xpathScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        xpathScrollPane.setPreferredSize(new Dimension(250, 100));
+        xpathScrollPane.setPreferredSize(new Dimension(250, 100));
+        xpathScrollPane.setBorder(BorderFactory.createTitledBorder("XPath query"));
+        p.add(xpathScrollPane, c);
         c.insets = insets1;
+        c.gridwidth = 1;
 
         c.gridwidth = 2;
         c.gridx = 0;
@@ -158,7 +171,9 @@ public class XPathNodeDialog extends NodeDialogPane {
 
         c.gridy++;
         c.weighty = 1;
-        m_nsPanel = new NamespacesPanel();
+        m_nsPanel = new KeyValuePanel();
+        m_nsPanel.setKeyColumnLabel("Prefix");
+        m_nsPanel.setValueColumnLabel("Namespace");
         m_nsPanel.setBorder(BorderFactory.createTitledBorder("Namespaces"));
         p.add(m_nsPanel, c);
         return p;
@@ -227,8 +242,8 @@ public class XPathNodeDialog extends NodeDialogPane {
         } else if (m_returnNodeSet.isSelected()) {
             s.setReturnType(XPathOutput.NodeSet);
         }
-        s.setNsPrefixes(m_nsPanel.getNameSpacePrefixes());
-        s.setNamespaces(m_nsPanel.getNamespaces());
+        s.setNsPrefixes(m_nsPanel.getKeys());
+        s.setNamespaces(m_nsPanel.getValues());
         s.saveSettings(settings);
     }
 
