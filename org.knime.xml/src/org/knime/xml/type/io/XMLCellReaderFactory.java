@@ -57,12 +57,12 @@ import javax.xml.stream.XMLStreamException;
 
 /**
  *
- * @author Heik Hofer
+ * @author Heiko Hofer
  */
 public class XMLCellReaderFactory {
     public static XMLCellReader createXMLCellReader(final InputStream is)
                throws ParserConfigurationException, XMLStreamException{
-        return new XMLXpathCellReader(is);
+        return new XMLDOMCellReader(is);
     }
 
     public static XMLCellReader createXPathXMLCellReader(final InputStream is,

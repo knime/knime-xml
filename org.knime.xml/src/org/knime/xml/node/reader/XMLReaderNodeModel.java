@@ -180,7 +180,8 @@ public class XMLReaderNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
         InputStream in = null;
         try {
-            in = openInputStream();
+            DataContainer cont = exec.createDataContainer(createOutSpec());
+            int rowCount = 0;
             XMLCellReader reader = null;
             if (m_settings.getUseXPathFilter()) {
                 String[] prefix = m_settings.getNsPrefixes();
@@ -189,24 +190,35 @@ public class XMLReaderNodeModel extends NodeModel {
                     new DefaultNamespaceContext(prefix, namespaces);
                 LimitedXPathMatcher xpathMatcher =
                     new LimitedXPathMatcher(m_settings.getXpath(), nsContext);
+                if (xpathMatcher.rootMatches()) {
+                    in = openInputStream();
+                    reader = XMLCellReaderFactory.createXMLCellReader(in);
+                    DataCell cell = reader.readXML();
+                    DataRow row = new DefaultRow("Row " + rowCount, cell);
+                    cont.addRowToTable(row);
+                    rowCount++;
+                    in.close();
+                }
+                in = openInputStream();
                 reader = XMLCellReaderFactory.createXPathXMLCellReader(in,
                         xpathMatcher);
+                DataCell cell = reader.readXML();
+                while(null != cell) {
+                    // TODO Check noding conventions for row ID naming
+                    DataRow row = new DefaultRow("Row " + rowCount, cell);
+                    cont.addRowToTable(row);
+                    rowCount++;
+                    cell = reader.readXML();
+                }
             } else {
+                in = openInputStream();
                 reader = XMLCellReaderFactory.createXMLCellReader(in);
-            }
-            int rowCount = 0;
-            DataContainer cont = exec.createDataContainer(createOutSpec());
-            DataCell cell = reader.readXML();
-            while(null != cell) {
-                // TODO Check noding conventions for row ID naming
+                DataCell cell = reader.readXML();
                 DataRow row = new DefaultRow("Row " + rowCount, cell);
                 cont.addRowToTable(row);
-                rowCount++;
-                cell = reader.readXML();
             }
             cont.close();
             DataTable table = cont.getTable();
-            //DataTable table = parseXML(in, exec);
 
             BufferedDataTable out = exec.createBufferedDataTable(table, exec);
             return new BufferedDataTable[]{out};

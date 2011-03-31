@@ -50,16 +50,9 @@
  */
 package org.knime.xml.type.io;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,16 +68,13 @@ import javax.xml.stream.XMLStreamReader;
 import org.knime.core.data.DataCell;
 import org.knime.xml.type.XMLCellFactory;
 import org.knime.xml.type.XMLValue;
-import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -99,18 +89,8 @@ public class XMLXpathCellReader implements XMLCellReader {
     private List<Document> m_docs;
     private List<Node> m_currNodes;
     private boolean m_reentrent;
-    private boolean m_first;
     private List<String> m_base;
-
-    /**
-     * @param is
-     * @throws XMLStreamException
-     * @throws IOException
-     * @throws SAXException
-     */
-    public XMLXpathCellReader(final InputStream in) throws ParserConfigurationException, XMLStreamException {
-        this(in, new LimitedXPathMatcher());
-    }
+    private List<String> m_space;
 
     public XMLXpathCellReader(final InputStream is,
             final LimitedXPathMatcher xpathMatcher) throws ParserConfigurationException, XMLStreamException {
@@ -130,8 +110,9 @@ public class XMLXpathCellReader implements XMLCellReader {
         m_currNodes = new LinkedList<Node>();
 
         m_reentrent = false;
-        m_first = true;
         m_base = new LinkedList<String>();
+        m_space = new LinkedList<String>();
+        initStreamParser();
     }
 
     private void initStreamParser() throws XMLStreamException {
@@ -147,44 +128,6 @@ public class XMLXpathCellReader implements XMLCellReader {
      * @throws IOException
      */
     public DataCell readXML() throws XMLStreamException, IOException {
-        if (m_first) {
-            m_first = false;
-            if (m_xpathMatcher.rootMatches()) {
-                InputSource source = null;
-                // when the xpath has also node matching parts
-                if (m_xpathMatcher.nodeMatches()) {
-                    Writer writer = new StringWriter();
-                    char[] buffer = new char[1024];
-                    Reader reader =
-                            new BufferedReader(new InputStreamReader(m_in,
-                                    "UTF-8"));
-                    int n = reader.read(buffer);
-                    while (n != -1) {
-                        writer.write(buffer, 0, n);
-                        n = reader.read(buffer);
-                    }
-                    String xml = writer.toString();
-                    source = new InputSource(xml);
-                    // recreate m_in for the stream parser
-                    m_in = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-                    initStreamParser();
-                } else {
-                    source = new InputSource(m_in);
-                }
-                Document doc;
-                try {
-                    doc = m_builder.parse(new InputSource(m_in));
-                } catch (SAXException e) {
-                    throw new XMLStreamException(e);
-                }
-                // TODO: strip white space and trim nodes?
-                removeEmptyTextRecursive(doc);
-                DataCell cell = XMLCellFactory.create(doc);
-                return cell;
-            } else {
-                initStreamParser();
-            }
-        }
         if (!m_xpathMatcher.nodeMatches()) {
             return null;
         }
@@ -192,6 +135,7 @@ public class XMLXpathCellReader implements XMLCellReader {
             switch (m_parser.getEventType()) {
             case XMLStreamConstants.START_ELEMENT:
                 updateBasePath();
+                updateXmlSpaceDefinition();
                 for (int i = 0; i < m_docs.size(); i++) {
                     Element element = createElement(m_docs.get(i));
                     m_currNodes.get(i).appendChild(element);
@@ -292,50 +236,7 @@ public class XMLXpathCellReader implements XMLCellReader {
             }
             m_parser.next();
         }
-        if (m_xpathMatcher.rootMatches() && !m_docs.isEmpty()) {
-            DataCell cell = XMLCellFactory.create(m_docs.get(0));
-            m_docs.remove(0);
-            m_currNodes.remove(0);
-            return cell;
-        }
         return null;
-    }
-
-    /**
-     *  Removes all descendent text nodes that contain only whitespace. These
-     *  come from the newlines and indentation between child elements, and
-     *  could be removed by by the parser if you had a DTD that specified
-     *  element-only content.
-     */
-    public static void removeEmptyTextRecursive(final Node node)
-    {
-        List<Node> toRemove = new ArrayList<Node>();
-        NodeList list = node.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node child = list.item(i);
-            switch (child.getNodeType())
-            {
-                case Node.ELEMENT_NODE :
-                    removeEmptyTextRecursive(child);
-                    break;
-                case Node.CDATA_SECTION_NODE :
-                case Node.TEXT_NODE :
-                    String str = child.getNodeValue();
-                    if (null == str || str.trim().isEmpty()) {
-                        toRemove.add(child);
-                    } else {
-                        ((CharacterData)child).setData(str.trim());
-                    }
-                    break;
-                default :
-                    // do nothing
-            }
-        }
-        for (Node child : toRemove) {
-            node.removeChild(child);
-        }
-
-
     }
 
     private int getCharacterOffset() {
@@ -388,6 +289,19 @@ public class XMLXpathCellReader implements XMLCellReader {
         m_base.add(0, basePath);
     }
 
+    private void updateXmlSpaceDefinition() {
+        String space = m_space.isEmpty() ? null
+                : m_space.get(m_space.size() - 1);
+        for (int i = 0; i < m_parser.getAttributeCount(); i++) {
+            if (m_parser.getAttributeLocalName(i).equals("space")
+                    && m_parser.getAttributePrefix(i).equals(
+                            XMLConstants.XML_NS_PREFIX)) {
+                space = m_parser.getAttributeValue(i);
+            }
+        }
+        m_space.add(0, space);
+    }
+
 
     private DataCell createDataCell(final Document doc)
         throws XMLStreamException, IOException, ParserConfigurationException,
@@ -405,6 +319,7 @@ public class XMLXpathCellReader implements XMLCellReader {
      * @throws XMLStreamException
      * @throws IOException
      */
+    @Override
     public void close() throws XMLStreamException, IOException {
         m_parser.close();
         m_in.close();
