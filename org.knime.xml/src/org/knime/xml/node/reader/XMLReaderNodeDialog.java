@@ -72,7 +72,7 @@ import org.knime.core.node.util.FilesHistoryPanel;
 import org.knime.xml.node.ui.KeyValuePanel;
 
 /**
- * This is the dialog for the XML reader;
+ * This is the dialog for the XML reader.
  *
  * @author Heiko Hofer
  */
@@ -96,7 +96,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.insets = new Insets(2, 2, 2, 2);
         c.gridx = 0;
@@ -133,7 +133,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c1.gridy++;
         c1.insets = new Insets(0, 0, 0, 0);
         pXPath.add(new JLabel("Does not support XPath completely, "
-                + "see node description"), c1);
+                + "see node description."), c1);
 
         c.gridy++;
         p.add(pXPath, c);
