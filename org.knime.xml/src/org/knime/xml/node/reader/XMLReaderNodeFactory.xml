@@ -5,9 +5,21 @@
     <shortDescription>Reads a XML File.</shortDescription>
     <fullDescription>
         <intro>
-            Reads a well formed XML File. The file is parsed in a DOM.
+            Reads a well formed XML document. An XPath query can be specified to 
+            read only a portion of the file. In this case the output will be
+            the nodes in the document that match the XPath query.
 		</intro>
-        <option name="File Chooser">
+        <option name="Selected File">
+            The XML document which can be a local file on disk or an URL.
+        </option>
+        <option name="Use XPath Filter">
+            If checked the nodes of the document which match den XPath query
+            will be read, only.
+        </option>
+        <option name="XPath Query">
+            Choose the file to read.
+        </option>
+        <option name="Namespaces">
             Choose the file to read.
         </option>
     </fullDescription>
