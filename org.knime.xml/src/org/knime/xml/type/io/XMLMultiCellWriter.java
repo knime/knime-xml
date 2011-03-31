@@ -139,7 +139,7 @@ class XMLMultiCellWriter implements XMLCellWriter {
      */
     private void initWriter(final OutputStream os) throws XMLStreamException {
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
-        m_writer = factory.createXMLStreamWriter(os);
+        m_writer = factory.createXMLStreamWriter(os, "UTF-8");
     }
 
     /**
