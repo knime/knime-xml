@@ -67,6 +67,11 @@ import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.container.DataContainer;
 import org.knime.core.data.def.DefaultRow;
+import org.knime.core.data.xml.type.XMLCell;
+import org.knime.core.data.xml.type.io.LimitedXPathMatcher;
+import org.knime.core.data.xml.type.io.XMLCellReader;
+import org.knime.core.data.xml.type.io.XMLCellReaderFactory;
+import org.knime.core.data.xml.type.util.DefaultNamespaceContext;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -75,11 +80,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.xml.type.XMLCell;
-import org.knime.xml.type.io.LimitedXPathMatcher;
-import org.knime.xml.type.io.XMLCellReader;
-import org.knime.xml.type.io.XMLCellReaderFactory;
-import org.knime.xml.type.util.DefaultNamespaceContext;
 
 /**
  * This is the model for the XML Reader node.

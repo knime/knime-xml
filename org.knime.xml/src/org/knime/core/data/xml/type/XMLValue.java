@@ -46,28 +46,71 @@
  * ------------------------------------------------------------------------
  *
  * History
- *   09.03.2011 (hofer): created
+ *   16.12.2010 (hofer): created
  */
-package org.knime.xml.type.io;
+package org.knime.core.data.xml.type;
 
-import java.io.InputStream;
+import javax.swing.Icon;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataValue;
+import org.knime.core.data.renderer.DataValueRendererFamily;
+import org.knime.core.data.renderer.DefaultDataValueRendererFamily;
+import org.knime.core.data.renderer.MultiLineStringValueRenderer;
+import org.w3c.dom.Document;
+
 
 /**
+ * This value encapsulates a {@link Document}
  *
  * @author Heiko Hofer
  */
-public class XMLCellReaderFactory {
-    public static XMLCellReader createXMLCellReader(final InputStream is)
-               throws ParserConfigurationException, XMLStreamException{
-        return new XMLDOMCellReader(is);
+public interface XMLValue extends DataValue {
+    /**
+     * Returns the parsed XML document.
+     *
+     * @return the DOM
+     */
+    public Document getDocument();
+
+    /**
+     * Meta information to this value type.
+     *
+     * @see DataValue#UTILITY
+     */
+    public static final UtilityFactory UTILITY = new XMLUtilityFactory();
+
+    /** Implementations of the meta information of this value class. */
+    public static class XMLUtilityFactory extends UtilityFactory {
+        /** Singleton icon to be used to display this cell type. */
+        private static final Icon ICON = loadIcon(XMLValue.class,
+                "/icons/xmlicon.png");
+
+        /** Only subclasses are allowed to instantiate this class. */
+        protected XMLUtilityFactory() {
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Icon getIcon() {
+            if (null != ICON) {
+                return ICON;
+            } else {
+                return super.getIcon();
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected DataValueRendererFamily getRendererFamily(
+                final DataColumnSpec spec) {
+            return new DefaultDataValueRendererFamily(
+                    new MultiLineStringValueRenderer("XML Document"));
+        }
     }
 
-    public static XMLCellReader createXPathXMLCellReader(final InputStream is,
-            final LimitedXPathMatcher xpathMatcher)
-                throws ParserConfigurationException, XMLStreamException{
-        return new XMLXpathCellReader(is, xpathMatcher);
-    }
 }

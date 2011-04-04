@@ -65,6 +65,9 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.xml.type.XMLValue;
+import org.knime.core.data.xml.type.io.XMLCellWriter;
+import org.knime.core.data.xml.type.io.XMLCellWriterFactory;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -74,9 +77,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.xml.type.XMLValue;
-import org.knime.xml.type.io.XMLCellWriter;
-import org.knime.xml.type.io.XMLCellWriterFactory;
 
 /**
  * This is the model for the XML Writer node. It takes an XML column from the

@@ -48,7 +48,7 @@
  * History
  *   31.03.2011 (hofer): created
  */
-package org.knime.xml.type.io;
+package org.knime.core.data.xml.type.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +61,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.knime.core.data.DataCell;
-import org.knime.xml.type.XMLCellFactory;
+import org.knime.core.data.xml.type.XMLCellFactory;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

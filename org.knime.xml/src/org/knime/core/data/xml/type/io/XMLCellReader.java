@@ -46,21 +46,21 @@
  * ------------------------------------------------------------------------
  *
  * History
- *   08.03.2011 (hofer): created
+ *   09.03.2011 (hofer): created
  */
-package org.knime.xml.type.io;
+package org.knime.core.data.xml.type.io;
+
+import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.knime.xml.type.XMLValue;
+import org.knime.core.data.DataCell;
 
 /**
  *
  * @author Heiko Hofer
  */
-public interface XMLCellWriter {
-
-    void write(XMLValue cell) throws XMLStreamException;
-
-    void close() throws XMLStreamException;
+public interface XMLCellReader {
+    DataCell readXML() throws XMLStreamException, IOException;
+    void close() throws XMLStreamException, IOException;
 }

@@ -66,6 +66,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.xml.type.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -74,7 +75,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.xml.node.ui.KeyValuePanel;
 import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
-import org.knime.xml.type.XMLValue;
 
 /**
  * This is the dialog for the XPath node.

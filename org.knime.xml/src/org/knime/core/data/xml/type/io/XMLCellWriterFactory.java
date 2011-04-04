@@ -46,21 +46,28 @@
  * ------------------------------------------------------------------------
  *
  * History
- *   09.03.2011 (hofer): created
+ *   08.03.2011 (hofer): created
  */
-package org.knime.xml.type.io;
+package org.knime.core.data.xml.type.io;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import org.knime.core.data.DataCell;
 
 /**
  *
  * @author Heiko Hofer
  */
-public interface XMLCellReader {
-    DataCell readXML() throws XMLStreamException, IOException;
-    void close() throws XMLStreamException, IOException;
+public class XMLCellWriterFactory {
+    public static XMLCellWriter createXMLCellWriter(final OutputStream os) throws XMLStreamException {
+        return new XMLMultiCellWriter(os);
+    }
+
+    public static XMLCellWriter createXMLMultiCellWriter(final OutputStream os,
+            final QName rootElement,
+            final Map<QName, String> rootAttributes) throws XMLStreamException {
+        return new XMLMultiCellWriter(os, rootElement, rootAttributes);
+    }
 }
