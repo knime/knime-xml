@@ -48,7 +48,7 @@
  * History
  *   16.12.2010 (hofer): created
  */
-package org.knime.core.data.xml.type;
+package org.knime.core.data.xml;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -48,7 +48,7 @@
  * History
  *   08.03.2011 (hofer): created
  */
-package org.knime.core.data.xml.type.io;
+package org.knime.core.data.xml.io;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamException;

@@ -48,26 +48,19 @@
  * History
  *   08.03.2011 (hofer): created
  */
-package org.knime.core.data.xml.type.io;
+package org.knime.core.data.xml.io;
 
-import java.io.OutputStream;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
+import org.knime.core.data.xml.XMLValue;
 
 /**
  *
  * @author Heiko Hofer
  */
-public class XMLCellWriterFactory {
-    public static XMLCellWriter createXMLCellWriter(final OutputStream os) throws XMLStreamException {
-        return new XMLMultiCellWriter(os);
-    }
+public interface XMLCellWriter {
 
-    public static XMLCellWriter createXMLMultiCellWriter(final OutputStream os,
-            final QName rootElement,
-            final Map<QName, String> rootAttributes) throws XMLStreamException {
-        return new XMLMultiCellWriter(os, rootElement, rootAttributes);
-    }
+    void write(XMLValue cell) throws XMLStreamException;
+
+    void close() throws XMLStreamException;
 }

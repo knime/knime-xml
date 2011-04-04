@@ -63,7 +63,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.xml.type.XMLValue;
+import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;

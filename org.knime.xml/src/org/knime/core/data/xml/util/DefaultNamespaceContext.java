@@ -48,7 +48,7 @@
  * History
  *   09.03.2011 (hofer): created
  */
-package org.knime.core.data.xml.type.util;
+package org.knime.core.data.xml.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

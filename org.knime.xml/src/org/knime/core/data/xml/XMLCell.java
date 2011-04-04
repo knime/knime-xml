@@ -48,7 +48,7 @@
  * History
  *   16.12.2010 (hofer): created
  */
-package org.knime.core.data.xml.type;
+package org.knime.core.data.xml;
 
 import java.io.IOException;
 
@@ -59,26 +59,31 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
+import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
-import org.knime.core.data.container.BlobDataCell;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * {@link BlobDataCell} implementation that encapsulates a
- * {@link XMLCellContent}.
+ * {@link DataCell} implementation that encapsulates a {@link XMLCellContent}.
  *
  * @author Heiko Hofer
  */
-public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
+public class XMLCell extends DataCell implements XMLValue, StringValue {
+    /**
+     * Type for this cell implementation.
+     * Convenience access member for {@link XMLCellFactory#TYPE}.
+     */
+    public static final DataType TYPE = DataType.getType(XMLCell.class);
+
     private final static XMLSerializer SERIALIZER = new XMLSerializer();
-    private static class XMLSerializer implements DataCellSerializer<XMLBlobCell> {
+    private static class XMLSerializer implements DataCellSerializer<XMLCell> {
         /**
          * {@inheritDoc}
          */
         @Override
-        public void serialize(final XMLBlobCell cell,
+        public void serialize(final XMLCell cell,
                 final DataCellDataOutput output) throws IOException {
             try {
                 output.writeUTF(cell.getStringValue());
@@ -93,11 +98,11 @@ public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
          * {@inheritDoc}
          */
         @Override
-        public XMLBlobCell deserialize(final DataCellDataInput input)
+        public XMLCell deserialize(final DataCellDataInput input)
                 throws IOException {
             String s = input.readUTF();
             try {
-                return new XMLBlobCell(new XMLCellContent(s));
+                return new XMLCell(new XMLCellContent(s));
             } catch (ParserConfigurationException e) {
                 throw new IOException(e.getMessage(), e);
             } catch (SAXException e) {
@@ -113,10 +118,9 @@ public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
      *
      * @return a serializer
      */
-    public static DataCellSerializer<XMLBlobCell> getCellSerializer() {
+    public static DataCellSerializer<XMLCell> getCellSerializer() {
         return SERIALIZER;
     }
-
 
     /**
      * Returns the preferred value class for XML cells which is
@@ -128,22 +132,15 @@ public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
         return XMLValue.class;
     }
 
+
     private XMLCellContent m_content;
 
     /**
      * Create a new instance.
      * @param content the content of this cell
      */
-    public XMLBlobCell(final XMLCellContent content) {
+    XMLCell(final XMLCellContent content) {
         m_content = content;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getStringValue() {
-        return m_content.getStringValue();
     }
 
     /**
@@ -167,8 +164,8 @@ public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
      */
     @Override
     protected boolean equalsDataCell(final DataCell dc) {
-        XMLBlobCell that = (XMLBlobCell)dc;
-        return m_content.equals(that.m_content);
+        XMLCell that = (XMLCell)dc;
+        return this.m_content.equals(that.m_content);
     }
 
     /**
@@ -179,4 +176,11 @@ public class XMLBlobCell extends BlobDataCell implements XMLValue, StringValue {
         return m_content.hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getStringValue() {
+        return m_content.getStringValue();
+    }
 }

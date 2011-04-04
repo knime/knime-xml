@@ -48,19 +48,26 @@
  * History
  *   09.03.2011 (hofer): created
  */
-package org.knime.core.data.xml.type.io;
+package org.knime.core.data.xml.io;
 
-import java.io.IOException;
+import java.io.InputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-
-import org.knime.core.data.DataCell;
 
 /**
  *
  * @author Heiko Hofer
  */
-public interface XMLCellReader {
-    DataCell readXML() throws XMLStreamException, IOException;
-    void close() throws XMLStreamException, IOException;
+public class XMLCellReaderFactory {
+    public static XMLCellReader createXMLCellReader(final InputStream is)
+               throws ParserConfigurationException, XMLStreamException{
+        return new XMLDOMCellReader(is);
+    }
+
+    public static XMLCellReader createXPathXMLCellReader(final InputStream is,
+            final LimitedXPathMatcher xpathMatcher)
+                throws ParserConfigurationException, XMLStreamException{
+        return new XMLXpathCellReader(is, xpathMatcher);
+    }
 }

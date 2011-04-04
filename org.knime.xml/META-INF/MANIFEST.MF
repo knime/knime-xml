@@ -7,9 +7,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.knime.base;bundle-version="2.3.0"
-Export-Package: org.knime.core.data.xml.type,
- org.knime.core.data.xml.type.io,
- org.knime.core.data.xml.type.util,
+Export-Package: org.knime.core.data.xml.io,
+ org.knime.core.data.xml.util,
  org.knime.xml.node.reader,
  org.knime.xml.node.ui,
  org.knime.xml.node.writer,
