@@ -50,6 +50,7 @@
 . */
 package org.knime.xml.node.reader;
 
+import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
@@ -66,6 +67,15 @@ public class XMLReaderNodeFactory extends NodeFactory<XMLReaderNodeModel> {
     @Override
     public XMLReaderNodeModel createNodeModel() {
         return new XMLReaderNodeModel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public XMLReaderNodeModel createNodeModel(
+            final NodeCreationContext context) {
+        return new XMLReaderNodeModel(context);
     }
 
     /**
