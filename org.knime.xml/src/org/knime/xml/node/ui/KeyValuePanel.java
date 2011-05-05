@@ -55,17 +55,30 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -75,8 +88,8 @@ import javax.swing.table.AbstractTableModel;
  */
 @SuppressWarnings("serial")
 public class KeyValuePanel extends JPanel {
-    private KeyValueTableModel m_model;
-    private JTable m_table;
+    private final KeyValueTableModel m_model;
+    private final JTable m_table;
     private JButton m_addButton;
     private JButton m_removeButton;
 
@@ -118,6 +131,20 @@ public class KeyValuePanel extends JPanel {
         JScrollPane scroll = new JScrollPane(m_table);
         add(scroll, c);
 
+        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V,
+                KeyEvent.CTRL_MASK);
+        m_table.getInputMap().put(ctrlV, "TablePaste");
+        m_table.getActionMap().put("TablePaste",
+                new PasteAction(this));
+
+        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_V,
+                KeyEvent.CTRL_MASK);
+        m_table.getInputMap().put(ctrlC, "TableCopy");
+        m_table.getActionMap().put("TableCopy",
+                new CopyAction(this));
+        
+        m_table.addMouseListener(new TableMouseAdapter(this));
+        
         c.gridx++;
         c.weightx = 0;
         c.insets = new Insets(0, 0, 0, 0);
@@ -234,8 +261,8 @@ public class KeyValuePanel extends JPanel {
     }
 
     private static class KeyValueTableModel extends AbstractTableModel {
-        private List<String> m_keys;
-        private List<String> m_values;
+        private final List<String> m_keys;
+        private final List<String> m_values;
         private String m_keyColumnLabel;
         private String m_valueColumnLabel;
 
@@ -400,5 +427,241 @@ public class KeyValuePanel extends JPanel {
         }
 
     }
+
+    /**
+     * The swing action for copying the selected cells to the system clipboard.
+     *
+     * @author Heiko Hofer
+     */
+    static class CopyAction extends AbstractAction {
+    	private final KeyValuePanel m_panel;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param panel the 'model' for this action
+         */
+        CopyAction(final KeyValuePanel panel) {
+            super("Copy");           
+            m_panel = panel;
+            panel.m_table.getSelectionModel().addListSelectionListener(
+                    new ListSelectionListener() {
+                @Override
+				public void valueChanged(final ListSelectionEvent e) {
+                    setEnabled(!panel.m_table.getSelectionModel()
+                    		.isSelectionEmpty());
+                }
+            });
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+		public void actionPerformed(final ActionEvent e) {
+            int[] rows = m_panel.m_table.getSelectedRows();
+            int[] cols = new int[]{0, 1};
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < rows.length; i++) {
+                for (int k = 0; k < cols.length; k++) {
+                    Object value = m_panel.m_table.getValueAt(rows[i], cols[k]);
+                    builder.append(value.toString());
+
+                    if (k < cols.length - 1) {
+                        builder.append("\t");
+                    }
+                }
+                builder.append("\n");
+            }
+            StringSelection str  = new StringSelection(builder.toString());
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(str,str);
+        }
+
+    }
+    
+    /**
+     * The swing action to insert cells from the system clipboard.
+     *
+     * @author Heiko Hofer
+     */
+    static class PasteAction extends AbstractAction {
+        private final KeyValuePanel m_panel;
+        private int m_endRow;
+        private int m_endCol;
+        private KeyValueTableModel m_tempModel;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param panel the 'model' for this action
+         */
+        PasteAction(final KeyValuePanel panel) {
+            super("Paste");
+            m_panel = panel;
+            panel.m_table.getSelectionModel().addListSelectionListener(
+                    new ListSelectionListener() {
+                @Override
+				public void valueChanged(final ListSelectionEvent e) {
+                    setEnabled(!panel.m_table.getSelectionModel().
+                    		isSelectionEmpty());
+                }
+            });
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+		public void actionPerformed(final ActionEvent e) {
+            JTable table = m_panel.m_table;
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            int startRow = table.getSelectionModel().getAnchorSelectionIndex();
+            int startCol = 0;
+            m_endRow = startRow;
+            m_endCol = startCol;
+            m_tempModel = new KeyValueTableModel();
+            m_tempModel.setTableData(m_panel.getKeys(), m_panel.getValues());
+            try {
+                String trstring =
+                        (String)(clipboard.getContents(this)
+                                .getTransferData(DataFlavor.stringFlavor));
+                StringTokenizer rows = new StringTokenizer(trstring, "\n", true);
+                for (int i = 0; rows.hasMoreTokens(); i++) {
+                    String row = rows.nextToken();
+                    if (!row.equals("\n")) {
+                        StringTokenizer cells = new StringTokenizer(row, "\t",
+                                true);
+                        for (int j = 0; cells.hasMoreTokens(); j++) {
+                            String value = cells.nextToken();
+                            if (!value.equals("\t")) {
+                                setValueAt(value, startRow + i, startCol + j);
+                                if (cells.hasMoreTokens()) {
+                                    cells.nextToken();
+                                    // When row ends with a delimiter
+                                    if (!cells.hasMoreTokens()) {
+                                        setValueAt("", startRow + i,
+                                                startCol + j + 1);
+                                    }
+                                }
+                            } else { // an empty cell
+                                setValueAt("", startRow + i, startCol + j);
+                                // When row ends with a delimiter
+                                if (!cells.hasMoreTokens()) {
+                                    setValueAt("", startRow + i,
+                                            startCol + j + 1);
+                                }
+                            }
+                        }
+                        if (rows.hasMoreTokens()) {
+                            rows.nextToken();
+                        }
+                    } else { // an empty row
+                        while (startRow + i >= m_tempModel.getRowCount()) {
+                            m_tempModel.addRow();
+                        }
+                    }
+                }
+                m_panel.setTableData(m_tempModel.getKeys(),
+                        m_tempModel.getValues());
+
+                m_tempModel.setTableData(new String[0], new String[0]);
+                m_tempModel = null;
+                table.getSelectionModel().setSelectionInterval(startRow,
+                        m_endRow);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException(ex.getMessage());
+            }
+        }
+
+        private void setValueAt(final Object value, final int row,
+                final int col) {
+            while (row >= m_tempModel.getRowCount()) {
+                m_tempModel.addRow();
+            }
+            if (col < m_tempModel.getColumnCount()) {
+                m_endRow = Math.max(m_endRow, row);
+                m_endCol = Math.max(m_endCol, col);
+                m_tempModel.setValueAt(value, row, col);
+            }
+        }
+    }
+
+    /**
+     * Shows popup menu of the table.
+     *
+     * @author Heiko Hofer
+     */
+    private static class TableMouseAdapter extends MouseAdapter {
+        private final JTable m_table;
+        private final JPopupMenu m_popup;
+
+        /**
+         * @param panel
+         */
+        TableMouseAdapter(final KeyValuePanel panel) {
+            m_table = panel.m_table;
+            m_popup = new JPopupMenu();
+            m_popup.add(new CopyAction(panel));
+            m_popup.add(new PasteAction(panel));
+
+            m_table.add(m_popup);
+        }
+
+        private void showPopup(final MouseEvent e) {
+            int row = m_table.rowAtPoint(e.getPoint());
+            int col = m_table.columnAtPoint(e.getPoint());
+            if (row == -1 || col == -1) {
+                return;
+            }
+            // click in selection
+            if (m_table.getSelectionModel().isSelectedIndex(row)
+                  && m_table.getColumnModel().getSelectionModel()
+                      .isSelectedIndex(col)) {
+                m_popup.show(m_table, e.getX(), e.getY());
+            } else {
+                if (!(e.isControlDown() || e.isShiftDown())) {
+                    m_table.getSelectionModel().setSelectionInterval(
+                            row, row);
+                    m_table.getColumnModel().getSelectionModel()
+                        .setSelectionInterval(col, col);
+                    m_popup.show(m_table, e.getX(), e.getY());
+                }
+            }
+
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                showPopup(e);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void mousePressed(final MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                showPopup(e);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void mouseReleased(final MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                showPopup(e);
+            }
+        }
+
+    }    
 
 }

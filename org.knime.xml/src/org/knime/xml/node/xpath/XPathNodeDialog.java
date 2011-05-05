@@ -50,10 +50,13 @@
  */
 package org.knime.xml.node.xpath;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -92,6 +95,8 @@ public class XPathNodeDialog extends NodeDialogPane {
     private JRadioButton m_returnNode;
     private JRadioButton m_returnNodeSet;
     private KeyValuePanel m_nsPanel;
+    private JCheckBox m_useRootsNS;
+    private JTextField m_rootNSPrefix;
 
     /**
      * Creates a new dialog.
@@ -156,7 +161,8 @@ public class XPathNodeDialog extends NodeDialogPane {
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         xpathScrollPane.setPreferredSize(new Dimension(250, 100));
         xpathScrollPane.setPreferredSize(new Dimension(250, 100));
-        xpathScrollPane.setBorder(BorderFactory.createTitledBorder("XPath query"));
+        xpathScrollPane.setBorder(BorderFactory.createTitledBorder(
+        		"XPath query"));
         p.add(xpathScrollPane, c);
         c.insets = insets1;
         c.gridwidth = 1;
@@ -171,11 +177,49 @@ public class XPathNodeDialog extends NodeDialogPane {
 
         c.gridy++;
         c.weighty = 1;
+        JPanel nsp = new JPanel(new BorderLayout());
+        nsp.setBorder(BorderFactory.createTitledBorder("Namespaces"));
+
+        nsp.add(infereRootDefaulNSPanel(), BorderLayout.SOUTH);
         m_nsPanel = new KeyValuePanel();
         m_nsPanel.setKeyColumnLabel("Prefix");
         m_nsPanel.setValueColumnLabel("Namespace");
-        m_nsPanel.setBorder(BorderFactory.createTitledBorder("Namespaces"));
-        p.add(m_nsPanel, c);
+        nsp.add(m_nsPanel);
+        p.add(nsp, c);
+        return p;
+    }
+    
+    private JPanel infereRootDefaulNSPanel() {
+        JPanel p = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(2, 4, 2, 4);
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
+        c.weightx = 0;
+        c.weighty = 1;
+        m_useRootsNS = 
+        	new JCheckBox("Incorporate namespace of the root element.");
+        m_useRootsNS.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				m_rootNSPrefix.setEnabled(
+						m_useRootsNS.isSelected());
+			}
+		});
+        p.add(m_useRootsNS, c);
+
+        c.gridy++;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        p.add(new JLabel("Prefix of root's namespace:"), c);
+        c.gridx++;
+        c.weightx = 1;
+        m_rootNSPrefix = new JTextField();
+        p.add(m_rootNSPrefix, c);        
         return p;
     }
 
@@ -244,6 +288,9 @@ public class XPathNodeDialog extends NodeDialogPane {
         }
         s.setNsPrefixes(m_nsPanel.getKeys());
         s.setNamespaces(m_nsPanel.getValues());
+        s.setUseRootsNS(m_useRootsNS.isSelected());
+        s.setRootsNSPrefix(m_rootNSPrefix.getText().trim());
+        
         s.saveSettings(settings);
     }
 
@@ -273,6 +320,10 @@ public class XPathNodeDialog extends NodeDialogPane {
         }
         m_nsPanel.setTableData(s.getNsPrefixes(), s.getNamespaces());
 
+        m_useRootsNS.setSelected(s.getUseRootsNS());
+        m_rootNSPrefix.setText(s.getRootsNSPrefix());
+        m_rootNSPrefix.setEnabled(
+				m_useRootsNS.isSelected());        
     }
 
 }

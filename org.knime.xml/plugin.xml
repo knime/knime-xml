@@ -16,6 +16,12 @@
             id="org.knime.xml.node.writer.XMLWriterNodeFactory">
       </node> 
       <node
+            category-path="/io/write"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory"
+            id="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory">
+      </node> 
+      <node
             category-path="/misc/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
@@ -26,7 +32,7 @@
          point="org.knime.workbench.repository.categories">
       <category
             description="Nodes for processing XML"
-            icon="icons/category_xml.png"
+            icon="icons/xml.png"
             level-id="xml"
             name="XML"
             path="/misc">

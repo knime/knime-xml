@@ -48,7 +48,7 @@
  * History
  *   10.02.2011 (hofer): created
  */
-package org.knime.xml.node.writer;
+package org.knime.xml.node.combinewriter;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -56,17 +56,24 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 /**
- *
+ * The settings of the XML combine writer node.
+ * 
  * @author Heiko Hofer
  */
-public class XMLWriterNodeSettings {
+public class XMLCombineWriterNodeSettings {
     private static final String INPUT_COLUMN = "inputColumn";
-    private static final String FOLDER = "folder";
+    private static final String OUTPUT_FILE = "file";
     private static final String OVERWRITE_EXISTING = "overwriteExistingFiles";
+    private static final String ROOT_ELEMENT = "rootElement";
+    private static final String ATTRIBUTES = "attributes";
+    private static final String ATTRIBUTE_VALUES = "attributeValues";
 
     private String m_inputColumn = null;
-    private String m_folder = null;
+    private String m_outputFile = null;
     private boolean m_overwriteExistingFiles = false;
+    private String m_rootElement = null;
+    private String[] m_attributes = new String[0];
+    private String[] m_attributeValues = new String[0];
 
 
     /**
@@ -86,15 +93,15 @@ public class XMLWriterNodeSettings {
     /**
      * @return the folder
      */
-    String getFolder() {
-        return m_folder;
+    String getOutputFile() {
+        return m_outputFile;
     }
 
     /**
-     * @param folder the folder to set
+     * @param file the folder to set
      */
-    void setFolder(final String folder) {
-        m_folder = folder;
+    void setOutputFile(final String file) {
+        m_outputFile = file;
     }
 
     /**
@@ -111,6 +118,48 @@ public class XMLWriterNodeSettings {
         m_overwriteExistingFiles = overwriteExistingFiles;
     }
 
+    /**
+     * @return the rootElement
+     */
+    String getRootElement() {
+        return m_rootElement;
+    }
+
+    /**
+     * @param rootElement the rootElement to set
+     */
+    void setRootElement(final String rootElement) {
+        m_rootElement = rootElement;
+    }
+
+    /**
+     * @return the attributes
+     */
+    String[] getAttributeNames() {
+        return m_attributes;
+    }
+
+    /**
+     * @param attributes the attributes to set
+     */
+    void setAttributeNames(final String[] attributes) {
+        m_attributes = attributes;
+    }
+
+    /**
+     * @return the attributeValues
+     */
+    String[] getAttributeValues() {
+        return m_attributeValues;
+    }
+
+    /**
+     * @param attributeValues the attributeValues to set
+     */
+    void setAttributeValues(final String[] attributeValues) {
+        m_attributeValues = attributeValues;
+    }
+
     /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
@@ -118,9 +167,12 @@ public class XMLWriterNodeSettings {
     void loadSettingsDialog(final NodeSettingsRO settings,
             final DataTableSpec inSpec) {
         m_inputColumn = settings.getString(INPUT_COLUMN, null);
-        m_folder = settings.getString(FOLDER, null);
+        m_outputFile = settings.getString(OUTPUT_FILE, null);
         m_overwriteExistingFiles =
             settings.getBoolean(OVERWRITE_EXISTING, false);
+        m_rootElement = settings.getString(ROOT_ELEMENT, null);
+        m_attributes = settings.getStringArray(ATTRIBUTES, new String[0]);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES, new String[0]);
     }
 
     /** Called from model when settings are to be loaded.
@@ -130,8 +182,11 @@ public class XMLWriterNodeSettings {
     void loadSettingsModel(final NodeSettingsRO settings)
         throws InvalidSettingsException {
         m_inputColumn = settings.getString(INPUT_COLUMN);
-        m_folder = settings.getString(FOLDER);
+        m_outputFile = settings.getString(OUTPUT_FILE);
         m_overwriteExistingFiles = settings.getBoolean(OVERWRITE_EXISTING);
+        m_rootElement = settings.getString(ROOT_ELEMENT);
+        m_attributes = settings.getStringArray(ATTRIBUTES);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES);
     }
 
     /** Called from model and dialog to save current settings.
@@ -139,8 +194,11 @@ public class XMLWriterNodeSettings {
      */
     void saveSettings(final NodeSettingsWO settings) {
         settings.addString(INPUT_COLUMN, m_inputColumn);
-        settings.addString(FOLDER, m_folder);
+        settings.addString(OUTPUT_FILE, m_outputFile);
         settings.addBoolean(OVERWRITE_EXISTING, m_overwriteExistingFiles);
+        settings.addString(ROOT_ELEMENT, m_rootElement);
+        settings.addStringArray(ATTRIBUTES, m_attributes);
+        settings.addStringArray(ATTRIBUTE_VALUES, m_attributeValues);
     }
 
 }

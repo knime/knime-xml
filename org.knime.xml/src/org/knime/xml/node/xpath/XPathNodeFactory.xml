@@ -26,6 +26,27 @@
               <li>NodeList -> Collection cell type (Collection of XML cells)</li>  
             </ul>  
         </option>
+        <option name="Namespaces">
+            The prefices and the namespaces used in the XPath query. For the
+            example when querying XHTML documents with the XPath Query:<br/>
+            <i>//pre:h1</i><br/> 
+            the following namespace must be defined:
+            <br/>
+            Prefix: <i>pre</i>
+            <br/>
+            Namespace: <i>http://www.w3.org/1999/xhtml</i>         
+        </option>
+        <option name="Incorporate namespace of the root element.">
+            <p>This option is useful when you do not have the default
+            namespace of your document at hand.</p>
+        	<p>If checked, the namespace of the root element ist added to the 
+        	<b>Namespaces</b> table during runtime. Please define a prefix for this 
+        	namespace in <b>Prefix of root's namespace</b>.</p>
+        	<p>For the example of XHTML documents the namespace of the root 
+        	element is http://www.w3.org/1999/xhtml so that with the
+        	root's prefix of <i>pre</i> you can leave
+        	the <b>Namespaces</b> table empty.</p>     
+        </option>          
     </fullDescription>
 
     <ports>

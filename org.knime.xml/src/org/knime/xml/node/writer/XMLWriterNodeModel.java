@@ -54,12 +54,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -88,7 +83,7 @@ import org.knime.core.node.NodeSettingsWO;
 public class XMLWriterNodeModel extends NodeModel {
     private static NodeLogger LOGGER = NodeLogger.getLogger(
             XMLWriterNodeModel.class);
-    private XMLWriterNodeSettings m_settings;
+    private final XMLWriterNodeSettings m_settings;
 
     /**
      * Creates a new model with no input port and one output port.
@@ -141,21 +136,6 @@ public class XMLWriterNodeModel extends NodeModel {
             }
         }
 
-        if (m_settings.getCombineRows()) {
-            if (m_settings.getRootElement().isEmpty()) {
-                throw new InvalidSettingsException("The root element is "
-                        + "empty. Please define a root element.");
-            }
-            // createRootAttributes(..) does some validity checking concerning
-            // namespace definition
-            Map<QName, String> rootAttributes = createRootAttributes(
-                    m_settings.getAttributeNames(),
-                    m_settings.getAttributeValues());
-            // createRootAttributes(..) does some validity checking concerning
-            // namespace definition
-            createRootElement(m_settings.getRootElement(),
-                    rootAttributes);
-        }
         return new DataTableSpec[0];
     }
 
@@ -174,187 +154,42 @@ public class XMLWriterNodeModel extends NodeModel {
         final int colIndex =
                 inData[0].getDataTableSpec().findColumnIndex(
                         m_settings.getInputColumn());
-        if (m_settings.getCombineRows()) {
-            File xmlFile =
-                    new File(dir, inData[0].getSpec().getName() + ".xml");
-            if (!m_settings.getOverwriteExistingFiles() && xmlFile.exists()) {
+        
+        for (DataRow row : inData[0]) {
+            exec.checkCanceled();
+            exec.setProgress(count / max, "Writing " + row.getKey()
+                    + ".xml");
+
+            File xmlFile = new File(dir, row.getKey() + ".xml");
+            if (!m_settings.getOverwriteExistingFiles()
+                    && xmlFile.exists()) {
                 throw new IOException("File '" + xmlFile.getAbsolutePath()
                         + "' already exists");
             }
 
-            Map<QName, String> rootAttributes = createRootAttributes(
-                    m_settings.getAttributeNames(),
-                    m_settings.getAttributeValues());
-            QName rootElement = createRootElement(m_settings.getRootElement(),
-                    rootAttributes);
-
-            XMLCellWriter xmlCellWriter =
-                XMLCellWriterFactory.createXMLMultiCellWriter(
-                    new FileOutputStream(xmlFile), rootElement, rootAttributes);
-
-            for (DataRow row : inData[0]) {
-                exec.checkCanceled();
-                exec.setProgress(count / max, "Writing row " + count + " ("
-                        + max + ")");
-                DataCell cell = row.getCell(colIndex);
-                if (!cell.isMissing()) {
-                    xmlCellWriter.write((XMLValue)cell);
-                } else {
-                    missingCellCount++;
-                    LOGGER.debug("Skip row " + row.getKey().getString()
-                            + " since the cell is a missing data cell.");
+            DataCell cell = row.getCell(colIndex);
+            if (!cell.isMissing()) {
+                XMLCellWriter xmlCellWriter =
+                    XMLCellWriterFactory.createXMLCellWriter(
+                        new FileOutputStream(xmlFile));
+                xmlCellWriter.write((XMLValue)cell);
+                xmlCellWriter.close();
+            } else {
+                missingCellCount++;
+                if (xmlFile.exists()) {
+                    xmlFile.delete();
                 }
-                count++;
+                LOGGER.debug("Skip row " + row.getKey().getString()
+                        + " since the cell is a missing data cell.");
             }
-            xmlCellWriter.close();
-        } else {
-            for (DataRow row : inData[0]) {
-                exec.checkCanceled();
-                exec.setProgress(count / max, "Writing " + row.getKey()
-                        + ".xml");
-
-                File xmlFile = new File(dir, row.getKey() + ".xml");
-                if (!m_settings.getOverwriteExistingFiles()
-                        && xmlFile.exists()) {
-                    throw new IOException("File '" + xmlFile.getAbsolutePath()
-                            + "' already exists");
-                }
-
-                DataCell cell = row.getCell(colIndex);
-                if (!cell.isMissing()) {
-                    XMLCellWriter xmlCellWriter =
-                        XMLCellWriterFactory.createXMLCellWriter(
-                            new FileOutputStream(xmlFile));
-                    xmlCellWriter.write((XMLValue)cell);
-                    xmlCellWriter.close();
-                } else {
-                    missingCellCount++;
-                    if (xmlFile.exists()) {
-                        xmlFile.delete();
-                    }
-                    LOGGER.debug("Skip row " + row.getKey().getString()
-                            + " since the cell is a missing data cell.");
-                }
-                count++;
-            }
+            count++;
         }
+        
         if (missingCellCount > 0) {
             setWarningMessage("Skipped " + missingCellCount + " rows due "
                     + "to missing values.");
         }
         return new BufferedDataTable[0];
-    }
-
-
-    /**
-     * @param attributeNames
-     * @param attributeValues
-     * @return
-     */
-    private Map<QName, String> createRootAttributes(final String[] attributeNames,
-            final String[] attributeValues) {
-        List<Integer> noNamespaceDef = new ArrayList<Integer>();
-        Map<String, String> nsMap = new HashMap<String, String>();
-        Map<QName, String> attrs = new HashMap<QName, String>();
-        for (int i = 0; i < attributeNames.length; i++) {
-            String qname = attributeNames[i];
-            if (qname.equals("xmlns") || qname.startsWith("xmlns:")) {
-                int colon = qname.indexOf(':');
-                String prefix = colon > -1
-                    ? qname.substring(0, colon)
-                    : "";
-                String localName = colon > -1
-                    ? qname.substring(colon + 1)
-                    : qname;
-                String nsURI = XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
-                if (nsMap.containsKey(prefix)) {
-                    String msg = null == prefix
-                            ? "The attributes of the root element contains "
-                              + "more than one default name space definition."
-                            : "The namespace prefix \"" + prefix
-                              + "\" is definied more than one time "
-                              + "for the root element";
-                    throw new IllegalArgumentException(msg);
-                }
-                nsMap.put(prefix, attributeValues[i]);
-                attrs.put(new QName(nsURI, localName, prefix),
-                        attributeValues[i]);
-            } else {
-                noNamespaceDef.add(i);
-            }
-        }
-        for (int i : noNamespaceDef) {
-            String qname = attributeNames[i];
-            int colon = qname.indexOf(':');
-            String prefix = colon > -1
-                ? qname.substring(0, colon)
-                : XMLConstants.DEFAULT_NS_PREFIX;
-            String localName = colon > -1
-                ? qname.substring(colon + 1)
-                : qname;
-            String nsURI = prefix.isEmpty()
-                ? XMLConstants.NULL_NS_URI
-                : nsMap.get(prefix);
-            if (null == nsURI) {
-                throw new IllegalArgumentException("Please specify a "
-                        + "namespace for the prefix: \"" + prefix
-                        + "\" on the root element.");
-            }
-            attrs.put(new QName(nsURI, localName, prefix),
-                    attributeValues[i]);
-        }
-
-        return attrs;
-    }
-
-    /**
-     * @param rootAttributes
-     * @return
-     */
-    private QName createRootElement(final String qname,
-            final Map<QName, String> rootAttributes) {
-        // get namespace definitions from the attributes
-        Map<String, String> nsMap = new HashMap<String, String>();
-        for (QName attrQName : rootAttributes.keySet()) {
-            String attrPrefix = attrQName.getPrefix();
-            String attrLocalName = attrQName.getLocalPart();
-
-            if (null == attrPrefix || attrPrefix.isEmpty()) {
-                if (attrLocalName.equals("xmlns")) {
-                    // default namespace definition
-                    nsMap.put(XMLConstants.DEFAULT_NS_PREFIX,
-                            rootAttributes.get(attrQName));
-                }
-            } else {
-                if (attrPrefix.equals("xmlns")) {
-                    // namespace definition
-                    nsMap.put(attrLocalName, rootAttributes.get(attrQName));
-                }
-            }
-        }
-        // Analyze given qualified name for the root element
-        int colon = qname.indexOf(':');
-        String prefix = colon > -1
-            ? qname.substring(0, colon)
-            : XMLConstants.DEFAULT_NS_PREFIX;
-        String localName = colon > -1
-            ? qname.substring(colon + 1)
-            : qname;
-
-        String nsURI = null;
-        if (nsMap.containsKey(prefix)) {
-            nsURI = nsMap.get(prefix);
-        } else {
-            if (prefix.isEmpty()) {
-                nsURI = XMLConstants.NULL_NS_URI;
-            } else {
-                throw new IllegalArgumentException("Please specify a "
-                        + "namespace for the prefix: \"" + prefix
-                        + "\" on the root element.");
-            }
-        }
-
-        return new QName(nsURI, localName, prefix);
     }
 
     /**

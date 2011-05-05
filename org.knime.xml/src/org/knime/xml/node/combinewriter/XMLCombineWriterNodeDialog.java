@@ -48,17 +48,19 @@
  * History
  *   17.12.2010 (hofer): created
  */
-package org.knime.xml.node.writer;
+package org.knime.xml.node.combinewriter;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.xml.XMLValue;
@@ -69,22 +71,25 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.xml.node.ui.KeyValuePanel;
 
 /**
- * This is the dialog for the XML writer.
+ * This is the dialog for the XML combine writer.
  *
  * @author Heiko Hofer
  */
-public class XMLWriterNodeDialog extends NodeDialogPane {
+public class XMLCombineWriterNodeDialog extends NodeDialogPane {
     private ColumnSelectionComboxBox m_inputColumn;
-    private FilesHistoryPanel m_folder;
+    private FilesHistoryPanel m_outputFile;
     private JCheckBox m_overwriteExisting;
+    private JTextField m_rootElement;
+    private KeyValuePanel m_attributesPanel;
 
     /**
      * Creates a new dialog.
      */
     @SuppressWarnings("unchecked")
-    public XMLWriterNodeDialog() {
+    public XMLCombineWriterNodeDialog() {
         super();
 
         JPanel settings = createSettingsPanel();
@@ -115,13 +120,13 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
-        p.add(new JLabel("Selected Directory:"), c);
+        p.add(new JLabel("Selected File:"), c);
         c.gridx++;
         c.weightx = 1;
-        m_folder = new FilesHistoryPanel("org.knime.xml.node.writer", false);
-        m_folder.setSelectMode(JFileChooser.DIRECTORIES_ONLY);
-        m_folder.setBorder(null);
-        p.add(m_folder, c);
+        m_outputFile = new FilesHistoryPanel("org.knime.xml.node.combinewriter", false);
+        m_outputFile.setSelectMode(JFileChooser.FILES_ONLY);
+        m_outputFile.setBorder(null);
+        p.add(m_outputFile, c);
 
         c.gridx = 0;
         c.gridy++;
@@ -129,11 +134,27 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         m_overwriteExisting = new JCheckBox("Overwrite existing files.");
         p.add(m_overwriteExisting, c);
-        
+
+        c.gridx = 0;
         c.gridy++;
+        c.weightx = 0;
+        p.add(new JLabel("Root element:"), c);
+        c.gridx++;
+        c.weightx = 1;
+        m_rootElement = new JTextField();
+        p.add(m_rootElement, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 2;
         c.weighty = 1;
-        p.add(new JPanel(), c);
-        
+        m_attributesPanel = new KeyValuePanel();
+        m_attributesPanel.setKeyColumnLabel("Name");
+        m_attributesPanel.setValueColumnLabel("Value");
+        m_attributesPanel.setBorder(BorderFactory.createTitledBorder(
+                "Attributes of the root element."));
+        p.add(m_attributesPanel, c);
+
         return p;
     }
 
@@ -143,10 +164,13 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        XMLWriterNodeSettings s = new XMLWriterNodeSettings();
+        XMLCombineWriterNodeSettings s = new XMLCombineWriterNodeSettings();
         s.setInputColumn(m_inputColumn.getSelectedColumn());
-        s.setFolder(m_folder.getSelectedFile());
+        s.setOutputFile(m_outputFile.getSelectedFile());
         s.setOverwriteExisting(m_overwriteExisting.isSelected());
+        s.setRootElement(m_rootElement.getText());
+        s.setAttributeNames(m_attributesPanel.getKeys());
+        s.setAttributeValues(m_attributesPanel.getValues());
         s.saveSettings(settings);
     }
 
@@ -156,11 +180,14 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final DataTableSpec[] specs) throws NotConfigurableException {
-        XMLWriterNodeSettings s = new XMLWriterNodeSettings();
+        XMLCombineWriterNodeSettings s = new XMLCombineWriterNodeSettings();
         s.loadSettingsDialog(settings, null);
         m_inputColumn.update(specs[0], s.getInputColumn());
-        m_folder.setSelectedFile(s.getFolder());
+        m_outputFile.setSelectedFile(s.getOutputFile());
         m_overwriteExisting.setSelected(s.getOverwriteExistingFiles());
+        m_rootElement.setText(s.getRootElement());
+        m_attributesPanel.setTableData(s.getAttributeNames(),
+                s.getAttributeValues());
     }
 
 }
