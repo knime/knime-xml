@@ -26,7 +26,19 @@
             expert-flag="false"
             factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
             id="org.knime.xml.node.xpath.XPathNodeFactory">
-      </node>            
+      </node>
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
+            id="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory">
+      </node>
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
+            id="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory">
+      </node>
    </extension>
    <extension
          point="org.knime.workbench.repository.categories">

@@ -181,6 +181,7 @@ public class KeyValuePanel extends JPanel {
             public void actionPerformed(final ActionEvent arg0) {
                 int[] rows = m_table.getSelectedRows();
                 if (rows.length > 0) {
+                	commitOpenEditor();
                     m_model.removeRows(rows);
                 }
             }
@@ -191,6 +192,13 @@ public class KeyValuePanel extends JPanel {
         c.weighty = 1;
         p.add(new JPanel(), c);
         return p;
+    }
+    
+    /**
+     * Access to underlying table.
+     */
+    public JTable getTable() {
+    	return m_table;
     }
 
 
