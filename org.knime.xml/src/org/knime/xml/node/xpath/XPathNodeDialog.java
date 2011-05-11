@@ -76,7 +76,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
-import org.knime.xml.node.ui.KeyValuePanel;
+import org.knime.core.node.util.KeyValuePanel;
 import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
 
 /**

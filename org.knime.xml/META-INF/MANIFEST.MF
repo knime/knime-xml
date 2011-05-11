@@ -9,6 +9,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.knime.base;bundle-version="2.3.0"
 Export-Package: org.knime.xml.node.combinewriter,
  org.knime.xml.node.reader,
- org.knime.xml.node.ui,
  org.knime.xml.node.writer,
  org.knime.xml.node.xpath
