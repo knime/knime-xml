@@ -149,6 +149,7 @@ public class XMLCombineWriterNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         c.weighty = 1;
         m_attributesPanel = new KeyValuePanel();
+        m_attributesPanel.getTable().setPreferredScrollableViewportSize(null);
         m_attributesPanel.setKeyColumnLabel("Name");
         m_attributesPanel.setValueColumnLabel("Value");
         m_attributesPanel.setBorder(BorderFactory.createTitledBorder(
