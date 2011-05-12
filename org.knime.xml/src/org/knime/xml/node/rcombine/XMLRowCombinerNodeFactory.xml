@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Manipulator" icon="./xmlrowcombiner.png">
+    <name>XML Row Combiner</name>
+    <shortDescription>Concatenates the cells in a XML column.</shortDescription>
+    <fullDescription>
+        <intro>
+            Concatenates the cells of an XML column. The root elements children
+            of the created XML cell are the root elements of the source cells.
+		</intro>
+        <option name="XML column">The column containing the XML cells.</option>
+        <option name="New column name">
+            Name of the new column in the output table.
+        </option>
+        <option name="Element name">
+            Name of the created XML element.
+        </option>           
+        <option name="Custom attributes">
+        	Attributes added to the XML element can be 
+            defined here.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Data Table">
+            Input table containing at least one XML column.
+        </inPort>
+        <outPort index="0" name="Output Table">
+            The output table with one XML cell.
+        </outPort>             
+    </ports>
+</knimeNode>
+
+

@@ -39,6 +39,18 @@
             factory-class="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
             id="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory">
       </node>
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
+            id="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory">
+      </node>
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
+            id="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory">
+      </node>      
    </extension>
    <extension
          point="org.knime.workbench.repository.categories">
