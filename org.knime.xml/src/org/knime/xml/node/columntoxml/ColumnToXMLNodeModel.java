@@ -144,7 +144,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
         	// validate element name
             if (null == m_settings.getElementName()) {
             	// auto-configure
-                m_settings.setElementName("Cell");            
+                m_settings.setElementName("cell");            
             }
             if (m_settings.getElementName().trim().isEmpty()) {
             	throw new InvalidSettingsException("Please set a name for " 

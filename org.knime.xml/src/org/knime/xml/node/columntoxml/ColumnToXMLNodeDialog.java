@@ -161,6 +161,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         c.weighty = 1;    
         m_dataBoundAttributes = new KeyValuePanel();
+        m_dataBoundAttributes.getTable().setPreferredScrollableViewportSize(null);
         m_dataBoundAttributes.setBorder(
         		BorderFactory.createTitledBorder("Data bound attributes"));
         m_dataBoundAttributes.setKeyColumnLabel("Name");
