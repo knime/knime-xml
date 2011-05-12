@@ -182,6 +182,8 @@ public class XPathNodeDialog extends NodeDialogPane {
 
         nsp.add(infereRootDefaulNSPanel(), BorderLayout.SOUTH);
         m_nsPanel = new KeyValuePanel();
+        m_nsPanel.getTable().setPreferredScrollableViewportSize(null);
+        m_nsPanel.getTable().setPreferredScrollableViewportSize(null);
         m_nsPanel.setKeyColumnLabel("Prefix");
         m_nsPanel.setValueColumnLabel("Namespace");
         nsp.add(m_nsPanel);
