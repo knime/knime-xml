@@ -72,6 +72,7 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.RowKey;
 import org.knime.core.data.container.DataContainer;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.xml.XMLCell;
@@ -319,7 +320,8 @@ public class XMLReaderNodeModel extends NodeModel {
                     in = openInputStream();
                     reader = XMLCellReaderFactory.createXMLCellReader(in);
                     DataCell cell = XMLCellFactory.create(reader.readXML());
-                    DataRow row = new DefaultRow("Row " + rowCount, cell);
+                    DataRow row = new DefaultRow(
+                    		RowKey.createRowKey(rowCount), cell);
                     cont.addRowToTable(row);
                     rowCount++;
                     in.close();
@@ -330,8 +332,8 @@ public class XMLReaderNodeModel extends NodeModel {
                 XMLValue value = reader.readXML();
                 while(null != value) {
                 	DataCell cell = XMLCellFactory.create(value);
-                    // TODO Check noding conventions for row ID naming
-                    DataRow row = new DefaultRow("Row " + rowCount, cell);
+                    DataRow row = new DefaultRow(
+                    		RowKey.createRowKey(rowCount), cell);
                     cont.addRowToTable(row);
                     rowCount++;
                     value = reader.readXML();
@@ -340,7 +342,8 @@ public class XMLReaderNodeModel extends NodeModel {
                 in = openInputStream();
                 reader = XMLCellReaderFactory.createXMLCellReader(in);                
                 DataCell cell = XMLCellFactory.create(reader.readXML());
-                DataRow row = new DefaultRow("Row " + rowCount, cell);
+                DataRow row = new DefaultRow(
+                		RowKey.createRowKey(rowCount), cell);
                 cont.addRowToTable(row);
             }
             cont.close();
