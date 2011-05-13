@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Manipulator" icon="./xslt.png">
+    <name>XSLT</name>
+    <shortDescription>Applies XSLT stylesheets on the cells of an XML column.</shortDescription>
+    <fullDescription>
+        <intro>
+            Applies XSLT stylesheets on the cells of an XML column. The node
+            applies to every cell in the XML column every stylesheet in the 
+            XSLT column. The result will be a column with collection cells one
+            cell for every stylesheet or simple cells when <b>use first
+            stylesheet, only</b> is checked.
+		</intro>
+		<option name="New column name">
+        	The name of the new column.
+        </option> 		
+        <option name="XML column">
+        	The column containing the XML cells.
+        </option>
+        <option name="Remove source column">
+            If checked the XML column does not show up in the output table.
+        </option>        
+        <option name="Stylesheet column">
+            The column with the XSLT stylesheets.
+        </option>
+        <option name="Use first stylesheet only">
+            If checked only the first stylesheet of the <b>XSLT stylesheet 
+            column</b> is applied. The new column will comprise simple cells
+            and no collection cells.
+        </option>     
+        <option name="Output is XML">
+            If checked the output will be XML cells instead of string cells.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Input Table">
+            Input table containing at least one XML column.
+        </inPort>
+        <inPort index="0" name="Stylesheet Table">
+            Input table containing at least one XML column with XSLT stylesheets.
+        </inPort>        
+        <outPort index="0" name="Output Table">
+            The output table with .
+        </outPort>             
+    </ports>
+</knimeNode>
+
+

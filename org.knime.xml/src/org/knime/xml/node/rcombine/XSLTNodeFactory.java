@@ -1,5 +1,5 @@
-<!--
-========================================================================
+/*
+ * ------------------------------------------------------------------------
  *
  *  Copyright (C) 2003 - 2010
  *  University of Konstanz, Germany and
@@ -43,8 +43,61 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
-====================================================================
--->
-<body>
-	Applies XSLT on a XML column.
-</body>
+ * ---------------------------------------------------------------------
+ *
+ * History
+ *   12.05.2010 (hofer): created
+. */
+package org.knime.xml.node.xslt;
+
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeView;
+
+/**
+ * This is the factory for the XML combine Writer node.
+ *
+ * @author Heiko Hofer
+ */
+public class XSLTNodeFactory extends NodeFactory<XSLTNodeModel> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public XSLTNodeModel createNodeModel() {
+        return new XSLTNodeModel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getNrNodeViews() {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<XSLTNodeModel> createNodeView(final int viewIndex,
+            final XSLTNodeModel nodeModel) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean hasDialog() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return new XSLTNodeDialog();
+    }
+}
