@@ -50,6 +50,12 @@
             expert-flag="false"
             factory-class="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
             id="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory">
+      </node>
+      <node
+            category-path="/misc/xml"
+            expert-flag="false"
+            factory-class="org.knime.xml.node.xslt.XSLTNodeFactory"
+            id="org.knime.xml.node.xslt.XSLTNodeFactory">
       </node>      
    </extension>
    <extension
