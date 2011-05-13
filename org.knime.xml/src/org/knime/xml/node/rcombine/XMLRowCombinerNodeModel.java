@@ -222,7 +222,7 @@ public class XMLRowCombinerNodeModel extends NodeModel {
 			}
 		    
 			DataCell newCell = XMLCellFactory.create(doc);
-			cont.addRowToTable(new DefaultRow(new RowKey("Row 0"), newCell));
+			cont.addRowToTable(new DefaultRow(RowKey.createRowKey(0), newCell));
 		} catch (final Exception e) {
 		    throw new IllegalStateException(e);
 		}
