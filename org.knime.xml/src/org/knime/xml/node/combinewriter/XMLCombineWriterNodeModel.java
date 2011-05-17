@@ -161,6 +161,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+        exec.checkCanceled();
         double max = inData[0].getRowCount();
         int count = 0;
         int missingCellCount = 0;

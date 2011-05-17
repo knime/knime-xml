@@ -212,6 +212,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+        exec.checkCanceled();
         DataTableSpec inSpec = inData[0].getDataTableSpec();
         ColumnRearranger rearranger = createColumnRearranger(inSpec);
         BufferedDataTable outTable =
@@ -398,7 +399,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
 			content.append(cellName);
 			content.append(">");
 			DataCell newCell = null;
-		    if (hasXMLContent) {
+		    if (hasXMLContent && !row.getCell(m_contentColumn).isMissing()) {
 				try {
 					Node child = getRootNode((XMLValue)row.getCell(
 							m_contentColumn));

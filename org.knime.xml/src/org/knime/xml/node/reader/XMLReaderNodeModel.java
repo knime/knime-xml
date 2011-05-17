@@ -302,6 +302,7 @@ public class XMLReaderNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+    	exec.checkCanceled();
         InputStream in = null;
         try {
             DataContainer cont = exec.createDataContainer(createOutSpec());
@@ -331,6 +332,7 @@ public class XMLReaderNodeModel extends NodeModel {
                         xpathMatcher);
                 XMLValue value = reader.readXML();
                 while(null != value) {
+                	exec.checkCanceled();
                 	DataCell cell = XMLCellFactory.create(value);
                     DataRow row = new DefaultRow(
                     		RowKey.createRowKey(rowCount), cell);
@@ -339,6 +341,7 @@ public class XMLReaderNodeModel extends NodeModel {
                     value = reader.readXML();
                 }
             } else {
+            	exec.checkCanceled();
                 in = openInputStream();
                 reader = XMLCellReaderFactory.createXMLCellReader(in);                
                 DataCell cell = XMLCellFactory.create(reader.readXML());
