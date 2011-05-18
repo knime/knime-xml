@@ -52,7 +52,6 @@ package org.knime.xml.node.stringtoxml;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeView;
 
 /**
@@ -60,7 +59,7 @@ import org.knime.core.node.NodeView;
  * 
  * @author Heiko Hofer
  */
-public class StringToXMLNodeFactory extends NodeFactory {
+public class StringToXMLNodeFactory extends NodeFactory<StringToXMLNodeModel> {
 
     /**
      * {@inheritDoc}
@@ -74,7 +73,7 @@ public class StringToXMLNodeFactory extends NodeFactory {
      * {@inheritDoc}
      */
     @Override
-    public NodeModel createNodeModel() {
+    public StringToXMLNodeModel createNodeModel() {
         return new StringToXMLNodeModel();
     }
 
@@ -82,8 +81,8 @@ public class StringToXMLNodeFactory extends NodeFactory {
      * {@inheritDoc}
      */
     @Override
-    public NodeView createNodeView(final int viewIndex,
-            final NodeModel nodeModel) {
+    public NodeView<StringToXMLNodeModel> createNodeView(final int viewIndex,
+            final StringToXMLNodeModel nodeModel) {
         return null;
     }
 

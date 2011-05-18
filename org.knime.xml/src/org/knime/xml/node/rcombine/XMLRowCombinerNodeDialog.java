@@ -76,7 +76,7 @@ import org.knime.core.node.util.KeyValuePanel;
  * @author Heiko Hofer
  */
 public class XMLRowCombinerNodeDialog extends NodeDialogPane {
-	private JTextField m_newColumn;
+    private JTextField m_newColumn;
     private ColumnSelectionComboxBox m_inputColumn;
     private JTextField m_rootElement;
     private KeyValuePanel m_attributesPanel;
@@ -84,7 +84,6 @@ public class XMLRowCombinerNodeDialog extends NodeDialogPane {
     /**
      * Creates a new dialog.
      */
-    @SuppressWarnings("unchecked")
     public XMLRowCombinerNodeDialog() {
         super();
 
@@ -93,6 +92,7 @@ public class XMLRowCombinerNodeDialog extends NodeDialogPane {
         addTab("Settings", settings);
     }
 
+    @SuppressWarnings("unchecked")
     private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

@@ -106,106 +106,106 @@ public class ColumnToXMLNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-    	// validate new column name
+        // validate new column name
         if (null == m_settings.getNewColumn()) {
-        	// auto-configure
+            // auto-configure
             m_settings.setNewColumn(
-            		DataTableSpec.getUniqueColumnName(inSpecs[0], "XML"));        
+                    DataTableSpec.getUniqueColumnName(inSpecs[0], "XML"));
         }
         if (m_settings.getNewColumn().trim().isEmpty()) {
-        	throw new InvalidSettingsException("Please set a name for " 
-        			+ "the new column.");
+            throw new InvalidSettingsException("Please set a name for "
+                    + "the new column.");
         } else {
-        	m_settings.setNewColumn(m_settings.getNewColumn().trim());
+            m_settings.setNewColumn(m_settings.getNewColumn().trim());
         }
         if (m_settings.getUseDataBoundElementName()) {
-        	// validate settings for the data bound column name
-        	if (null == m_settings.getElementNameColumn()) {        	
-	        	List<String> compatibleCols = new ArrayList<String>();
-	            for (DataColumnSpec c : inSpecs[0]) {
-	                if (c.getType().isCompatible(StringValue.class)) {
-	                    compatibleCols.add(c.getName());
-	                }
-	            }
-	            if (compatibleCols.size() == 1) {
-	                // auto-configure
-	                m_settings.setElementNameColumn(compatibleCols.get(0));
-	            } else if (compatibleCols.size() > 1) {
-	                // auto-guessing
-	            	m_settings.setElementNameColumn(compatibleCols.get(0));
-	                setWarningMessage("Auto guessing: using column \""
-	                        + compatibleCols.get(0) + "\" for element name.");
-	            } else {
-	                throw new InvalidSettingsException("No String "
-	                        + "column in input table for the element name.");
-	            }
-        	}
+            // validate settings for the data bound column name
+            if (null == m_settings.getElementNameColumn()) {
+                List<String> compatibleCols = new ArrayList<String>();
+                for (DataColumnSpec c : inSpecs[0]) {
+                    if (c.getType().isCompatible(StringValue.class)) {
+                        compatibleCols.add(c.getName());
+                    }
+                }
+                if (compatibleCols.size() == 1) {
+                    // auto-configure
+                    m_settings.setElementNameColumn(compatibleCols.get(0));
+                } else if (compatibleCols.size() > 1) {
+                    // auto-guessing
+                    m_settings.setElementNameColumn(compatibleCols.get(0));
+                    setWarningMessage("Auto guessing: using column \""
+                            + compatibleCols.get(0) + "\" for element name.");
+                } else {
+                    throw new InvalidSettingsException("No String "
+                            + "column in input table for the element name.");
+                }
+            }
         } else {
-        	// validate element name
+            // validate element name
             if (null == m_settings.getElementName()) {
-            	// auto-configure
-                m_settings.setElementName("cell");            
+                // auto-configure
+                m_settings.setElementName("cell");
             }
             if (m_settings.getElementName().trim().isEmpty()) {
-            	throw new InvalidSettingsException("Please set a name for " 
-            			+ "the element.");
+                throw new InvalidSettingsException("Please set a name for "
+                        + "the element.");
             } else {
-            	m_settings.setElementName(m_settings.getElementName().trim());
-            }        	
+                m_settings.setElementName(m_settings.getElementName().trim());
+            }
         }
-    
-    	if (null == m_settings.getElementContentColumn()) {  
-	    	// validate settings for the content column name
-	    	List<String> compatibleCols = new ArrayList<String>();
-	        for (DataColumnSpec c : inSpecs[0]) {
-	            if (c.getType().isCompatible(StringValue.class)
-	            		|| c.getType().isCompatible(XMLValue.class)) {
-	                compatibleCols.add(c.getName());
-	            }
-	        }
-	        if (compatibleCols.size() == 1) {
-	            // auto-configure
-	            m_settings.setElementContentColumn(compatibleCols.get(0));
-	        } else if (compatibleCols.size() > 1) {
-	            // auto-guessing
-	        	m_settings.setElementContentColumn(compatibleCols.get(0));
-	            setWarningMessage("Auto guessing: using column \""
-	                    + compatibleCols.get(0) + "\" for elements content.");
-	        } else {
-	            throw new InvalidSettingsException("No String "
-	                    + "column in input table for the elements content.");
-	        }  
-    	}
 
-    	for (int i = 0; i < m_settings.getDataBoundAttributeNames().length; 
-    		i++) {
-    		if (m_settings.getDataBoundAttributeNames()[i].trim().isEmpty()) {
-    			throw new InvalidSettingsException("Please define valid"
-    					+ " keys for the attributes. Empty keys are not"
-    					+ " allowed");
-    		}
-    	}
-    	for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
-    		if (m_settings.getAttributeNames()[i].trim().isEmpty()) {
-    			throw new InvalidSettingsException("Please define valid"
-    					+ " keys for the attributes. Empty keys are not"
-    					+ " allowed");
-    		}
-    	}
-    	for (int i = 0; i < m_settings.getDataBoundAttributeValues().length; 
-		i++) {
-    		String column = m_settings.getDataBoundAttributeValues()[i];
-    		
-			if (inSpecs[0].findColumnIndex(column) == -1) {
-				throw new InvalidSettingsException("The column "
-						+ "\"" + column + "\"" + " defined in the "
-						+ "Data Bound Attributes table does not exist.");
-			}
-		}    	
+        if (null == m_settings.getElementContentColumn()) {
+            // validate settings for the content column name
+            List<String> compatibleCols = new ArrayList<String>();
+            for (DataColumnSpec c : inSpecs[0]) {
+                if (c.getType().isCompatible(StringValue.class)
+                        || c.getType().isCompatible(XMLValue.class)) {
+                    compatibleCols.add(c.getName());
+                }
+            }
+            if (compatibleCols.size() == 1) {
+                // auto-configure
+                m_settings.setElementContentColumn(compatibleCols.get(0));
+            } else if (compatibleCols.size() > 1) {
+                // auto-guessing
+                m_settings.setElementContentColumn(compatibleCols.get(0));
+                setWarningMessage("Auto guessing: using column \""
+                        + compatibleCols.get(0) + "\" for elements content.");
+            } else {
+                throw new InvalidSettingsException("No String "
+                        + "column in input table for the elements content.");
+            }
+        }
+
+        for (int i = 0; i < m_settings.getDataBoundAttributeNames().length;
+            i++) {
+            if (m_settings.getDataBoundAttributeNames()[i].trim().isEmpty()) {
+                throw new InvalidSettingsException("Please define valid"
+                        + " keys for the attributes. Empty keys are not"
+                        + " allowed");
+            }
+        }
+        for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
+            if (m_settings.getAttributeNames()[i].trim().isEmpty()) {
+                throw new InvalidSettingsException("Please define valid"
+                        + " keys for the attributes. Empty keys are not"
+                        + " allowed");
+            }
+        }
+        for (int i = 0; i < m_settings.getDataBoundAttributeValues().length;
+        i++) {
+            String column = m_settings.getDataBoundAttributeValues()[i];
+
+            if (inSpecs[0].findColumnIndex(column) == -1) {
+                throw new InvalidSettingsException("The column "
+                        + "\"" + column + "\"" + " defined in the "
+                        + "Data Bound Attributes table does not exist.");
+            }
+        }
         ColumnRearranger rearranger = createColumnRearranger(inSpecs[0]);
         return new DataTableSpec[]{rearranger.createSpec()};
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -223,63 +223,63 @@ public class ColumnToXMLNodeModel extends NodeModel {
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec)
             throws InvalidSettingsException {
         // check user settings against input spec here
-    	Set<Integer> toRemove = new HashSet<Integer>();
-    	int nameColumn = -1;
-    	if (m_settings.getUseDataBoundElementName()) {
-    		nameColumn = validateColumn(m_settings.getElementNameColumn(),
-    				spec, toRemove);
-    	}    	
-    	
-    	int contentColumn = validateColumn(
-    			m_settings.getElementContentColumn(), spec, toRemove);
+        Set<Integer> toRemove = new HashSet<Integer>();
+        int nameColumn = -1;
+        if (m_settings.getUseDataBoundElementName()) {
+            nameColumn = validateColumn(m_settings.getElementNameColumn(),
+                    spec, toRemove);
+        }
 
-    	String[] attrColumnNames = m_settings.getDataBoundAttributeValues();
-    	int[] attrColumns = new int[attrColumnNames.length];
-    	for (int i = 0; i < attrColumns.length; i++) {
-    		attrColumns[i] = validateColumn(attrColumnNames[i], spec, toRemove);
-    	}
+        int contentColumn = validateColumn(
+                m_settings.getElementContentColumn(), spec, toRemove);
+
+        String[] attrColumnNames = m_settings.getDataBoundAttributeValues();
+        int[] attrColumns = new int[attrColumnNames.length];
+        for (int i = 0; i < attrColumns.length; i++) {
+            attrColumns[i] = validateColumn(attrColumnNames[i], spec, toRemove);
+        }
         String newName = m_settings.getNewColumn();
         int newNameIndex = spec.findColumnIndex(newName);
         if (newNameIndex >= 0 && !toRemove.contains(newNameIndex)) {
             throw new InvalidSettingsException("Cannot create column "
                     + newName + "since it is already in the input.");
         }
-        
+
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
         DataType newCellType = XMLCell.TYPE;
-        
+
         DataColumnSpecCreator appendSpec =
                 new DataColumnSpecCreator(newName, newCellType);
         colRearranger.append(
-        		new ColumnToXMLCellFactory(appendSpec.createSpec(),
-        				contentColumn, nameColumn, attrColumns, m_settings));
+                new ColumnToXMLCellFactory(appendSpec.createSpec(),
+                        contentColumn, nameColumn, attrColumns, m_settings));
         if (m_settings.getRemoveSourceColumns()) {
-        	int[] toRemoveI = new int[toRemove.size()];
-        	int c = 0;
-        	for (Integer i : toRemove) {
-        		toRemoveI[c] = i;
-        		c++;
-        	}
-        	colRearranger.remove(toRemoveI);
+            int[] toRemoveI = new int[toRemove.size()];
+            int c = 0;
+            for (Integer i : toRemove) {
+                toRemoveI[c] = i;
+                c++;
+            }
+            colRearranger.remove(toRemoveI);
         }
         return colRearranger;
     }
 
 
-	private int validateColumn(String column, DataTableSpec spec,
-			Set<Integer> toRemove) throws InvalidSettingsException {
+    private int validateColumn(final String column, final DataTableSpec spec,
+            final Set<Integer> toRemove) throws InvalidSettingsException {
         final int index = spec.findColumnIndex(column);
         if (index < 0) {
             throw new InvalidSettingsException(
                     "No such column in input table: " + column);
         }
         if (m_settings.getRemoveSourceColumns()) {
-        	toRemove.add(index);
+            toRemove.add(index);
         }
         return index;
-	}
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -333,110 +333,111 @@ public class ColumnToXMLNodeModel extends NodeModel {
     protected void reset() {
         // no internals
     }
-    
-    private class ColumnToXMLCellFactory extends SingleCellFactory {
-    	private final int m_contentColumn;
-    	private final int m_nameColumn;
-    	private final int[] m_attrColumns;
-    	private final ColumnToXMLNodeSettings m_settings;
-        
+
+    private static class ColumnToXMLCellFactory extends SingleCellFactory {
+        private final int m_contentColumn;
+        private final int m_nameColumn;
+        private final int[] m_attrColumns;
+        private final ColumnToXMLNodeSettings m_settings;
+
         /**
-		 * @param newColSpec
-		 * @param contentColumn
-		 * @param nameColumn
-		 * @param attrColumns
-		 * @param settings
-		 */
-		public ColumnToXMLCellFactory(DataColumnSpec newColSpec,
-				int contentColumn, int nameColumn, int[] attrColumns,
-				ColumnToXMLNodeSettings settings) {
-			super(newColSpec);
-			m_contentColumn = contentColumn;
-			m_nameColumn = nameColumn;
-			m_attrColumns = attrColumns;
-			m_settings = settings;
-		}
+         * @param newColSpec
+         * @param contentColumn
+         * @param nameColumn
+         * @param attrColumns
+         * @param settings
+         */
+        public ColumnToXMLCellFactory(final DataColumnSpec newColSpec,
+                final int contentColumn, final int nameColumn,
+                final int[] attrColumns,
+                final ColumnToXMLNodeSettings settings) {
+            super(newColSpec);
+            m_contentColumn = contentColumn;
+            m_nameColumn = nameColumn;
+            m_attrColumns = attrColumns;
+            m_settings = settings;
+        }
 
-		@Override
+        @Override
         public DataCell getCell(final DataRow row) {
-			
-			String cellName = m_nameColumn > 0 
-			        ? row.getCell(m_nameColumn).toString()
-					: m_settings.getElementName();
-			        
-			boolean hasXMLContent = row.getCell(m_contentColumn).getType()
-				.isCompatible(XMLValue.class);
-			String cellContent = !hasXMLContent
-				? row.getCell(m_contentColumn).toString() : "";		
-		
-			StringBuilder content = new StringBuilder();
-			content.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-			content.append("<");
-			content.append(cellName);
-			// Add data bound attributes			
-			for (int i = 0; i < m_settings.getDataBoundAttributeValues().length;
-			i++) {
-				content.append(" ");
-				content.append(m_settings.getDataBoundAttributeNames()[i]);
-				content.append("=\"");
-				String value = row.getCell(m_attrColumns[i]).toString();
-				content.append(value);
-				content.append("\"");
-			}
-			// Add attributes			
-			for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
-				content.append(" ");
-				content.append(m_settings.getAttributeNames()[i]);
-				content.append("=\"");
-				content.append(m_settings.getAttributeValues()[i]);
-				content.append("\"");
-			}			
-			content.append(">");
-			content.append("<![CDATA[");
-			content.append(cellContent.replaceAll("]]>", "]]>]]><![CDATA["));
-			content.append("]]>");
-			content.append("</");
-			content.append(cellName);
-			content.append(">");
-			DataCell newCell = null;
-		    if (hasXMLContent && !row.getCell(m_contentColumn).isMissing()) {
-				try {
-					Node child = getRootNode((XMLValue)row.getCell(
-							m_contentColumn));
-					InputStream is = new ByteArrayInputStream(
-							content.toString().getBytes("UTF-8"));
-					Document doc = XMLCellReaderFactory.createXMLCellReader(is)
-						.readXML().getDocument();
-					child = doc.importNode(child, true);
-					doc.getFirstChild().appendChild(child);
 
-	            	newCell = XMLCellFactory.create(doc);
-	            } catch (final Exception e) {
-	                throw new IllegalStateException(e);
-	            }
-		    } else {
-		    	try {
-	            	newCell = XMLCellFactory.create(content.toString());
-	            } catch (final Exception e) {
-	                throw new IllegalStateException(e);
-	            }		    	
-		    }
+            String cellName = m_nameColumn > 0
+                    ? row.getCell(m_nameColumn).toString()
+                    : m_settings.getElementName();
+
+            boolean hasXMLContent = row.getCell(m_contentColumn).getType()
+                .isCompatible(XMLValue.class);
+            String cellContent = !hasXMLContent
+                ? row.getCell(m_contentColumn).toString() : "";
+
+            StringBuilder content = new StringBuilder();
+            content.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            content.append("<");
+            content.append(cellName);
+            // Add data bound attributes
+            for (int i = 0; i < m_settings.getDataBoundAttributeValues().length;
+            i++) {
+                content.append(" ");
+                content.append(m_settings.getDataBoundAttributeNames()[i]);
+                content.append("=\"");
+                String value = row.getCell(m_attrColumns[i]).toString();
+                content.append(value);
+                content.append("\"");
+            }
+            // Add attributes
+            for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
+                content.append(" ");
+                content.append(m_settings.getAttributeNames()[i]);
+                content.append("=\"");
+                content.append(m_settings.getAttributeValues()[i]);
+                content.append("\"");
+            }
+            content.append(">");
+            content.append("<![CDATA[");
+            content.append(cellContent.replaceAll("]]>", "]]>]]><![CDATA["));
+            content.append("]]>");
+            content.append("</");
+            content.append(cellName);
+            content.append(">");
+            DataCell newCell = null;
+            if (hasXMLContent && !row.getCell(m_contentColumn).isMissing()) {
+                try {
+                    Node child = getRootNode((XMLValue)row.getCell(
+                            m_contentColumn));
+                    InputStream is = new ByteArrayInputStream(
+                            content.toString().getBytes("UTF-8"));
+                    Document doc = XMLCellReaderFactory.createXMLCellReader(is)
+                        .readXML().getDocument();
+                    child = doc.importNode(child, true);
+                    doc.getFirstChild().appendChild(child);
+
+                    newCell = XMLCellFactory.create(doc);
+                } catch (final Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            } else {
+                try {
+                    newCell = XMLCellFactory.create(content.toString());
+                } catch (final Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }
             return newCell;
         }
 
-		/**
-		 * @param cell
-		 * @return
-		 */
-		private Node getRootNode(XMLValue cell) {
-			Document doc = cell.getDocument();
-			Node node = doc.getFirstChild();
-			while (node.getNodeType() != Node.ELEMENT_NODE
-					&& null != node) {
-				node = node.getNextSibling();
-			}
-			return node;
-		}
+        /**
+         * @param cell
+         * @return
+         */
+        private Node getRootNode(final XMLValue cell) {
+            Document doc = cell.getDocument();
+            Node node = doc.getFirstChild();
+            while (node.getNodeType() != Node.ELEMENT_NODE
+                    && null != node) {
+                node = node.getNextSibling();
+            }
+            return node;
+        }
     }
 
 }

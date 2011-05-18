@@ -57,7 +57,7 @@ import org.knime.core.node.NodeSettingsWO;
 
 /**
  * The settings of the XML combine writer node.
- * 
+ *
  * @author Heiko Hofer
  */
 public class XMLCombineWriterNodeSettings {
@@ -172,7 +172,8 @@ public class XMLCombineWriterNodeSettings {
             settings.getBoolean(OVERWRITE_EXISTING, false);
         m_rootElement = settings.getString(ROOT_ELEMENT, null);
         m_attributes = settings.getStringArray(ATTRIBUTES, new String[0]);
-        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES, new String[0]);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES,
+                new String[0]);
     }
 
     /** Called from model when settings are to be loaded.

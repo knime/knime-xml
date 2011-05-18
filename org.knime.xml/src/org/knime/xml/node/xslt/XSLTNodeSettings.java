@@ -60,12 +60,12 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class XSLTNodeSettings {
-	private static final String NEW_COLUMN = "newColumn";
-    private static final String INPUT_COLUMN = "inputColumn";    
+    private static final String NEW_COLUMN = "newColumn";
+    private static final String INPUT_COLUMN = "inputColumn";
     private static final String REMOVE_INPUT_COLUMN = "removeInputColumn";
     private static final String XSLT_COLUMN = "xsltColumn";
-    private static final String USE_FIRST_STYLESHEET_ONLY = 
-    	"useFirstStylesheetOnly";
+    private static final String USE_FIRST_STYLESHEET_ONLY =
+        "useFirstStylesheetOnly";
     private static final String OUTPUT_IS_XML = "outputIsXML";
 
     private String m_inputColumn = null;
@@ -74,92 +74,92 @@ public class XSLTNodeSettings {
     private String m_xsltColumn = null;
     private boolean m_useFirstStylesheeOnly = true;
     private boolean m_outputIsXML = false;
-    
-	/**
-	 * @return the inputColumn
-	 */
-	String getInputColumn() {
-		return m_inputColumn;
-	}
 
-	/**
-	 * @param inputColumn the inputColumn to set
-	 */
-	void setInputColumn(String inputColumn) {
-		m_inputColumn = inputColumn;
-	}
+    /**
+     * @return the inputColumn
+     */
+    String getInputColumn() {
+        return m_inputColumn;
+    }
 
-	/**
-	 * @return the newColumn
-	 */
-	String getNewColumn() {
-		return m_newColumn;
-	}
+    /**
+     * @param inputColumn the inputColumn to set
+     */
+    void setInputColumn(final String inputColumn) {
+        m_inputColumn = inputColumn;
+    }
 
-	/**
-	 * @param newColumn the newColumn to set
-	 */
-	void setNewColumn(String newColumn) {
-		m_newColumn = newColumn;
-	}
+    /**
+     * @return the newColumn
+     */
+    String getNewColumn() {
+        return m_newColumn;
+    }
 
-	/**
-	 * @return the removeInputColumn
-	 */
-	boolean getRemoveInputColumn() {
-		return m_removeInputColumn;
-	}
+    /**
+     * @param newColumn the newColumn to set
+     */
+    void setNewColumn(final String newColumn) {
+        m_newColumn = newColumn;
+    }
 
-	/**
-	 * @param removeInputColumn the removeInputColumn to set
-	 */
-	void setRemoveInputColumn(boolean removeInputColumn) {
-		m_removeInputColumn = removeInputColumn;
-	}
+    /**
+     * @return the removeInputColumn
+     */
+    boolean getRemoveInputColumn() {
+        return m_removeInputColumn;
+    }
 
-	/**
-	 * @return the xsltColumn
-	 */
-	String getXsltColumn() {
-		return m_xsltColumn;
-	}
+    /**
+     * @param removeInputColumn the removeInputColumn to set
+     */
+    void setRemoveInputColumn(final boolean removeInputColumn) {
+        m_removeInputColumn = removeInputColumn;
+    }
 
-	/**
-	 * @param xsltColumn the xsltColumn to set
-	 */
-	void setXsltColumn(String xsltColumn) {
-		m_xsltColumn = xsltColumn;
-	}
+    /**
+     * @return the xsltColumn
+     */
+    String getXsltColumn() {
+        return m_xsltColumn;
+    }
 
-	/**
-	 * @return the useFirstStylesheeOnly
-	 */
-	boolean getUseFirstStylesheeOnly() {
-		return m_useFirstStylesheeOnly;
-	}
+    /**
+     * @param xsltColumn the xsltColumn to set
+     */
+    void setXsltColumn(final String xsltColumn) {
+        m_xsltColumn = xsltColumn;
+    }
 
-	/**
-	 * @param useFirstStylesheeOnly the useFirstStylesheeOnly to set
-	 */
-	void setUseFirstStylesheeOnly(boolean useFirstStylesheeOnly) {
-		m_useFirstStylesheeOnly = useFirstStylesheeOnly;
-	}
+    /**
+     * @return the useFirstStylesheeOnly
+     */
+    boolean getUseFirstStylesheeOnly() {
+        return m_useFirstStylesheeOnly;
+    }
 
-	/**
-	 * @return the outputIsXML
-	 */
-	boolean getOutputIsXML() {
-		return m_outputIsXML;
-	}
+    /**
+     * @param useFirstStylesheeOnly the useFirstStylesheeOnly to set
+     */
+    void setUseFirstStylesheeOnly(final boolean useFirstStylesheeOnly) {
+        m_useFirstStylesheeOnly = useFirstStylesheeOnly;
+    }
 
-	/**
-	 * @param outputIsXML the outputIsXML to set
-	 */
-	void setOutputIsXML(boolean outputIsXML) {
-		m_outputIsXML = outputIsXML;
-	}
+    /**
+     * @return the outputIsXML
+     */
+    boolean getOutputIsXML() {
+        return m_outputIsXML;
+    }
 
-	/** Called from dialog when settings are to be loaded.
+    /**
+     * @param outputIsXML the outputIsXML to set
+     */
+    void setOutputIsXML(final boolean outputIsXML) {
+        m_outputIsXML = outputIsXML;
+    }
+
+    /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
      */
@@ -170,7 +170,7 @@ public class XSLTNodeSettings {
         m_removeInputColumn = settings.getBoolean(REMOVE_INPUT_COLUMN, false);
         m_xsltColumn = settings.getString(XSLT_COLUMN, null);
         m_useFirstStylesheeOnly = settings.getBoolean(
-        		USE_FIRST_STYLESHEET_ONLY, true);
+                USE_FIRST_STYLESHEET_ONLY, true);
         m_outputIsXML = settings.getBoolean(OUTPUT_IS_XML, false);
     }
 
@@ -185,8 +185,8 @@ public class XSLTNodeSettings {
         m_removeInputColumn = settings.getBoolean(REMOVE_INPUT_COLUMN);
         m_xsltColumn = settings.getString(XSLT_COLUMN);
         m_useFirstStylesheeOnly = settings.getBoolean(
-        		USE_FIRST_STYLESHEET_ONLY);
-        m_outputIsXML = settings.getBoolean(OUTPUT_IS_XML);     
+                USE_FIRST_STYLESHEET_ONLY);
+        m_outputIsXML = settings.getBoolean(OUTPUT_IS_XML);
     }
 
     /** Called from model and dialog to save current settings.
@@ -196,7 +196,7 @@ public class XSLTNodeSettings {
         settings.addString(INPUT_COLUMN, m_inputColumn);
         settings.addString(NEW_COLUMN, m_newColumn);
         settings.addBoolean(REMOVE_INPUT_COLUMN, m_removeInputColumn);
-        settings.addString(XSLT_COLUMN, m_xsltColumn);       
+        settings.addString(XSLT_COLUMN, m_xsltColumn);
         settings.addBoolean(USE_FIRST_STYLESHEET_ONLY, m_useFirstStylesheeOnly);
         settings.addBoolean(OUTPUT_IS_XML, m_outputIsXML);
     }

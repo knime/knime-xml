@@ -83,7 +83,6 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
     /**
      * Creates a new dialog.
      */
-    @SuppressWarnings("unchecked")
     public XMLWriterNodeDialog() {
         super();
 
@@ -92,6 +91,7 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         addTab("Settings", settings);
     }
 
+    @SuppressWarnings("unchecked")
     private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -129,11 +129,11 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         m_overwriteExisting = new JCheckBox("Overwrite existing files.");
         p.add(m_overwriteExisting, c);
-        
+
         c.gridy++;
         c.weighty = 1;
         p.add(new JPanel(), c);
-        
+
         return p;
     }
 

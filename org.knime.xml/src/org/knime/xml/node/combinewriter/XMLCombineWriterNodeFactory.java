@@ -59,7 +59,8 @@ import org.knime.core.node.NodeView;
  *
  * @author Heiko Hofer
  */
-public class XMLCombineWriterNodeFactory extends NodeFactory<XMLCombineWriterNodeModel> {
+public class XMLCombineWriterNodeFactory
+    extends NodeFactory<XMLCombineWriterNodeModel> {
     /**
      * {@inheritDoc}
      */
@@ -80,7 +81,8 @@ public class XMLCombineWriterNodeFactory extends NodeFactory<XMLCombineWriterNod
      * {@inheritDoc}
      */
     @Override
-    public NodeView<XMLCombineWriterNodeModel> createNodeView(final int viewIndex,
+    public NodeView<XMLCombineWriterNodeModel> createNodeView(
+            final int viewIndex,
             final XMLCombineWriterNodeModel nodeModel) {
         return null;
     }

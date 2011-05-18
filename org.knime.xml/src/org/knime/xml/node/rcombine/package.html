@@ -1,5 +1,5 @@
-/*
- * ------------------------------------------------------------------------
+<!--
+========================================================================
  *
  *  Copyright (C) 2003 - 2010
  *  University of Konstanz, Germany and
@@ -43,62 +43,8 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
- *
- * History
- *   17.12.2010 (hofer): created
-. */
-package org.knime.xml.node.rcombine;
-
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
-
-/**
- * This is the factory for the XML combine Writer node.
- *
- * @author Heiko Hofer
- */
-public class XMLRowCombinerNodeFactory
-    extends NodeFactory<XMLRowCombinerNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public XMLRowCombinerNodeModel createNodeModel() {
-        return new XMLRowCombinerNodeModel();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<XMLRowCombinerNodeModel> createNodeView(final int viewIndex,
-            final XMLRowCombinerNodeModel nodeModel) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new XMLRowCombinerNodeDialog();
-    }
-}
+====================================================================
+-->
+<body>
+	Node that merges cells of an XML column into a single XML cell.
+</body>

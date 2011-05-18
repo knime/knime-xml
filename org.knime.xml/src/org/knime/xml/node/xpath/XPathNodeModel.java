@@ -99,8 +99,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * This is the model for the XPath node. It takes an XML column from the
- * input table and performs a XPath query on every cell.
+ * This is the model for the XPath node. It takes an XML column from the input
+ * table and performs a XPath query on every cell.
  *
  * @author Heiko Hofer
  */
@@ -149,9 +149,8 @@ public class XPathNodeModel extends NodeModel {
         if (null == m_settings.getNewColumn()) {
             if (null != m_settings.getInputColumn()) {
                 // auto-configure
-                String newName =
-                        DataTableSpec.getUniqueColumnName(inSpecs[0],
-                                m_settings.getInputColumn() + " (xpath)");
+                String newName = DataTableSpec.getUniqueColumnName(inSpecs[0],
+                        m_settings.getInputColumn() + " (xpath)");
                 m_settings.setNewColumn(newName);
             } else {
                 m_settings.setNewColumn("XPath query result");
@@ -160,99 +159,99 @@ public class XPathNodeModel extends NodeModel {
         if (null == m_settings.getReturnType()) {
             throw new InvalidSettingsException("No return type defined.");
         }
-        if (m_settings.getUseRootsNS() && 
-        		(m_settings.getRootsNSPrefix() == null
-        		|| m_settings.getRootsNSPrefix().trim().isEmpty())) {
-        	throw new InvalidSettingsException(
-        			"The prefix of root's default namespace is not set.");
+        if (m_settings.getUseRootsNS()
+                && (m_settings.getRootsNSPrefix() == null || m_settings
+                        .getRootsNSPrefix().trim().isEmpty())) {
+            throw new InvalidSettingsException(
+                    "The prefix of root's default namespace is not set.");
         }
         m_xpathExpr = null;
         if (null != m_settings.getXpathQuery()) {
-        	
+
             XPathFactory factory = XPathFactory.newInstance();
             XPath xpath = factory.newXPath();
-            xpath.setNamespaceContext(new XPathNamespaceContext(
-                    m_settings.getNsPrefixes(),
-                    m_settings.getNamespaces()));
+            xpath.setNamespaceContext(new XPathNamespaceContext(m_settings
+                    .getNsPrefixes(), m_settings.getNamespaces()));
             try {
-            	XPathExpression xpathExpr 
-            		= xpath.compile(m_settings.getXpathQuery());
-            	
-            	if (m_settings.getUseRootsNS() && 
-            			Arrays.binarySearch(m_settings.getNsPrefixes(), 
-            					m_settings.getRootsNSPrefix()) >= 0) {
-            		throw new InvalidSettingsException(
+                XPathExpression xpathExpr = xpath.compile(m_settings
+                        .getXpathQuery());
+
+                if (m_settings.getUseRootsNS()
+                        && Arrays.binarySearch(m_settings.getNsPrefixes(),
+                                m_settings.getRootsNSPrefix()) >= 0) {
+                    throw new InvalidSettingsException(
                             "The namespace table uses the prefix "
-            				+ "reserved for the "
-            				+ "roots namespace.");
-            	} else {
-            		m_xpathExpr = xpathExpr;
-            	}
+                                    + "reserved for the " + "roots namespace.");
+                } else {
+                    m_xpathExpr = xpathExpr;
+                }
             } catch (XPathExpressionException e) {
-            	if (m_settings.getUseRootsNS()) {
-	            	// try to compile it with roots default prefix            	
-	           		createXPathExpr(null);
-	          		// the xpath compiles with the roots default prefix
-	          		m_xpathExpr = null;
-            	} else {
-            		throw new InvalidSettingsException(
-            				"XPath expression cannot be compiled.", e);
-            	}
+                if (m_settings.getUseRootsNS()) {
+                    // try to compile it with roots default prefix
+                    createXPathExpr(null);
+                    // the xpath compiles with the roots default prefix
+                    m_xpathExpr = null;
+                } else {
+                    throw new InvalidSettingsException(
+                            "XPath expression cannot be compiled.", e);
+                }
             }
         } else {
             throw new InvalidSettingsException("No XPath query defined.");
         }
 
         ColumnRearranger rearranger = createColumnRearranger(inSpecs[0]);
-        return new DataTableSpec[]{rearranger.createSpec()};
+        return new DataTableSpec[] {
+                rearranger.createSpec()
+        };
     }
-    
-    private XPathExpression createXPathExpr(XMLValue xmlValue) 
-    		throws InvalidSettingsException {
-    	List<String> nsPrefixes = new ArrayList<String>(); 
-    	nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
-    	if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
-    		throw new InvalidSettingsException(
+
+    private XPathExpression createXPathExpr(final XMLValue xmlValue)
+            throws InvalidSettingsException {
+        List<String> nsPrefixes = new ArrayList<String>();
+        nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
+        if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
+            throw new InvalidSettingsException(
                     "The namespace table uses the prefix reserved for the "
-    				+ "roots namespace.");
-    	}
-    	nsPrefixes.add(m_settings.getRootsNSPrefix());
-    	List<String> namespaces = new ArrayList<String>(); 
-    	namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
-    	if (xmlValue == null) {
-    		String ns_template = "roots_ns_";
-    		int counter = 0;
-    		String ns = ns_template + counter;
-    		while(namespaces.contains(ns)) {
-    			counter++;
-    			ns = ns_template + counter;
-    		}
-    		namespaces.add(ns);
-    	} else {
-    		Node root = xmlValue.getDocument().getFirstChild();
-    		while (root.getNodeType() != Node.ELEMENT_NODE) {
-    			root = root.getNextSibling();
-    		}
-    		String rootNSUri = root.getNamespaceURI();
-    		if (rootNSUri != null) {
-    			namespaces.add(rootNSUri);
-    		} else {
-    			throw new InvalidSettingsException(
-                	"The root node does not have a namesapce URI.");
-    		}
-    	}
-    	
+                            + "roots namespace.");
+        }
+        nsPrefixes.add(m_settings.getRootsNSPrefix());
+        List<String> namespaces = new ArrayList<String>();
+        namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
+        if (xmlValue == null) {
+            String nsTemplate = "roots_ns_";
+            int counter = 0;
+            String ns = nsTemplate + counter;
+            while (namespaces.contains(ns)) {
+                counter++;
+                ns = nsTemplate + counter;
+            }
+            namespaces.add(ns);
+        } else {
+            Node root = xmlValue.getDocument().getFirstChild();
+            while (root.getNodeType() != Node.ELEMENT_NODE) {
+                root = root.getNextSibling();
+            }
+            String rootNSUri = root.getNamespaceURI();
+            if (rootNSUri != null) {
+                namespaces.add(rootNSUri);
+            } else {
+                throw new InvalidSettingsException(
+                        "The root node does not have a namesapce URI.");
+            }
+        }
+
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
-        xpath.setNamespaceContext(new XPathNamespaceContext(
-        		nsPrefixes.toArray(new String[nsPrefixes.size()]),
-                namespaces.toArray(new String[namespaces.size()])));
+        xpath.setNamespaceContext(new XPathNamespaceContext(nsPrefixes
+                .toArray(new String[nsPrefixes.size()]), namespaces
+                .toArray(new String[namespaces.size()])));
         try {
             return xpath.compile(m_settings.getXpathQuery());
         } catch (XPathExpressionException e) {
-            throw new InvalidSettingsException(
-                    "XPath query cannot be parsed.", e);
-        }    	
+            throw new InvalidSettingsException("XPath query cannot be parsed.",
+                    e);
+        }
     }
 
     /**
@@ -263,9 +262,11 @@ public class XPathNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
         DataTableSpec inSpec = inData[0].getDataTableSpec();
         ColumnRearranger rearranger = createColumnRearranger(inSpec);
-        BufferedDataTable outTable =
-                exec.createColumnRearrangeTable(inData[0], rearranger, exec);
-        return new BufferedDataTable[]{outTable};
+        BufferedDataTable outTable = exec.createColumnRearrangeTable(inData[0],
+                rearranger, exec);
+        return new BufferedDataTable[] {
+            outTable
+        };
     }
 
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec)
@@ -280,7 +281,7 @@ public class XPathNodeModel extends NodeModel {
         String newName = m_settings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
                 || (spec.containsName(newName) && newName.equals(xmlColumn)
-                        && !m_settings.getRemoveInputColumn())) {
+                && !m_settings.getRemoveInputColumn())) {
             throw new InvalidSettingsException("Cannot create column "
                     + newName + "since it is already in the input.");
         }
@@ -300,8 +301,8 @@ public class XPathNodeModel extends NodeModel {
             newCellType = DataType.getType(ListCell.class, XMLCell.TYPE);
         }
 
-        DataColumnSpecCreator appendSpec =
-                new DataColumnSpecCreator(newName, newCellType);
+        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName,
+                newCellType);
         colRearranger.append(new SingleCellFactory(appendSpec.createSpec()) {
             @Override
             public DataCell getCell(final DataRow row) {
@@ -309,11 +310,12 @@ public class XPathNodeModel extends NodeModel {
                 if (xmlCell.isMissing()) {
                     return DataType.getMissingCell();
                 }
-                XMLValue xmlValue = (XMLValue)xmlCell;
+                XMLValue xmlValue = (XMLValue) xmlCell;
                 DataCell newCell = null;
                 try {
-                	XPathExpression xpathExpr = m_xpathExpr == null 
-						? createXPathExpr(xmlValue) : m_xpathExpr;
+                    XPathExpression xpathExpr = m_xpathExpr == null
+                    ? createXPathExpr(xmlValue)
+                            : m_xpathExpr;
                     if (returnType.equals(XPathOutput.Boolean)) {
                         Object result = xpathExpr.evaluate(
                                 xmlValue.getDocument(), XPathConstants.BOOLEAN);
@@ -338,10 +340,10 @@ public class XPathNodeModel extends NodeModel {
                                 xmlValue.getDocument(), XPathConstants.NODE);
                         Node value = (Node) result;
                         DocumentBuilderFactory domFactory =
-                            DocumentBuilderFactory.newInstance();
+                        DocumentBuilderFactory.newInstance();
                         domFactory.setNamespaceAware(true);
                         DocumentBuilder docBuilder = domFactory
-                                                      .newDocumentBuilder();
+                                .newDocumentBuilder();
                         Document doc = docBuilder.newDocument();
                         Node node = doc.importNode(value, true);
                         doc.appendChild(node);
@@ -353,10 +355,10 @@ public class XPathNodeModel extends NodeModel {
                         NodeList nodes = (NodeList) result;
                         List<DataCell> cells = new ArrayList<DataCell>();
                         DocumentBuilderFactory domFactory =
-                            DocumentBuilderFactory.newInstance();
+                        DocumentBuilderFactory.newInstance();
                         domFactory.setNamespaceAware(true);
                         DocumentBuilder docBuilder = domFactory
-                                                        .newDocumentBuilder();
+                                .newDocumentBuilder();
                         for (int i = 0; i < nodes.getLength(); i++) {
                             Node value = nodes.item(i);
                             Document doc = docBuilder.newDocument();
@@ -397,7 +399,6 @@ public class XPathNodeModel extends NodeModel {
             CanceledExecutionException {
         // no internals
     }
-
 
     /**
      * {@inheritDoc}
@@ -451,7 +452,9 @@ public class XPathNodeModel extends NodeModel {
 
         @Override
         public String getNamespaceURI(final String prefix) {
-            if (prefix == null) throw new NullPointerException("Null prefix");
+            if (prefix == null) {
+                throw new NullPointerException("Null prefix");
+            }
             if ("xml".equals(prefix)) {
                 return XMLConstants.XML_NS_URI;
             } else if (m_namespaces.containsKey(prefix)) {
@@ -461,14 +464,13 @@ public class XPathNodeModel extends NodeModel {
             }
         }
 
-
         @Override
         public String getPrefix(final String uri) {
             // This method isn't necessary for XPath processing.
             throw new UnsupportedOperationException();
         }
 
-
+        @SuppressWarnings("rawtypes")
         @Override
         public Iterator getPrefixes(final String uri) {
             // This method isn't necessary for XPath processing.

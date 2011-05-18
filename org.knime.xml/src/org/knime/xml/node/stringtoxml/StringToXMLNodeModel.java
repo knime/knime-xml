@@ -44,7 +44,7 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
- * 
+ *
  * History
  *   05.05.2011 (hofer): created
  */
@@ -80,7 +80,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 
 /**
  * NodeModel of the String To XML Node.
- * 
+ *
  * @author Heiko Hofer
  */
 public class StringToXMLNodeModel extends NodeModel {
@@ -131,7 +131,7 @@ public class StringToXMLNodeModel extends NodeModel {
         // find indices to work on.
         DataTableSpec inspec = inData[0].getDataTableSpec();
         List<String> inclcols = m_inclCols.getIncludeList();
-        
+
         if (inclcols.size() == 0) {
             // nothing to convert, let's return the input table.
             setWarningMessage("No columns selected,"
@@ -159,23 +159,23 @@ public class StringToXMLNodeModel extends NodeModel {
 
     private int[] findColumnIndices(final DataTableSpec spec)
             throws InvalidSettingsException {
-    	if (m_inclCols.getIncludeList().isEmpty()
-    			&& m_inclCols.getExcludeList().isEmpty()
-    			&& spec.getNumColumns() > 0) {
-    		// do auto-configuration
-    		List<String> toIncl = new ArrayList<String>();
-    		List<String> toExcl = new ArrayList<String>();
-    		for (int i = 0; i < spec.getNumColumns(); i++) {
-    			DataColumnSpec col = spec.getColumnSpec(i);
-    			if (col.getType().isCompatible(StringValue.class)) {
-    				toIncl.add(col.getName());
-    			} else {
-    				toExcl.add(col.getName());
-    			}
-    		}
-    		m_inclCols.setNewValues(toIncl, toExcl, false);
-    	}
-    	
+        if (m_inclCols.getIncludeList().isEmpty()
+                && m_inclCols.getExcludeList().isEmpty()
+                && spec.getNumColumns() > 0) {
+            // do auto-configuration
+            List<String> toIncl = new ArrayList<String>();
+            List<String> toExcl = new ArrayList<String>();
+            for (int i = 0; i < spec.getNumColumns(); i++) {
+                DataColumnSpec col = spec.getColumnSpec(i);
+                if (col.getType().isCompatible(StringValue.class)) {
+                    toIncl.add(col.getName());
+                } else {
+                    toExcl.add(col.getName());
+                }
+            }
+            m_inclCols.setNewValues(toIncl, toExcl, false);
+        }
+
         List<String> inclcols = m_inclCols.getIncludeList();
         StringBuilder warnings = new StringBuilder();
         if (inclcols.size() == 0) {
@@ -183,12 +183,12 @@ public class StringToXMLNodeModel extends NodeModel {
         }
         List<Integer> indicesvec = new ArrayList<Integer>();
         if (m_inclCols.isKeepAllSelected()) {
-    		for (int i = 0; i < spec.getNumColumns(); i++) {
-    			DataColumnSpec col = spec.getColumnSpec(i);
-    			if (col.getType().isCompatible(StringValue.class)) {
-    				indicesvec.add(i);
-    			}
-    		}        	
+            for (int i = 0; i < spec.getNumColumns(); i++) {
+                DataColumnSpec col = spec.getColumnSpec(i);
+                if (col.getType().isCompatible(StringValue.class)) {
+                    indicesvec.add(i);
+                }
+            }
         } else {
             for (int i = 0; i < inclcols.size(); i++) {
                 int colIndex = spec.findColumnIndex(inclcols.get(i));
@@ -222,7 +222,7 @@ public class StringToXMLNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-    	// nod does not have internals to reset
+        // nod does not have internals to reset
     }
 
     /**
@@ -258,7 +258,7 @@ public class StringToXMLNodeModel extends NodeModel {
     protected void loadInternals(final File nodeInternDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-    	// node does not have internal settings
+        // node does not have internal settings
     }
 
     /**
@@ -268,7 +268,7 @@ public class StringToXMLNodeModel extends NodeModel {
     protected void saveInternals(final File nodeInternDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-    	// node does not have internal settings
+        // node does not have internal settings
     }
 
     /**
@@ -308,23 +308,23 @@ public class StringToXMLNodeModel extends NodeModel {
          * {@inheritDoc}
          */
         @Override
-		public DataCell[] getCells(final DataRow row) {        	
+        public DataCell[] getCells(final DataRow row) {
             DataCell[] newcells = new DataCell[m_colindices.length];
             for (int i = 0; i < newcells.length; i++) {
                 DataCell dc = row.getCell(m_colindices[i]);
                 if (dc.isMissing()) {
-                	newcells[i] = DataType.getMissingCell();
+                    newcells[i] = DataType.getMissingCell();
                 } else {
-	                try {
-	                	newcells[i] = XMLCellFactory.create(dc.toString());
-					} catch (Exception e) {
-						m_error.append("Cell in row:\"" 
-							+ row.getKey().getString() 
-							+ "\" and column \"" 
-							+ m_spec.getColumnSpec(m_colindices[i]).getName() 
-							+ "\" could not be parsed. Add missing value.\n");
-						newcells[i] = DataType.getMissingCell();
-					}
+                    try {
+                        newcells[i] = XMLCellFactory.create(dc.toString());
+                    } catch (Exception e) {
+                        m_error.append("Cell in row:\""
+                            + row.getKey().getString()
+                            + "\" and column \""
+                            + m_spec.getColumnSpec(m_colindices[i]).getName()
+                            + "\" could not be parsed. Add missing value.\n");
+                        newcells[i] = DataType.getMissingCell();
+                    }
                 }
             }
             return newcells;
@@ -334,7 +334,7 @@ public class StringToXMLNodeModel extends NodeModel {
          * {@inheritDoc}
          */
         @Override
-		public DataColumnSpec[] getColumnSpecs() {
+        public DataColumnSpec[] getColumnSpecs() {
             DataColumnSpec[] newcolspecs =
                     new DataColumnSpec[m_colindices.length];
             for (int i = 0; i < newcolspecs.length; i++) {
@@ -353,7 +353,7 @@ public class StringToXMLNodeModel extends NodeModel {
          * {@inheritDoc}
          */
         @Override
-		public void setProgress(final int curRowNr, final int rowCount,
+        public void setProgress(final int curRowNr, final int rowCount,
                 final RowKey lastKey, final ExecutionMonitor exec) {
             exec.setProgress((double)curRowNr / (double)rowCount, "Converting");
         }

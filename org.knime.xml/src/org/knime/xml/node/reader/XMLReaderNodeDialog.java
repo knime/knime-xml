@@ -115,7 +115,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         m_useXPathFilter = new JCheckBox("Use XPath Filter");
         m_useXPathFilter.addActionListener(new ActionListener() {
             @Override
-			public void actionPerformed(final ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 enableXPathComponents(m_useXPathFilter.isSelected());
             }
         });
@@ -140,7 +140,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
 
         c.gridy++;
         p.add(pXPath, c);
-        
+
         c.gridy++;
         c.weighty = 1;
         JPanel nsp = new JPanel(new BorderLayout());
@@ -153,12 +153,12 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         m_nsPanel.setValueColumnLabel("Namespace");
         nsp.add(m_nsPanel);
         p.add(nsp, c);
-        
-        
+
+
         enableXPathComponents(m_useXPathFilter.isSelected());
         return p;
     }
-    
+
     private JPanel infereRootDefaulNSPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -171,15 +171,15 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         c.weightx = 0;
         c.weighty = 1;
-        m_useRootsNS = 
-        	new JCheckBox("Incorporate namespace of the root element.");
-        m_useRootsNS.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				m_rootNSPrefix.setEnabled(
-						m_useRootsNS.isSelected());
-			}
-		});
+        m_useRootsNS =
+            new JCheckBox("Incorporate namespace of the root element.");
+        m_useRootsNS.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_rootNSPrefix.setEnabled(
+                        m_useRootsNS.isSelected());
+            }
+        });
         p.add(m_useRootsNS, c);
 
         c.gridy++;
@@ -189,10 +189,10 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c.gridx++;
         c.weightx = 1;
         m_rootNSPrefix = new JTextField();
-        p.add(m_rootNSPrefix, c);        
+        p.add(m_rootNSPrefix, c);
         return p;
     }
-    
+
 
     private void enableXPathComponents(final boolean enable) {
         m_xpath.setEnabled(enable);
@@ -216,7 +216,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         s.setNsPrefixes(m_nsPanel.getKeys());
         s.setNamespaces(m_nsPanel.getValues());
         s.setUseRootsNS(m_useRootsNS.isSelected());
-        s.setRootsNSPrefix(m_rootNSPrefix.getText().trim());        
+        s.setRootsNSPrefix(m_rootNSPrefix.getText().trim());
         s.saveSettings(settings);
     }
 
@@ -235,12 +235,12 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         m_xpath.setText(s.getXpath());
         m_nsPanel.setTableData(s.getNsPrefixes(), s.getNamespaces());
 
-        enableXPathComponents(s.getUseXPathFilter());     
+        enableXPathComponents(s.getUseXPathFilter());
         m_useRootsNS.setSelected(s.getUseRootsNS());
         m_rootNSPrefix.setText(s.getRootsNSPrefix());
-        m_rootNSPrefix.setEnabled(m_useRootsNS.isSelected() 
-        		&& m_useXPathFilter.isSelected());
-           
+        m_rootNSPrefix.setEnabled(m_useRootsNS.isSelected()
+                && m_useXPathFilter.isSelected());
+
     }
 
 }

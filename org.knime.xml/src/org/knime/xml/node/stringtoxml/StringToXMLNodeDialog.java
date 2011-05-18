@@ -44,7 +44,7 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
- * 
+ *
  * History
  *   05.05.2011 (hofer): created
  */
@@ -57,7 +57,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 
 /**
  * Dialog of the String To XML Node.
- * 
+ *
  * @author Heiko Hofer
  */
 public class StringToXMLNodeDialog extends DefaultNodeSettingsPane {
@@ -70,7 +70,7 @@ public class StringToXMLNodeDialog extends DefaultNodeSettingsPane {
     public StringToXMLNodeDialog() {
         addDialogComponent(new DialogComponentColumnFilter(
                 new SettingsModelFilterString(
-                		StringToXMLNodeModel.CFG_INCLUDED_COLUMNS), 0, true,
+                        StringToXMLNodeModel.CFG_INCLUDED_COLUMNS), 0, true,
                 new Class[]{StringValue.class}));
     }
 }

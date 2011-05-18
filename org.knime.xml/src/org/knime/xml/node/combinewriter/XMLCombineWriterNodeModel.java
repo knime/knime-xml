@@ -80,7 +80,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 /**
- * This is the model for the XML combine Writer node. 
+ * This is the model for the XML combine Writer node.
  * It takes an XML column from the input table combines it to a single
  * document and writes the document to a file.
  *
@@ -138,7 +138,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
             }
         }
 
-    	if (m_settings.getRootElement().isEmpty()) {
+        if (m_settings.getRootElement().isEmpty()) {
             throw new InvalidSettingsException("The root element is "
                     + "empty. Please define a root element.");
         }
@@ -151,7 +151,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
         // namespace definition
         createRootElement(m_settings.getRootElement(),
                 rootAttributes);
-        
+
         return new DataTableSpec[0];
     }
 
@@ -169,9 +169,9 @@ public class XMLCombineWriterNodeModel extends NodeModel {
         final int colIndex =
                 inData[0].getDataTableSpec().findColumnIndex(
                         m_settings.getInputColumn());
-    
+
         File xmlFile = new File(m_settings.getOutputFile());
-        
+
         if (!m_settings.getOverwriteExistingFiles() && xmlFile.exists()) {
             throw new IOException("File '" + xmlFile.getAbsolutePath()
                     + "' already exists");
@@ -202,7 +202,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
             count++;
         }
         xmlCellWriter.close();
-        
+
         if (missingCellCount > 0) {
             setWarningMessage("Skipped " + missingCellCount + " rows due "
                     + "to missing values.");
@@ -212,14 +212,14 @@ public class XMLCombineWriterNodeModel extends NodeModel {
 
 
     /**
-     * Create the list of attributes for the root element
-     * 
+     * Create the list of attributes for the root element.
+     *
      * @param attributeNames the names of the attributes
      * @param attributeValues the values of the attributes
      * @return a map of the attributes qualified name to their value
      */
     private Map<QName, String> createRootAttributes(
-    		final String[] attributeNames,
+            final String[] attributeNames,
             final String[] attributeValues) {
         Map<QName, String> attrs = new HashMap<QName, String>();
         DefaultNamespaceContext nsContext = createNameSpaceContext(

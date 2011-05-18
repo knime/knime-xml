@@ -60,20 +60,20 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class XMLColumnCombinerNodeSettings {
-	private static final String NEW_COLUMN = "newColumn";
-	private static final String ELEMENT_NAME = "elementName";
-	private static final String USE_DATA_BOUND_ELEMENT_NAME = 
-		"useDataBoundElementName";
+    private static final String NEW_COLUMN = "newColumn";
+    private static final String ELEMENT_NAME = "elementName";
+    private static final String USE_DATA_BOUND_ELEMENT_NAME =
+        "useDataBoundElementName";
     private static final String ELEMENT_NAME_COLUMN = "elementNameColumn";
     private static final String INPUT_COLUMN = "inputColumns";
     private static final String INCLUDE_ALL = "includeAll";
     private static final String REMOVE_SOURCE_COLUMNS = "removeSourceColumns";
-    private static final String DATA_BOUND_ATTRIBUTE_NAMES = 
-    	"dataBoundAttributeNames";
-    private static final String DATA_BOUND_ATTRIBUTE_VALUES = 
-    	"dataBoundAttributeColumns";
+    private static final String DATA_BOUND_ATTRIBUTE_NAMES =
+        "dataBoundAttributeNames";
+    private static final String DATA_BOUND_ATTRIBUTE_VALUES =
+        "dataBoundAttributeColumns";
     private static final String ATTRIBUTE_NAMES = "attributeNames";
-    private static final String ATTRIBUTE_VALUES = "attributeValues";    
+    private static final String ATTRIBUTE_VALUES = "attributeValues";
 
     private String m_newColumn = null;
     private String m_elementName = null;
@@ -86,185 +86,185 @@ public class XMLColumnCombinerNodeSettings {
     private String[] m_dataBoundAttributeValues = new String[0];
     private String[] m_attributeNames = new String[0];
     private String[] m_attributeValues = new String[0];
-    
-    
-	/**
-	 * @return the newColumn
-	 */
-	String getNewColumn() {
-		return m_newColumn;
-	}
 
-	/**
-	 * @param newColumn the newColumn to set
-	 */
-	void setNewColumn(String newColumn) {
-		m_newColumn = newColumn;
-	}
 
-	/**
-	 * @return the useDataBoundElementName
-	 */
-	boolean getUseDataBoundElementName() {
-		return m_useDataBoundElementName;
-	}
+    /**
+     * @return the newColumn
+     */
+    String getNewColumn() {
+        return m_newColumn;
+    }
 
-	/**
-	 * @param useDataBoundElementName the useDataBoundElementName to set
-	 */
-	void setUseDataBoundElementName(boolean useDataBoundElementName) {
-		m_useDataBoundElementName = useDataBoundElementName;
-	}
+    /**
+     * @param newColumn the newColumn to set
+     */
+    void setNewColumn(final String newColumn) {
+        m_newColumn = newColumn;
+    }
 
-	/**
-	 * @return the removeSourceColumns
-	 */
-	boolean getRemoveSourceColumns() {
-		return m_removeSourceColumns;
-	}
+    /**
+     * @return the useDataBoundElementName
+     */
+    boolean getUseDataBoundElementName() {
+        return m_useDataBoundElementName;
+    }
 
-	/**
-	 * @param removeSourceColumns the removeSourceColumns to set
-	 */
-	void setRemoveSourceColumns(boolean removeSourceColumns) {
-		m_removeSourceColumns = removeSourceColumns;
-	}
+    /**
+     * @param useDataBoundElementName the useDataBoundElementName to set
+     */
+    void setUseDataBoundElementName(final boolean useDataBoundElementName) {
+        m_useDataBoundElementName = useDataBoundElementName;
+    }
 
-	/**
-	 * @return the elementName
-	 */
-	String getElementName() {
-		return m_elementName;
-	}
+    /**
+     * @return the removeSourceColumns
+     */
+    boolean getRemoveSourceColumns() {
+        return m_removeSourceColumns;
+    }
 
-	/**
-	 * @param elementName the elementName to set
-	 */
-	void setElementName(String elementName) {
-		m_elementName = elementName;
-	}
+    /**
+     * @param removeSourceColumns the removeSourceColumns to set
+     */
+    void setRemoveSourceColumns(final boolean removeSourceColumns) {
+        m_removeSourceColumns = removeSourceColumns;
+    }
 
-	/**
-	 * @return the elementNameColumn
-	 */
-	String getElementNameColumn() {
-		return m_elementNameColumn;
-	}
+    /**
+     * @return the elementName
+     */
+    String getElementName() {
+        return m_elementName;
+    }
 
-	/**
-	 * @param elementNameColumn the elementNameColumn to set
-	 */
-	void setElementNameColumn(String elementNameColumn) {
-		m_elementNameColumn = elementNameColumn;
-	}
+    /**
+     * @param elementName the elementName to set
+     */
+    void setElementName(final String elementName) {
+        m_elementName = elementName;
+    }
 
-	/**
-	 * @return the inputColumns
-	 */
-	String[] getInputColumns() {
-		return m_inputColumns;
-	}
+    /**
+     * @return the elementNameColumn
+     */
+    String getElementNameColumn() {
+        return m_elementNameColumn;
+    }
 
-	/**
-	 * @param inputColumns the inputColumns to set
-	 */
-	void setInputColumns(String[] inputColumns) {
-		m_inputColumns = inputColumns;
-	}
+    /**
+     * @param elementNameColumn the elementNameColumn to set
+     */
+    void setElementNameColumn(final String elementNameColumn) {
+        m_elementNameColumn = elementNameColumn;
+    }
 
-	/**
-	 * @param includeAll the includeAll to set
-	 */
-	void setIncludeAll(boolean includeAll) {
-		m_includeAll = includeAll;
-	}
+    /**
+     * @return the inputColumns
+     */
+    String[] getInputColumns() {
+        return m_inputColumns;
+    }
 
-	/**
-	 * @return the includeAll
-	 */
-	boolean getIncludeAll() {
-		return m_includeAll;
-	}
+    /**
+     * @param inputColumns the inputColumns to set
+     */
+    void setInputColumns(final String[] inputColumns) {
+        m_inputColumns = inputColumns;
+    }
 
-	/**
-	 * @return the dataBoundAttributeNames
-	 */
-	String[] getDataBoundAttributeNames() {
-		return m_dataBoundAttributeNames;
-	}
+    /**
+     * @param includeAll the includeAll to set
+     */
+    void setIncludeAll(final boolean includeAll) {
+        m_includeAll = includeAll;
+    }
 
-	/**
-	 * @param dataBoundAttributeNames the dataBoundAttributeNames to set
-	 */
-	void setDataBoundAttributeNames(String[] dataBoundAttributeNames) {
-		m_dataBoundAttributeNames = dataBoundAttributeNames;
-	}
+    /**
+     * @return the includeAll
+     */
+    boolean getIncludeAll() {
+        return m_includeAll;
+    }
 
-	/**
-	 * @return the dataBoundAttributeValues
-	 */
-	String[] getDataBoundAttributeValues() {
-		return m_dataBoundAttributeValues;
-	}
+    /**
+     * @return the dataBoundAttributeNames
+     */
+    String[] getDataBoundAttributeNames() {
+        return m_dataBoundAttributeNames;
+    }
 
-	/**
-	 * @param dataBoundAttributeValues the dataBoundAttributeValues to set
-	 */
-	void setDataBoundAttributeValues(String[] dataBoundAttributeValues) {
-		m_dataBoundAttributeValues = dataBoundAttributeValues;
-	}
+    /**
+     * @param dataBoundAttributeNames the dataBoundAttributeNames to set
+     */
+    void setDataBoundAttributeNames(final String[] dataBoundAttributeNames) {
+        m_dataBoundAttributeNames = dataBoundAttributeNames;
+    }
 
-	/**
-	 * @return the attributeNames
-	 */
-	String[] getAttributeNames() {
-		return m_attributeNames;
-	}
+    /**
+     * @return the dataBoundAttributeValues
+     */
+    String[] getDataBoundAttributeValues() {
+        return m_dataBoundAttributeValues;
+    }
 
-	/**
-	 * @param attributeNames the attributeNames to set
-	 */
-	void setAttributeNames(String[] attributeNames) {
-		m_attributeNames = attributeNames;
-	}
+    /**
+     * @param dataBoundAttributeValues the dataBoundAttributeValues to set
+     */
+    void setDataBoundAttributeValues(final String[] dataBoundAttributeValues) {
+        m_dataBoundAttributeValues = dataBoundAttributeValues;
+    }
 
-	/**
-	 * @return the attributeValues
-	 */
-	String[] getAttributeValues() {
-		return m_attributeValues;
-	}
+    /**
+     * @return the attributeNames
+     */
+    String[] getAttributeNames() {
+        return m_attributeNames;
+    }
 
-	/**
-	 * @param attributeValues the attributeValues to set
-	 */
-	void setAttributeValues(String[] attributeValues) {
-		m_attributeValues = attributeValues;
-	}
+    /**
+     * @param attributeNames the attributeNames to set
+     */
+    void setAttributeNames(final String[] attributeNames) {
+        m_attributeNames = attributeNames;
+    }
 
-	/** Called from dialog when settings are to be loaded.
+    /**
+     * @return the attributeValues
+     */
+    String[] getAttributeValues() {
+        return m_attributeValues;
+    }
+
+    /**
+     * @param attributeValues the attributeValues to set
+     */
+    void setAttributeValues(final String[] attributeValues) {
+        m_attributeValues = attributeValues;
+    }
+
+    /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
      */
     void loadSettingsDialog(final NodeSettingsRO settings,
             final DataTableSpec inSpec) {
-    	m_newColumn = settings.getString(NEW_COLUMN, null);
-    	m_elementName = settings.getString(ELEMENT_NAME, null);
-    	m_useDataBoundElementName = settings.getBoolean(
-    			USE_DATA_BOUND_ELEMENT_NAME, false);
-    	m_elementNameColumn = settings.getString(ELEMENT_NAME_COLUMN, null);
-    	m_inputColumns = settings.getStringArray(INPUT_COLUMN, (String[])null);
-    	m_includeAll = settings.getBoolean(INCLUDE_ALL, false);
-    	m_removeSourceColumns = settings.getBoolean(REMOVE_SOURCE_COLUMNS, 
-    			false);
-    	m_dataBoundAttributeNames = settings.getStringArray(
-    			DATA_BOUND_ATTRIBUTE_NAMES, new String[0]);
-    	m_dataBoundAttributeValues = settings.getStringArray(
-    			DATA_BOUND_ATTRIBUTE_VALUES, new String[0]);
-    	m_attributeNames = settings.getStringArray(ATTRIBUTE_NAMES, 
-    			new String[0]);
-    	m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES, 
-    			new String[0]);
+        m_newColumn = settings.getString(NEW_COLUMN, null);
+        m_elementName = settings.getString(ELEMENT_NAME, null);
+        m_useDataBoundElementName = settings.getBoolean(
+                USE_DATA_BOUND_ELEMENT_NAME, false);
+        m_elementNameColumn = settings.getString(ELEMENT_NAME_COLUMN, null);
+        m_inputColumns = settings.getStringArray(INPUT_COLUMN, (String[])null);
+        m_includeAll = settings.getBoolean(INCLUDE_ALL, false);
+        m_removeSourceColumns = settings.getBoolean(REMOVE_SOURCE_COLUMNS,
+                false);
+        m_dataBoundAttributeNames = settings.getStringArray(
+                DATA_BOUND_ATTRIBUTE_NAMES, new String[0]);
+        m_dataBoundAttributeValues = settings.getStringArray(
+                DATA_BOUND_ATTRIBUTE_VALUES, new String[0]);
+        m_attributeNames = settings.getStringArray(ATTRIBUTE_NAMES,
+                new String[0]);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES,
+                new String[0]);
     }
 
     /** Called from model when settings are to be loaded.
@@ -273,40 +273,40 @@ public class XMLColumnCombinerNodeSettings {
      */
     void loadSettingsModel(final NodeSettingsRO settings)
         throws InvalidSettingsException {
-    	m_newColumn = settings.getString(NEW_COLUMN);
-    	m_elementName = settings.getString(ELEMENT_NAME);
-    	m_useDataBoundElementName = settings.getBoolean(
-    			USE_DATA_BOUND_ELEMENT_NAME);
-    	m_elementNameColumn = settings.getString(ELEMENT_NAME_COLUMN);
-    	m_inputColumns = settings.getStringArray(INPUT_COLUMN);
-    	m_includeAll = settings.getBoolean(INCLUDE_ALL);
-    	m_removeSourceColumns = settings.getBoolean(REMOVE_SOURCE_COLUMNS);
-    	m_dataBoundAttributeNames = settings.getStringArray(
-    			DATA_BOUND_ATTRIBUTE_NAMES);
-    	m_dataBoundAttributeValues = settings.getStringArray(
-    			DATA_BOUND_ATTRIBUTE_VALUES);
-    	m_attributeNames = settings.getStringArray(ATTRIBUTE_NAMES);
-    	m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES);
+        m_newColumn = settings.getString(NEW_COLUMN);
+        m_elementName = settings.getString(ELEMENT_NAME);
+        m_useDataBoundElementName = settings.getBoolean(
+                USE_DATA_BOUND_ELEMENT_NAME);
+        m_elementNameColumn = settings.getString(ELEMENT_NAME_COLUMN);
+        m_inputColumns = settings.getStringArray(INPUT_COLUMN);
+        m_includeAll = settings.getBoolean(INCLUDE_ALL);
+        m_removeSourceColumns = settings.getBoolean(REMOVE_SOURCE_COLUMNS);
+        m_dataBoundAttributeNames = settings.getStringArray(
+                DATA_BOUND_ATTRIBUTE_NAMES);
+        m_dataBoundAttributeValues = settings.getStringArray(
+                DATA_BOUND_ATTRIBUTE_VALUES);
+        m_attributeNames = settings.getStringArray(ATTRIBUTE_NAMES);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES);
     }
 
     /** Called from model and dialog to save current settings.
      * @param settings To save to.
      */
     void saveSettings(final NodeSettingsWO settings) {
-    	settings.addString(NEW_COLUMN, m_newColumn);
+        settings.addString(NEW_COLUMN, m_newColumn);
         settings.addString(ELEMENT_NAME, m_elementName);
-        settings.addBoolean(USE_DATA_BOUND_ELEMENT_NAME, 
-        		m_useDataBoundElementName);
+        settings.addBoolean(USE_DATA_BOUND_ELEMENT_NAME,
+                m_useDataBoundElementName);
         settings.addString(ELEMENT_NAME_COLUMN, m_elementNameColumn);
         settings.addStringArray(INPUT_COLUMN, m_inputColumns);
         settings.addBoolean(INCLUDE_ALL, m_includeAll);
         settings.addBoolean(REMOVE_SOURCE_COLUMNS, m_removeSourceColumns);
-        settings.addStringArray(DATA_BOUND_ATTRIBUTE_NAMES, 
-        		m_dataBoundAttributeNames);
-        settings.addStringArray(DATA_BOUND_ATTRIBUTE_VALUES, 
-        		m_dataBoundAttributeValues);        
+        settings.addStringArray(DATA_BOUND_ATTRIBUTE_NAMES,
+                m_dataBoundAttributeNames);
+        settings.addStringArray(DATA_BOUND_ATTRIBUTE_VALUES,
+                m_dataBoundAttributeValues);
         settings.addStringArray(ATTRIBUTE_NAMES, m_attributeNames);
-        settings.addStringArray(ATTRIBUTE_VALUES, m_attributeValues);        
+        settings.addStringArray(ATTRIBUTE_VALUES, m_attributeValues);
     }
 
 }

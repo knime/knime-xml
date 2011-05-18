@@ -74,8 +74,8 @@ import org.knime.core.node.util.ColumnSelectionComboxBox;
  * @author Heiko Hofer
  */
 public class XSLTNodeDialog extends NodeDialogPane {
-	private JTextField m_newColumn;
-    private ColumnSelectionComboxBox m_inputColumn;    
+    private JTextField m_newColumn;
+    private ColumnSelectionComboxBox m_inputColumn;
     private JCheckBox m_removeInputColumn;
     private ColumnSelectionComboxBox m_xsltColumn;
     private JCheckBox m_useFirstStylesheeOnly;
@@ -87,12 +87,12 @@ public class XSLTNodeDialog extends NodeDialogPane {
     public XSLTNodeDialog() {
         super();
 
-        JPanel settings = createSettingsPanel();;
+        JPanel settings = createSettingsPanel();
         addTab("Settings", settings);
     }
 
     @SuppressWarnings("unchecked")
-	private JPanel createSettingsPanel() {
+    private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -112,7 +112,7 @@ public class XSLTNodeDialog extends NodeDialogPane {
         c.weightx = 1;
         m_newColumn = new JTextField();
         p.add(m_newColumn, c);
-        
+
         c.insets = new Insets(3, 3, 3, 3);
         c.gridx = 0;
         c.gridy++;
@@ -130,7 +130,7 @@ public class XSLTNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         m_removeInputColumn = new JCheckBox("Remove source column.");
         p.add(m_removeInputColumn, c);
-        
+
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
@@ -140,7 +140,7 @@ public class XSLTNodeDialog extends NodeDialogPane {
         c.weightx = 1;
         m_xsltColumn = new ColumnSelectionComboxBox(XMLValue.class);
         m_xsltColumn.setBorder(null);
-        p.add(m_xsltColumn, c);        
+        p.add(m_xsltColumn, c);
 
         c.gridx = 0;
         c.gridwidth = 2;
@@ -148,19 +148,19 @@ public class XSLTNodeDialog extends NodeDialogPane {
         c.gridy++;
         m_useFirstStylesheeOnly = new JCheckBox("Use first stylesheet only.");
         p.add(m_useFirstStylesheeOnly, c);
-        
+
         c.gridy++;
         m_outputIsXML = new JCheckBox("Output is XML.");
         p.add(m_outputIsXML, c);
-        
+
         c.gridy++;
         c.weighty = 1;
         p.add(new JPanel(), c);
-        
+
         return p;
     }
-    
-    
+
+
     /**
      * {@inheritDoc}
      */
@@ -175,7 +175,7 @@ public class XSLTNodeDialog extends NodeDialogPane {
         s.setXsltColumn(m_xsltColumn.getSelectedColumn());
         s.setUseFirstStylesheeOnly(m_useFirstStylesheeOnly.isSelected());
         s.setOutputIsXML(m_outputIsXML.isSelected());
-        
+
         s.saveSettings(settings);
     }
 

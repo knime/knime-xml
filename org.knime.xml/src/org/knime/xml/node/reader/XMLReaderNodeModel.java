@@ -100,7 +100,7 @@ import org.knime.core.node.NodeSettingsWO;
 public class XMLReaderNodeModel extends NodeModel {
     private final XMLReaderNodeSettings m_settings;
     private LimitedXPathMatcher m_xpathExpr;
-    
+
     /**
      * Creates a new model with no input port and one output port.
      */
@@ -109,17 +109,14 @@ public class XMLReaderNodeModel extends NodeModel {
         m_settings = new XMLReaderNodeSettings();
     }
 
-
-
     /**
-     * @param context the node creation context
+     * @param context
+     *            the node creation context
      */
-     XMLReaderNodeModel(final NodeCreationContext context) {
+    XMLReaderNodeModel(final NodeCreationContext context) {
         this();
         m_settings.setFileURL(context.getUrl().toString());
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -167,13 +164,13 @@ public class XMLReaderNodeModel extends NodeModel {
         }
 
         if (m_settings.getUseXPathFilter()) {
-            if (m_settings.getUseRootsNS() && 
-            		(m_settings.getRootsNSPrefix() == null
-            		|| m_settings.getRootsNSPrefix().trim().isEmpty())) {
-            	throw new InvalidSettingsException(
-            			"The prefix of root's default namespace is not set.");
+            if (m_settings.getUseRootsNS()
+                    && (m_settings.getRootsNSPrefix() == null || m_settings
+                            .getRootsNSPrefix().trim().isEmpty())) {
+                throw new InvalidSettingsException(
+                        "The prefix of root's default namespace is not set.");
             }
-            m_xpathExpr = null;        	
+            m_xpathExpr = null;
             // Check for empty prefix
             String[] prefix = m_settings.getNsPrefixes();
             String[] namespaces = m_settings.getNamespaces();
@@ -185,113 +182,109 @@ public class XMLReaderNodeModel extends NodeModel {
                 }
             }
             // DefaultNamespaceContext does some sanity checking
-            NamespaceContext nsContext =
-                new DefaultNamespaceContext(prefix, namespaces);
+            NamespaceContext nsContext = new DefaultNamespaceContext(prefix,
+                    namespaces);
             try {
-	            // LimitedXPathMatcher DefaultNamespaceContext does some
-	            // sanity checking
-            	LimitedXPathMatcher xpathExpr = new LimitedXPathMatcher(
-            			m_settings.getXpath(), nsContext);
-            	if (m_settings.getUseRootsNS() && 
-            			Arrays.binarySearch(m_settings.getNsPrefixes(), 
-            					m_settings.getRootsNSPrefix()) >= 0) {
-            		throw new InvalidSettingsException(
+                // LimitedXPathMatcher DefaultNamespaceContext does some
+                // sanity checking
+                LimitedXPathMatcher xpathExpr = new LimitedXPathMatcher(
+                        m_settings.getXpath(), nsContext);
+                if (m_settings.getUseRootsNS()
+                        && Arrays.binarySearch(m_settings.getNsPrefixes(),
+                                m_settings.getRootsNSPrefix()) >= 0) {
+                    throw new InvalidSettingsException(
                             "The namespace table uses the prefix "
-            				+ "reserved for the "
-            				+ "roots namespace.");
-            	} else {
-            		m_xpathExpr = xpathExpr;
-            	}
+                                    + "reserved for the " + "roots namespace.");
+                } else {
+                    m_xpathExpr = xpathExpr;
+                }
             } catch (InvalidSettingsException e) {
-               	if (m_settings.getUseRootsNS()) {
-	            	// try to compile it with roots default prefix            	
-               		createXPathExpr(null);
-	          		// the xpath compiles with the roots default prefix
-	          		m_xpathExpr = null;
-            	} else {
-            		throw new InvalidSettingsException(
-            				"XPath expression cannot be compiled.", e);
-            	}            	
+                if (m_settings.getUseRootsNS()) {
+                    // try to compile it with roots default prefix
+                    createXPathExpr(null);
+                    // the xpath compiles with the roots default prefix
+                    m_xpathExpr = null;
+                } else {
+                    throw new InvalidSettingsException(
+                            "XPath expression cannot be compiled.", e);
+                }
             }
         }
 
         DataTableSpec spec = createOutSpec();
-        return new DataTableSpec[]{spec};
+        return new DataTableSpec[] {spec};
     }
-    
-	private LimitedXPathMatcher createXPathExpr(InputStream in)
-			throws InvalidSettingsException {
-		List<String> nsPrefixes = new ArrayList<String>();
-		nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
-		if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
-			throw new InvalidSettingsException(
-					"The namespace table uses the prefix reserved for the "
-							+ "roots namespace.");
-		}
-		nsPrefixes.add(m_settings.getRootsNSPrefix());
-		List<String> namespaces = new ArrayList<String>();
-		namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
-		if (in == null) {
-			// made up a unique namespace for the root, this is for sanity 
-			// checking of the xpath, only
-			String ns_template = "roots_ns_";
-			int counter = 0;
-			String ns = ns_template + counter;
-			while (namespaces.contains(ns)) {
-				counter++;
-				ns = ns_template + counter;
-			}
-			namespaces.add(ns);
-		} else {
-			// read the roots namespace from the input
-			XMLInputFactory factory = XMLInputFactory.newInstance();
-			factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.TRUE);
-			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
-					Boolean.TRUE);
-			 try {
-				XMLStreamReader parser = 
-					factory.createXMLStreamReader(in);
-				while (parser.hasNext()) {
-					int type = parser.getEventType();
-					if (type == XMLStreamConstants.START_ELEMENT) {
-						String rootNSUri = parser.getNamespaceURI();
-						if (rootNSUri != null) {
-							namespaces.add(rootNSUri);
-							break;
-						} else {
-							throw new InvalidSettingsException("The root node "
-									+ "does not have a namesapce URI.");
-						}
-					}
-					parser.next();
-				}				
-			} catch (XMLStreamException e) {
-				throw new InvalidSettingsException("The namespace of the root" 
-						+ "element cannot be read.");
-			}
-		}
-		
+
+    private LimitedXPathMatcher createXPathExpr(final InputStream in)
+            throws InvalidSettingsException {
+        List<String> nsPrefixes = new ArrayList<String>();
+        nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
+        if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
+            throw new InvalidSettingsException(
+                    "The namespace table uses the prefix reserved for the "
+                            + "roots namespace.");
+        }
+        nsPrefixes.add(m_settings.getRootsNSPrefix());
+        List<String> namespaces = new ArrayList<String>();
+        namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
+        if (in == null) {
+            // made up a unique namespace for the root, this is for sanity
+            // checking of the xpath, only
+            String nsTemplate = "roots_ns_";
+            int counter = 0;
+            String ns = nsTemplate + counter;
+            while (namespaces.contains(ns)) {
+                counter++;
+                ns = nsTemplate + counter;
+            }
+            namespaces.add(ns);
+        } else {
+            // read the roots namespace from the input
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.TRUE);
+            factory.setProperty(
+                    XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
+                    Boolean.TRUE);
+            try {
+                XMLStreamReader parser = factory.createXMLStreamReader(in);
+                while (parser.hasNext()) {
+                    int type = parser.getEventType();
+                    if (type == XMLStreamConstants.START_ELEMENT) {
+                        String rootNSUri = parser.getNamespaceURI();
+                        if (rootNSUri != null) {
+                            namespaces.add(rootNSUri);
+                            break;
+                        } else {
+                            throw new InvalidSettingsException("The root node "
+                                    + "does not have a namesapce URI.");
+                        }
+                    }
+                    parser.next();
+                }
+            } catch (XMLStreamException e) {
+                throw new InvalidSettingsException("The namespace of the root"
+                        + "element cannot be read.");
+            }
+        }
+
         // DefaultNamespaceContext does some sanity checking
-        NamespaceContext nsContext =
-            new DefaultNamespaceContext(
-            		nsPrefixes.toArray(new String[nsPrefixes.size()]), 
-            		namespaces.toArray(new String[namespaces.size()]));
+        NamespaceContext nsContext = new DefaultNamespaceContext(
+                nsPrefixes.toArray(new String[nsPrefixes.size()]),
+                namespaces.toArray(new String[namespaces.size()]));
         // LimitedXPathMatcher DefaultNamespaceContext does some
         // sanity checking
         try {
-        	return new LimitedXPathMatcher(
-    			m_settings.getXpath(), nsContext);
-		} catch (InvalidSettingsException e) {
-			throw new InvalidSettingsException("XPath query cannot be parsed.",
-					e);
-		}
+            return new LimitedXPathMatcher(m_settings.getXpath(), nsContext);
+        } catch (InvalidSettingsException e) {
+            throw new InvalidSettingsException("XPath query cannot be parsed.",
+                    e);
+        }
 
-	}
-    
+    }
 
     private DataTableSpec createOutSpec() {
-        DataColumnSpecCreator colSpecCreator =
-                new DataColumnSpecCreator("XML", XMLCell.TYPE);
+        DataColumnSpecCreator colSpecCreator = new DataColumnSpecCreator("XML",
+                XMLCell.TYPE);
         DataTableSpec spec = new DataTableSpec(colSpecCreator.createSpec());
         return spec;
     }
@@ -302,27 +295,27 @@ public class XMLReaderNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	exec.checkCanceled();
+        exec.checkCanceled();
         InputStream in = null;
         try {
             DataContainer cont = exec.createDataContainer(createOutSpec());
             int rowCount = 0;
             XMLCellReader reader = null;
             if (m_settings.getUseXPathFilter()) {
-            	LimitedXPathMatcher xpathMatcher = null;
-            	if (null != m_xpathExpr) {
-            		xpathMatcher = m_xpathExpr;
-            	} else {
-	            	in = openInputStream();
-	            	xpathMatcher = createXPathExpr(in);
-				    in.close();
-            	}
+                LimitedXPathMatcher xpathMatcher = null;
+                if (null != m_xpathExpr) {
+                    xpathMatcher = m_xpathExpr;
+                } else {
+                    in = openInputStream();
+                    xpathMatcher = createXPathExpr(in);
+                    in.close();
+                }
                 if (xpathMatcher.rootMatches()) {
                     in = openInputStream();
                     reader = XMLCellReaderFactory.createXMLCellReader(in);
                     DataCell cell = XMLCellFactory.create(reader.readXML());
-                    DataRow row = new DefaultRow(
-                    		RowKey.createRowKey(rowCount), cell);
+                    DataRow row = new DefaultRow(RowKey.createRowKey(rowCount),
+                            cell);
                     cont.addRowToTable(row);
                     rowCount++;
                     in.close();
@@ -331,29 +324,29 @@ public class XMLReaderNodeModel extends NodeModel {
                 reader = XMLCellReaderFactory.createXPathXMLCellReader(in,
                         xpathMatcher);
                 XMLValue value = reader.readXML();
-                while(null != value) {
-                	exec.checkCanceled();
-                	DataCell cell = XMLCellFactory.create(value);
-                    DataRow row = new DefaultRow(
-                    		RowKey.createRowKey(rowCount), cell);
+                while (null != value) {
+                    exec.checkCanceled();
+                    DataCell cell = XMLCellFactory.create(value);
+                    DataRow row = new DefaultRow(RowKey.createRowKey(rowCount),
+                            cell);
                     cont.addRowToTable(row);
                     rowCount++;
                     value = reader.readXML();
                 }
             } else {
-            	exec.checkCanceled();
+                exec.checkCanceled();
                 in = openInputStream();
-                reader = XMLCellReaderFactory.createXMLCellReader(in);                
+                reader = XMLCellReaderFactory.createXMLCellReader(in);
                 DataCell cell = XMLCellFactory.create(reader.readXML());
-                DataRow row = new DefaultRow(
-                		RowKey.createRowKey(rowCount), cell);
+                DataRow row = new DefaultRow(RowKey.createRowKey(rowCount),
+                        cell);
                 cont.addRowToTable(row);
             }
             cont.close();
             DataTable table = cont.getTable();
 
             BufferedDataTable out = exec.createBufferedDataTable(table, exec);
-            return new BufferedDataTable[]{out};
+            return new BufferedDataTable[] {out};
         } finally {
             if (in != null) {
                 try {

@@ -57,7 +57,7 @@ import org.knime.core.node.NodeSettingsWO;
 
 /**
  * The settings of the XML combine writer node.
- * 
+ *
  * @author Heiko Hofer
  */
 public class XMLRowCombinerNodeSettings {
@@ -88,19 +88,19 @@ public class XMLRowCombinerNodeSettings {
         m_inputColumn = inputColumn;
     }
 
-	/**
-	 * @return the newColumn
-	 */
-	String getNewColumn() {
-		return m_newColumn;
-	}
+    /**
+     * @return the newColumn
+     */
+    String getNewColumn() {
+        return m_newColumn;
+    }
 
-	/**
-	 * @param newColumn the newColumn to set
-	 */
-	void setNewColumn(String newColumn) {
-		m_newColumn = newColumn;
-	}
+    /**
+     * @param newColumn the newColumn to set
+     */
+    void setNewColumn(final String newColumn) {
+        m_newColumn = newColumn;
+    }
 
     /**
      * @return the rootElement
@@ -154,7 +154,8 @@ public class XMLRowCombinerNodeSettings {
         m_newColumn = settings.getString(NEW_COLUMN, null);
         m_rootElement = settings.getString(ROOT_ELEMENT, null);
         m_attributes = settings.getStringArray(ATTRIBUTES, new String[0]);
-        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES, new String[0]);
+        m_attributeValues = settings.getStringArray(ATTRIBUTE_VALUES,
+                new String[0]);
     }
 
     /** Called from model when settings are to be loaded.

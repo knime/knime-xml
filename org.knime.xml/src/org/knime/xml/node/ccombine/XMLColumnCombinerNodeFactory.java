@@ -59,7 +59,8 @@ import org.knime.core.node.NodeView;
  *
  * @author Heiko Hofer
  */
-public class XMLColumnCombinerNodeFactory extends NodeFactory<XMLColumnCombinerNodeModel> {
+public class XMLColumnCombinerNodeFactory
+    extends NodeFactory<XMLColumnCombinerNodeModel> {
     /**
      * {@inheritDoc}
      */
@@ -80,7 +81,8 @@ public class XMLColumnCombinerNodeFactory extends NodeFactory<XMLColumnCombinerN
      * {@inheritDoc}
      */
     @Override
-    public NodeView<XMLColumnCombinerNodeModel> createNodeView(final int viewIndex,
+    public NodeView<XMLColumnCombinerNodeModel> createNodeView(
+            final int viewIndex,
             final XMLColumnCombinerNodeModel nodeModel) {
         return null;
     }

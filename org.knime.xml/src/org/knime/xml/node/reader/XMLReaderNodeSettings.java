@@ -56,8 +56,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 /**
- * The settings of the XML Reader node
- * 
+ * The settings of the XML Reader node.
+ *
  * @author Heiko Hofer
  */
 public class XMLReaderNodeSettings {
@@ -68,7 +68,7 @@ public class XMLReaderNodeSettings {
     private static final String NAMESPACES = "namespaces";
     private static final String USE_ROOTS_NS = "useRootsNameSpace";
     private static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
-    
+
     private String m_fileURL = null;
     private boolean m_useXPathFilter = false;
     private String m_xpath = "";
@@ -76,7 +76,7 @@ public class XMLReaderNodeSettings {
     private String[] m_namespaces = new String[0];
     private boolean m_useRootsNS = true;
     private String m_rootsNSPrefix = "dns";
-    
+
     /**
      * @return the fileURL
      */
@@ -149,34 +149,34 @@ public class XMLReaderNodeSettings {
     }
 
 
-	/**
-	 * @return the useRootsNS
-	 */
-	boolean getUseRootsNS() {
-		return m_useRootsNS;
-	}
+    /**
+     * @return the useRootsNS
+     */
+    boolean getUseRootsNS() {
+        return m_useRootsNS;
+    }
 
-	/**
-	 * @param useRootsNS the useRootsNS to set
-	 */
-	void setUseRootsNS(boolean useRootsNS) {
-		m_useRootsNS = useRootsNS;
-	}
+    /**
+     * @param useRootsNS the useRootsNS to set
+     */
+    void setUseRootsNS(final boolean useRootsNS) {
+        m_useRootsNS = useRootsNS;
+    }
 
-	/**
-	 * @return the rootsNSPrefix
-	 */
-	String getRootsNSPrefix() {
-		return m_rootsNSPrefix;
-	}
+    /**
+     * @return the rootsNSPrefix
+     */
+    String getRootsNSPrefix() {
+        return m_rootsNSPrefix;
+    }
 
-	/**
-	 * @param rootsNSPrefix the rootsNSPrefix to set
-	 */
-	void setRootsNSPrefix(String rootsNSPrefix) {
-		m_rootsNSPrefix = rootsNSPrefix;
-	}
-    
+    /**
+     * @param rootsNSPrefix the rootsNSPrefix to set
+     */
+    void setRootsNSPrefix(final String rootsNSPrefix) {
+        m_rootsNSPrefix = rootsNSPrefix;
+    }
+
     /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
@@ -189,7 +189,7 @@ public class XMLReaderNodeSettings {
         m_nsPrefixes = settings.getStringArray(NS_PREFIXES, new String[0]);
         m_namespaces = settings.getStringArray(NAMESPACES, new String[0]);
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, true);
-        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");        
+        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
     }
 
     /** Called from model when settings are to be loaded.
@@ -205,7 +205,7 @@ public class XMLReaderNodeSettings {
         m_namespaces = settings.getStringArray(NAMESPACES);
         // default is false to keep backward compatibility
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, false);
-        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");         
+        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
     }
 
     /** Called from model and dialog to save current settings.
@@ -218,7 +218,7 @@ public class XMLReaderNodeSettings {
         settings.addStringArray(NS_PREFIXES, m_nsPrefixes);
         settings.addStringArray(NAMESPACES, m_namespaces);
         settings.addBoolean(USE_ROOTS_NS, m_useRootsNS);
-        settings.addString(ROOTS_NS_PREFIX, m_rootsNSPrefix);        
+        settings.addString(ROOTS_NS_PREFIX, m_rootsNSPrefix);
     }
 
 }

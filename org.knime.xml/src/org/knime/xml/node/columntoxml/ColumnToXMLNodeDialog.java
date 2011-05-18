@@ -91,9 +91,9 @@ import org.knime.core.node.util.KeyValuePanel;
  * @author Heiko Hofer
  */
 public class ColumnToXMLNodeDialog extends NodeDialogPane {
-	private JTextField m_newColumn;
+    private JTextField m_newColumn;
     private JRadioButton m_useDataBoundElementName;
-    private ColumnSelectionComboxBox m_elementNameColumn;        
+    private ColumnSelectionComboxBox m_elementNameColumn;
     private JRadioButton m_useCustomElementName;
     private JTextField m_elementName;
     private ColumnSelectionComboxBox m_elementContentColumn;
@@ -113,7 +113,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
     }
 
     @SuppressWarnings("unchecked")
-	private JPanel createSettingsPanel() {
+    private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -124,7 +124,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         c.gridy = 0;
         c.weightx = 0;
         c.weighty = 0;
-        
+
         c.insets = new Insets(8, 4, 6, 4);
         c.gridwidth = 1;
         p.add(new JLabel(" New column name:"), c);
@@ -133,7 +133,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         m_newColumn = new JTextField();
         p.add(m_newColumn, c);
         c.weightx = 0;
-        
+
         c.insets = new Insets(2, 4, 6, 4);
         c.gridx = 0;
         c.gridwidth = 1;
@@ -142,41 +142,42 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         c.gridx++;
         c.weightx = 1;
         m_elementContentColumn = new ColumnSelectionComboxBox(
-        		StringValue.class, XMLValue.class);
+                StringValue.class, XMLValue.class);
         m_elementContentColumn.setBorder(null);
         p.add(m_elementContentColumn, c);
-        c.weightx = 0;        
-        
+        c.weightx = 0;
+
         c.insets = new Insets(2, 4, 2, 4);
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 2;
         JPanel elementName = createReturnTypePanel();
         elementName.setBorder(
-        		BorderFactory.createTitledBorder("Element name"));
+                BorderFactory.createTitledBorder("Element name"));
         p.add(elementName, c);
-        
+
         c.gridx = 0;
-        c.gridy++;        
+        c.gridy++;
         c.gridwidth = 2;
-        c.weighty = 1;    
+        c.weighty = 1;
         m_dataBoundAttributes = new KeyValuePanel();
-        m_dataBoundAttributes.getTable().setPreferredScrollableViewportSize(null);
+        m_dataBoundAttributes.getTable().
+            setPreferredScrollableViewportSize(null);
         m_dataBoundAttributes.setBorder(
-        		BorderFactory.createTitledBorder("Data bound attributes"));
+                BorderFactory.createTitledBorder("Data bound attributes"));
         m_dataBoundAttributes.setKeyColumnLabel("Name");
         m_dataBoundAttributes.setValueColumnLabel("Value");
         p.add(m_dataBoundAttributes, c);
-        
+
         c.gridy++;
         c.weighty = 1;
         m_attributes = new KeyValuePanel();
         m_attributes.setBorder(
-        		BorderFactory.createTitledBorder("Custom attributes"));
+                BorderFactory.createTitledBorder("Custom attributes"));
         m_attributes.setKeyColumnLabel("Name");
         m_attributes.setValueColumnLabel("Value");
         p.add(m_attributes, c);
-        
+
         c.gridy++;
         c.weighty = 0;
         m_removeSourceColumns = new JCheckBox("Remove source columns.");
@@ -185,7 +186,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
     }
 
     @SuppressWarnings("unchecked")
-	private JPanel createReturnTypePanel() {
+    private JPanel createReturnTypePanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -199,32 +200,32 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         c.weighty = 0;
 
         m_useDataBoundElementName = new JRadioButton("Data bound name:");
-        m_useDataBoundElementName.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				m_elementNameColumn.setEnabled(
-						m_useDataBoundElementName.isSelected());
-				m_elementName.setEnabled(
-						!m_useDataBoundElementName.isSelected());
-				
-			}
-		});
+        m_useDataBoundElementName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_elementNameColumn.setEnabled(
+                        m_useDataBoundElementName.isSelected());
+                m_elementName.setEnabled(
+                        !m_useDataBoundElementName.isSelected());
+
+            }
+        });
         m_useCustomElementName = new JRadioButton("Custom name:");
-        m_useCustomElementName.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				m_elementNameColumn.setEnabled(
-						!m_useCustomElementName.isSelected());
-				m_elementName.setEnabled(
-						m_useCustomElementName.isSelected());
-				
-			}
-		});
+        m_useCustomElementName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_elementNameColumn.setEnabled(
+                        !m_useCustomElementName.isSelected());
+                m_elementName.setEnabled(
+                        m_useCustomElementName.isSelected());
+
+            }
+        });
         ButtonGroup group = new ButtonGroup();
         group.add(m_useDataBoundElementName);
         group.add(m_useCustomElementName);
-        
-        
+
+
         p.add(m_useCustomElementName, c);
         c.gridx++;
         c.weightx = 1;
@@ -232,7 +233,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         p.add(m_elementName, c);
         c.gridx = 0;
         c.weightx = 0;
-        
+
         c.gridy++;
         p.add(m_useDataBoundElementName, c);
         c.gridx++;
@@ -240,7 +241,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         m_elementNameColumn = new ColumnSelectionComboxBox(StringValue.class);
         m_elementNameColumn.setBorder(null);
         p.add(m_elementNameColumn, c);
-                
+
         return p;
     }
 
@@ -273,7 +274,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
             final DataTableSpec[] specs) throws NotConfigurableException {
         ColumnToXMLNodeSettings s = new ColumnToXMLNodeSettings();
         s.loadSettingsDialog(settings, null);
-        
+
         m_newColumn.setText(s.getNewColumn());
         m_useDataBoundElementName.setSelected(s.getUseDataBoundElementName());
         m_useCustomElementName.setSelected(!s.getUseDataBoundElementName());
@@ -282,58 +283,61 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         m_elementName.setText(s.getElementName());
         m_elementName.setEnabled(!s.getUseDataBoundElementName());
         m_elementContentColumn.update(specs[0], s.getElementContentColumn());
-        m_dataBoundAttributes.setTableData(s.getDataBoundAttributeNames(), 
-        		s.getDataBoundAttributeValues());
-        
+        m_dataBoundAttributes.setTableData(s.getDataBoundAttributeNames(),
+                s.getDataBoundAttributeValues());
+
         TableColumn valueColumn = m_dataBoundAttributes.getTable()
-        	.getColumnModel().getColumn(1);
+            .getColumnModel().getColumn(1);
         @SuppressWarnings("unchecked")
-		ColumnSelectionComboxBox valueEditor = 
-        	new ColumnSelectionComboxBox(StringValue.class);
+        ColumnSelectionComboxBox valueEditor =
+            new ColumnSelectionComboxBox(StringValue.class);
         valueEditor.setBorder(null);
         valueEditor.update(specs[0], null);
         valueColumn.setCellEditor(
-        		new ColumnSelectionCellEditor(valueEditor));
+                new ColumnSelectionCellEditor(valueEditor));
         valueColumn.setCellRenderer(
-        		new ColumnSelectionCellRenderer(specs[0]));
+                new ColumnSelectionCellRenderer(specs[0]));
 
-        
-        m_attributes.setTableData(s.getAttributeNames(), 
-        		s.getAttributeValues());
+
+        m_attributes.setTableData(s.getAttributeNames(),
+                s.getAttributeValues());
         m_removeSourceColumns.setSelected(s.getRemoveSourceColumns());
-        
-        
-        
+
+
+
     }
-    
+
+    @SuppressWarnings("serial")
     private class  ColumnSelectionCellEditor extends DefaultCellEditor {
-    	/**
+        /**
          * Constructs a <code>DefaultCellEditor</code> object that uses a
          * combo box.
          *
          * @param comboBox  a <code>JComboBox</code> object
          */
-        public ColumnSelectionCellEditor(final ColumnSelectionComboxBox comboBox) {
-        	super(comboBox);
+        public ColumnSelectionCellEditor(
+                final ColumnSelectionComboxBox comboBox) {
+            super(comboBox);
             editorComponent = comboBox;
-            comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
+            comboBox.putClientProperty("JComboBox.isTableCellEditor",
+                    Boolean.TRUE);
             delegate = new EditorDelegate() {
                 @Override
-				public void setValue(Object value) {
-                	// call twice to avoid a strange behavior where the 
-                	// last editor call, maybe in another row, influences
-                	// the default value depicted by the combobox
-                	comboBox.setSelectedColumn((String)value);
-                    comboBox.setSelectedColumn((String)value);
+                public void setValue(final Object value1) {
+                    // call twice to avoid a strange behavior where the
+                    // last editor call, maybe in another row, influences
+                    // the default value depicted by the combobox
+                    comboBox.setSelectedColumn((String)value1);
+                    comboBox.setSelectedColumn((String)value1);
                 }
 
                 @Override
-				public Object getCellEditorValue() {
+                public Object getCellEditorValue() {
                     return comboBox.getSelectedColumn();
                 }
 
                 @Override
-				public boolean shouldSelectCell(EventObject anEvent) {
+                public boolean shouldSelectCell(final EventObject anEvent) {
                     if (anEvent instanceof MouseEvent) {
                         MouseEvent e = (MouseEvent)anEvent;
                         return e.getID() != MouseEvent.MOUSE_DRAGGED;
@@ -341,11 +345,11 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
                     return true;
                 }
                 @Override
-				public boolean stopCellEditing() {
+                public boolean stopCellEditing() {
                     if (comboBox.isEditable()) {
                         // Commit edited value.
                         comboBox.actionPerformed(new ActionEvent(
-                        		ColumnSelectionCellEditor.this, 0, ""));
+                                ColumnSelectionCellEditor.this, 0, ""));
                     }
                     return super.stopCellEditing();
                 }
@@ -354,44 +358,47 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         }
 
     }
-    
+
+    @SuppressWarnings("serial")
     private class ColumnSelectionCellRenderer extends DefaultTableCellRenderer {
-    	private final DataTableSpec m_spec;
-    	private final int m_defaultFontStyle;
+        private final DataTableSpec m_spec;
+        private final int m_defaultFontStyle;
 
-		/**
-		 * @param dataTableSpec
-		 */
-		public ColumnSelectionCellRenderer(DataTableSpec spec) {
-			m_spec = spec;
-			m_defaultFontStyle = getFont().getStyle();
-		}		
-	
+        /**
+         * Create a new instance.
+         * @param spec the spec of the input table
+         */
+        public ColumnSelectionCellRenderer(final DataTableSpec spec) {
+            m_spec = spec;
+            m_defaultFontStyle = getFont().getStyle();
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Component getTableCellRendererComponent(JTable table,
-				Object value, boolean isSelected, boolean hasFocus, int row,
-				int column) {
-			setFont(getFont().deriveFont(Font.BOLD));
-			Component c = super.getTableCellRendererComponent(table, value, 
-					isSelected, 
-					hasFocus, row, column);
-			
-			int col = m_spec.findColumnIndex((String)value);
-			if (col >= 0) {
-				DataColumnSpec colSpec = m_spec.getColumnSpec(col);
-				setIcon(colSpec.getType().getIcon());
-				setFont(getFont().deriveFont(Font.BOLD));
-			} else {
-				setIcon(null);
-				setFont(getFont().deriveFont(m_defaultFontStyle));
-			}
-			return c;
-		}
-    
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Component getTableCellRendererComponent(final JTable table,
+                final Object value, final boolean isSelected,
+                final boolean hasFocus, final int row,
+                final int column) {
+            setFont(getFont().deriveFont(Font.BOLD));
+            Component c = super.getTableCellRendererComponent(table, value,
+                    isSelected,
+                    hasFocus, row, column);
+
+            int col = m_spec.findColumnIndex((String)value);
+            if (col >= 0) {
+                DataColumnSpec colSpec = m_spec.getColumnSpec(col);
+                setIcon(colSpec.getType().getIcon());
+                setFont(getFont().deriveFont(Font.BOLD));
+            } else {
+                setIcon(null);
+                setFont(getFont().deriveFont(m_defaultFontStyle));
+            }
+            return c;
+        }
+
     }
-    
+
 }

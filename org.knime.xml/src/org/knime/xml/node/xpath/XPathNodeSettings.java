@@ -69,17 +69,22 @@ public class XPathNodeSettings {
     private static final String NAMESPACES = "namespaces";
     private static final String USE_ROOTS_NS = "useRootsNameSpace";
     private static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
-    
+
     /**
      * This enum holds all possible output types for XPath 1.0.
      *
      * @author Heiko Hofer
      */
     public enum XPathOutput {
+        /** XPath boolean type. */
         Boolean,
+        /** XPath numeric type. */
         Number,
+        /** XPath string type. */
         String,
+        /** XPath xml node type. */
         Node,
+        /** XPath collection of xml nodes type. */
         NodeSet;
     }
 
@@ -191,35 +196,35 @@ public class XPathNodeSettings {
         m_namespaces = namespaces;
     }
 
-	/**
-	 * @return the useRootsNS
-	 */
-	boolean getUseRootsNS() {
-		return m_useRootsNS;
-	}
+    /**
+     * @return the useRootsNS
+     */
+    boolean getUseRootsNS() {
+        return m_useRootsNS;
+    }
 
-	/**
-	 * @param useRootsNS the useRootsNS to set
-	 */
-	void setUseRootsNS(boolean useRootsNS) {
-		m_useRootsNS = useRootsNS;
-	}
+    /**
+     * @param useRootsNS the useRootsNS to set
+     */
+    void setUseRootsNS(final boolean useRootsNS) {
+        m_useRootsNS = useRootsNS;
+    }
 
-	/**
-	 * @return the rootsNSPrefix
-	 */
-	String getRootsNSPrefix() {
-		return m_rootsNSPrefix;
-	}
+    /**
+     * @return the rootsNSPrefix
+     */
+    String getRootsNSPrefix() {
+        return m_rootsNSPrefix;
+    }
 
-	/**
-	 * @param rootsNSPrefix the rootsNSPrefix to set
-	 */
-	void setRootsNSPrefix(String rootsNSPrefix) {
-		m_rootsNSPrefix = rootsNSPrefix;
-	}
+    /**
+     * @param rootsNSPrefix the rootsNSPrefix to set
+     */
+    void setRootsNSPrefix(final String rootsNSPrefix) {
+        m_rootsNSPrefix = rootsNSPrefix;
+    }
 
-	/** Called from dialog when settings are to be loaded.
+    /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
      */
@@ -236,7 +241,7 @@ public class XPathNodeSettings {
         m_namespaces = settings.getStringArray(NAMESPACES, new String[0]);
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, true);
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
-        
+
     }
 
     /** Called from model when settings are to be loaded.
@@ -252,9 +257,9 @@ public class XPathNodeSettings {
         m_returnType = XPathOutput.valueOf(settings.getString(RETURN_TYPE));
         m_nsPrefixes = settings.getStringArray(NS_PREFIXES);
         m_namespaces = settings.getStringArray(NAMESPACES);
-        // default is false to keep backward compatibility        
+        // default is false to keep backward compatibility
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, false);
-        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");        
+        m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
     }
 
     /** Called from model and dialog to save current settings.
@@ -267,7 +272,7 @@ public class XPathNodeSettings {
         settings.addString(XPATH_QUERY, m_xpathQuery);
         settings.addString(RETURN_TYPE, m_returnType.toString());
         settings.addStringArray(NS_PREFIXES, m_nsPrefixes);
-        settings.addStringArray(NAMESPACES, m_namespaces);        
+        settings.addStringArray(NAMESPACES, m_namespaces);
         settings.addBoolean(USE_ROOTS_NS, m_useRootsNS);
         settings.addString(ROOTS_NS_PREFIX, m_rootsNSPrefix);
     }

@@ -88,7 +88,6 @@ public class XMLCombineWriterNodeDialog extends NodeDialogPane {
     /**
      * Creates a new dialog.
      */
-    @SuppressWarnings("unchecked")
     public XMLCombineWriterNodeDialog() {
         super();
 
@@ -97,6 +96,7 @@ public class XMLCombineWriterNodeDialog extends NodeDialogPane {
         addTab("Settings", settings);
     }
 
+    @SuppressWarnings("unchecked")
     private JPanel createSettingsPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -123,7 +123,8 @@ public class XMLCombineWriterNodeDialog extends NodeDialogPane {
         p.add(new JLabel("Selected File:"), c);
         c.gridx++;
         c.weightx = 1;
-        m_outputFile = new FilesHistoryPanel("org.knime.xml.node.combinewriter", false);
+        m_outputFile = new FilesHistoryPanel(
+                "org.knime.xml.node.combinewriter", false);
         m_outputFile.setSelectMode(JFileChooser.FILES_ONLY);
         m_outputFile.setBorder(null);
         p.add(m_outputFile, c);

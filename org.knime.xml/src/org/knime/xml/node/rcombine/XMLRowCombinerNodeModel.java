@@ -82,7 +82,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -90,15 +89,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
- * This is the model for the XML combine Writer node. 
+ * This is the model for the XML combine Writer node.
  * It takes an XML column from the input table combines it to a single
  * document and writes the document to a file.
  *
  * @author Heiko Hofer
  */
 public class XMLRowCombinerNodeModel extends NodeModel {
-    private static NodeLogger LOGGER = NodeLogger.getLogger(
-            XMLRowCombinerNodeModel.class);
     private final XMLRowCombinerNodeSettings m_settings;
 
     /**
@@ -137,33 +134,33 @@ public class XMLRowCombinerNodeModel extends NodeModel {
                         + "column in input table.");
             }
         }
-    	// validate new column name
+        // validate new column name
         if (null == m_settings.getNewColumn()) {
-        	// auto-configure        	
+            // auto-configure
             m_settings.setNewColumn(
-            		DataTableSpec.getUniqueColumnName(inSpecs[0], "XML"));            
+                    DataTableSpec.getUniqueColumnName(inSpecs[0], "XML"));
         }
         if (m_settings.getNewColumn().trim().isEmpty()) {
-        	throw new InvalidSettingsException("Please set a name for " 
-        			+ "the new column.");
+            throw new InvalidSettingsException("Please set a name for "
+                    + "the new column.");
         } else {
-        	m_settings.setNewColumn(m_settings.getNewColumn().trim());
-        }        
+            m_settings.setNewColumn(m_settings.getNewColumn().trim());
+        }
 
-    	// validate element name
+        // validate element name
         if (null == m_settings.getRootElement()) {
-        	// auto-configure
-            m_settings.setRootElement("table");            
+            // auto-configure
+            m_settings.setRootElement("table");
         }
         if (m_settings.getRootElement().trim().isEmpty()) {
-        	throw new InvalidSettingsException("Please set a name for " 
-        			+ "the element.");
+            throw new InvalidSettingsException("Please set a name for "
+                    + "the element.");
         } else {
-        	m_settings.setRootElement(m_settings.getRootElement().trim());
-        }             
+            m_settings.setRootElement(m_settings.getRootElement().trim());
+        }
 
-        // createRootElement and createRootAttributes does some validity 
-    	// checking concerning namespace definition
+        // createRootElement and createRootAttributes does some validity
+        // checking concerning namespace definition
         Map<QName, String> rootAttributes = createRootAttributes(
                 m_settings.getAttributeNames(),
                 m_settings.getAttributeValues());
@@ -173,14 +170,14 @@ public class XMLRowCombinerNodeModel extends NodeModel {
         DataTableSpec spec = createOutSpec();
         return new DataTableSpec[]{spec};
     }
-    
+
     private DataTableSpec createOutSpec() {
         DataColumnSpecCreator colSpecCreator =
-                new DataColumnSpecCreator(m_settings.getNewColumn(), 
-                		XMLCell.TYPE);
+                new DataColumnSpecCreator(m_settings.getNewColumn(),
+                        XMLCell.TYPE);
         DataTableSpec spec = new DataTableSpec(colSpecCreator.createSpec());
         return spec;
-    }    
+    }
 
     /**
      * {@inheritDoc}
@@ -188,44 +185,53 @@ public class XMLRowCombinerNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-        
+        exec.checkCanceled();
         DataContainer cont = exec.createDataContainer(createOutSpec());
 
-		StringBuilder content = new StringBuilder();
-		content.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		content.append("<");
-		content.append(m_settings.getRootElement());
-		// Add attributes			
-		for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
-			content.append(" ");
-			content.append(m_settings.getAttributeNames()[i]);
-			content.append("=\"");
-			content.append(m_settings.getAttributeValues()[i]);
-			content.append("\"");
-		}			
-		content.append(">");
-		content.append("</");
-		content.append(m_settings.getRootElement());
-		content.append(">");
-		try {
-			InputStream is = new ByteArrayInputStream(
-					content.toString().getBytes("UTF-8"));
-			Document doc = XMLCellReaderFactory.createXMLCellReader(is)
-				.readXML().getDocument();
-			int col = inData[0].getSpec().findColumnIndex(
-					m_settings.getInputColumn());
-			for (CloseableRowIterator iter = inData[0].iterator(); iter.hasNext(); ) {
-				DataRow row = iter.next();
-				Node child = getRootNode((XMLValue)row.getCell(col));
-				child = doc.importNode(child, true);
-				doc.getFirstChild().appendChild(child);
-			}
-		    
-			DataCell newCell = XMLCellFactory.create(doc);
-			cont.addRowToTable(new DefaultRow(RowKey.createRowKey(0), newCell));
-		} catch (final Exception e) {
-		    throw new IllegalStateException(e);
-		}
+        StringBuilder content = new StringBuilder();
+        content.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        content.append("<");
+        content.append(m_settings.getRootElement());
+        // Add attributes
+        for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
+            content.append(" ");
+            content.append(m_settings.getAttributeNames()[i]);
+            content.append("=\"");
+            content.append(m_settings.getAttributeValues()[i]);
+            content.append("\"");
+        }
+        content.append(">");
+        content.append("</");
+        content.append(m_settings.getRootElement());
+        content.append(">");
+        try {
+            InputStream is = new ByteArrayInputStream(
+                    content.toString().getBytes("UTF-8"));
+            Document doc = XMLCellReaderFactory.createXMLCellReader(is)
+                .readXML().getDocument();
+            int col = inData[0].getSpec().findColumnIndex(
+                    m_settings.getInputColumn());
+            int count = 1;
+            int rowCount = inData[0].getRowCount();
+            for (CloseableRowIterator iter = inData[0].iterator();
+            iter.hasNext();) {
+                exec.checkCanceled();
+                DataRow row = iter.next();
+                DataCell cell = row.getCell(col);
+                if (!cell.isMissing()) {
+                    Node child = getRootNode((XMLValue)cell);
+                    child = doc.importNode(child, true);
+                    doc.getFirstChild().appendChild(child);
+                }
+                exec.setProgress(count / (double)rowCount);
+                count++;
+            }
+
+            DataCell newCell = XMLCellFactory.create(doc);
+            cont.addRowToTable(new DefaultRow(RowKey.createRowKey(0), newCell));
+        } catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
 
         cont.close();
         DataTable table = cont.getTable();
@@ -233,30 +239,30 @@ public class XMLRowCombinerNodeModel extends NodeModel {
         BufferedDataTable out = exec.createBufferedDataTable(table, exec);
         return new BufferedDataTable[]{out};
     }
-    
-	/**
-	 * @param cell
-	 * @return
-	 */
-	private Node getRootNode(XMLValue cell) {
-		Document doc = cell.getDocument();
-		Node node = doc.getFirstChild();
-		while (node.getNodeType() != Node.ELEMENT_NODE
-				&& null != node) {
-			node = node.getNextSibling();
-		}
-		return node;
-	}
 
     /**
-     * Create the list of attributes for the root element
-     * 
+     * @param cell
+     * @return
+     */
+    private Node getRootNode(final XMLValue cell) {
+        Document doc = cell.getDocument();
+        Node node = doc.getFirstChild();
+        while (node.getNodeType() != Node.ELEMENT_NODE
+                && null != node) {
+            node = node.getNextSibling();
+        }
+        return node;
+    }
+
+    /**
+     * Create the list of attributes for the root element.
+     *
      * @param attributeNames the names of the attributes
      * @param attributeValues the values of the attributes
      * @return a map of the attributes qualified name to their value
      */
     private Map<QName, String> createRootAttributes(
-    		final String[] attributeNames,
+            final String[] attributeNames,
             final String[] attributeValues) {
         Map<QName, String> attrs = new HashMap<QName, String>();
         DefaultNamespaceContext nsContext = createNameSpaceContext(
