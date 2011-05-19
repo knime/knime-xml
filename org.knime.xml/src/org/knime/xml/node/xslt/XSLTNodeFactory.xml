@@ -37,7 +37,7 @@
         <inPort index="0" name="Input Table">
             Input table containing at least one XML column.
         </inPort>
-        <inPort index="0" name="Stylesheet Table">
+        <inPort index="1" name="Stylesheet Table">
             Input table containing at least one XML column with XSLT stylesheets.
         </inPort>        
         <outPort index="0" name="Output Table">
