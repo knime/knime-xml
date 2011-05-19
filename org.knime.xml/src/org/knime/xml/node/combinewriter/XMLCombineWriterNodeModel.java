@@ -87,7 +87,7 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class XMLCombineWriterNodeModel extends NodeModel {
-    private static NodeLogger LOGGER = NodeLogger.getLogger(
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(
             XMLCombineWriterNodeModel.class);
     private final XMLCombineWriterNodeSettings m_settings;
 

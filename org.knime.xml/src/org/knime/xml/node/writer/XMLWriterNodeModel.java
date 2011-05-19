@@ -81,7 +81,7 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class XMLWriterNodeModel extends NodeModel {
-    private static NodeLogger LOGGER = NodeLogger.getLogger(
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(
             XMLWriterNodeModel.class);
     private final XMLWriterNodeSettings m_settings;
 
@@ -154,7 +154,7 @@ public class XMLWriterNodeModel extends NodeModel {
         final int colIndex =
                 inData[0].getDataTableSpec().findColumnIndex(
                         m_settings.getInputColumn());
-        
+
         for (DataRow row : inData[0]) {
             exec.checkCanceled();
             exec.setProgress(count / max, "Writing " + row.getKey()
@@ -184,7 +184,7 @@ public class XMLWriterNodeModel extends NodeModel {
             }
             count++;
         }
-        
+
         if (missingCellCount > 0) {
             setWarningMessage("Skipped " + missingCellCount + " rows due "
                     + "to missing values.");
