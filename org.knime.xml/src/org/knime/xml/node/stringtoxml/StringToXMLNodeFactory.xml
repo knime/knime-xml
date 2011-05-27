@@ -10,7 +10,7 @@
 	<fullDescription>
 		<intro>
 			Converts string cells in a column to XML. Every string cells must 
-		contain a valid XML document. 
+		contain a valid XML document, invalid records will result in a missing cell. 
 		</intro>
 		<option name="Column selection">Move the columns of interest into the &quot;Include&quot; list</option>
 		

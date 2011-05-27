@@ -4,58 +4,66 @@
    <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            category-path="/io/read"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.reader.XMLReaderNodeFactory"
             id="org.knime.xml.node.reader.XMLReaderNodeFactory">
       </node>
       <node
-            category-path="/io/write"
+            after="org.knime.xml.node.reader.XMLReaderNodeFactory"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.writer.XMLWriterNodeFactory"
             id="org.knime.xml.node.writer.XMLWriterNodeFactory">
-      </node> 
+      </node>
       <node
-            category-path="/io/write"
+            after="org.knime.xml.node.writer.XMLWriterNodeFactory"
+            category-path="/xml"
             expert-flag="false"
-            factory-class="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory"
-            id="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory">
+            factory-class="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
+            id="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory">
       </node> 
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
             id="org.knime.xml.node.xpath.XPathNodeFactory">
       </node>
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.xpath.XPathNodeFactory"
+            category-path="/xml"
             expert-flag="false"
-            factory-class="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
-            id="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory">
+            factory-class="org.knime.xml.node.xslt.XSLTNodeFactory"
+            id="org.knime.xml.node.xslt.XSLTNodeFactory">
       </node>
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.xslt.XSLTNodeFactory"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
             id="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory">
       </node>
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
             id="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory">
       </node>
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
+            category-path="/xml"
             expert-flag="false"
             factory-class="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
             id="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory">
-      </node>
+      </node> 
       <node
-            category-path="/misc/xml"
+            after="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
+            category-path="/xml"
             expert-flag="false"
-            factory-class="org.knime.xml.node.xslt.XSLTNodeFactory"
-            id="org.knime.xml.node.xslt.XSLTNodeFactory">
+            factory-class="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory"
+            id="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory">
       </node>      
    </extension>
    <extension
@@ -65,7 +73,7 @@
             icon="icons/xml.png"
             level-id="xml"
             name="XML"
-            path="/misc">
+            path="/">
       </category>
    </extension>   
 

@@ -2,12 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME XML
 Bundle-SymbolicName: org.knime.xml;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 2.4.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.knime.base;bundle-version="2.3.0"
-Export-Package: org.knime.xml.node.combinewriter,
+Require-Bundle: org.knime.base;bundle-version="2.4.0",
+ org.apache.xerces
+Export-Package: org.knime.xml.node.ccombine,
+ org.knime.xml.node.columntoxml,
+ org.knime.xml.node.combinewriter,
+ org.knime.xml.node.rcombine,
  org.knime.xml.node.reader,
+ org.knime.xml.node.stringtoxml,
  org.knime.xml.node.writer,
- org.knime.xml.node.xpath
+ org.knime.xml.node.xpath,
+ org.knime.xml.node.xslt

@@ -10,22 +10,22 @@
             the nodes in the document that match the XPath query.
 		</intro>
         <option name="Selected File">
-            The XML document to read. It can be a local file on disk or an URL.
+            The XML document to read. It can be a local file on disk or a URL.
         </option>
         <option name="Use XPath Filter">
-            If checked, the nodes of the document which match den XPath query
-            will be read, only.
+            If checked, only the nodes of the document, which match den XPath 
+            query, will be read.
         </option>
         <option name="XPath Query">
-            <p>Nodes of the document which match this XPath query will be read, 
-            only. Each matching node is read in a single data cell.</p>
+            <p>Only nodes of the document, which match this XPath query, will be 
+            read. Each matching node is read in a single data cell.</p>
             
             <p>Note, that XPath requires to explicitly denote namespaces. E.g. to
             read only the body of a XHTML document you can use the XPath query:
             <br/>
-            <i>/pre:html/pre:body</i>
+            <i>/dns:html/dns:body</i>
             <br/>
-            where pre is the prefix of the namespace defined in the 
+            where dns is the prefix of the namespace defined in the 
             <b>Namespaces</b> table.</p>
             
             <p>A limited XPath syntax is supported. Only absolute paths to
@@ -33,10 +33,10 @@
             is supported. It can be used to read e.g. the head and the body of 
             an XHTML document in single cells:
             <br/>
-            <i>/pre:html/pre:head | /pre:html/pre:body</i> </p>
+            <i>/dns:html/dns:head | /dns:html/dns:body</i> </p>
         </option>
         <option name="Namespaces">
-            The prefices and the namespaces used in the XPath query. For the
+            The prefixes and the namespaces used in the XPath query. For the
             example in <b>XPath Query</b> following namespace must be defined:
             <br/>
             Prefix: <i>pre</i>
@@ -46,12 +46,12 @@
         <option name="Incorporate namespace of the root element.">
             <p>This option is useful when you do not have the default
             namespace of your document at hand.</p>
-        	<p>If checked, the namespace of the root element ist added to the 
+        	<p>If checked, the namespace of the root element is added to the 
         	<b>Namespaces</b> table during runtime. Please define a prefix for this 
         	namespace in <b>Prefix of root's namespace</b>.</p>
         	<p>For the example of XHTML documents the namespace of the root 
         	element is http://www.w3.org/1999/xhtml so that with the
-        	root's prefix of <i>pre</i> you can leave
+        	root's prefix of <i>dns</i> you can leave
         	the <b>Namespaces</b> table empty.</p>     
         </option>        
     </fullDescription>

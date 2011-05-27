@@ -7,7 +7,7 @@
         <intro>
             The node takes the XML Documents of the selected column and writes
             them, each in a separate file, into a directory. The files will
-            be named by the table's row ids appended with ".xml".
+            be named after the table's row IDs appended with ".xml".
 		</intro>
         <option name="XML column">The column containing the XML cells.</option>
         <option name="Selected directory">Select the output directory here.</option>
