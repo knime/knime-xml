@@ -241,8 +241,8 @@ public class ColumnToXMLNodeModel extends NodeModel {
         String newName = m_settings.getNewColumn();
         int newNameIndex = spec.findColumnIndex(newName);
         if (newNameIndex >= 0 && !toRemove.contains(newNameIndex)) {
-            throw new InvalidSettingsException("Cannot create column "
-                    + newName + "since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column \""
+                    + newName + "\" since it is already in the input.");
         }
 
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
