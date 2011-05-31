@@ -6,8 +6,7 @@ Bundle-Version: 2.4.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.knime.base;bundle-version="2.4.0",
- org.apache.xerces
+Require-Bundle: org.knime.base;bundle-version="2.4.0"
 Export-Package: org.knime.xml.node.ccombine,
  org.knime.xml.node.columntoxml,
  org.knime.xml.node.combinewriter,
