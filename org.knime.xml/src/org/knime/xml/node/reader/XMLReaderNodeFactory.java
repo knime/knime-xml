@@ -50,9 +50,9 @@
 . */
 package org.knime.xml.node.reader;
 
+import org.knime.core.node.ContextAwareNodeFactory;
 import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
@@ -60,7 +60,8 @@ import org.knime.core.node.NodeView;
  *
  * @author Heiko Hofer
  */
-public class XMLReaderNodeFactory extends NodeFactory<XMLReaderNodeModel> {
+public class XMLReaderNodeFactory extends
+    ContextAwareNodeFactory<XMLReaderNodeModel> {
     /**
      * {@inheritDoc}
      */

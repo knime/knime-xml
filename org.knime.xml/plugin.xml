@@ -76,5 +76,14 @@
             path="/">
       </category>
    </extension>   
+     <extension
+           point="org.knime.workbench.editor.editor_filedrop">
+        <FileExtensionMapping
+              NodeFactory="org.knime.xml.node.reader.XMLReaderNodeFactory">
+           <FileExtension
+                 extension=".xml">
+           </FileExtension>
+        </FileExtensionMapping>
+    </extension>
 
 </plugin>
