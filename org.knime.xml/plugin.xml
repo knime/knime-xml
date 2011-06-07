@@ -77,7 +77,7 @@
       </category>
    </extension>   
      <extension
-           point="org.knime.workbench.editor.editor_filedrop">
+           point="org.knime.workbench.repository.registeredFileExtensions">
         <FileExtensionMapping
               NodeFactory="org.knime.xml.node.reader.XMLReaderNodeFactory">
            <FileExtension
