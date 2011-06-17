@@ -5,63 +5,54 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.reader.XMLReaderNodeFactory"
             id="org.knime.xml.node.reader.XMLReaderNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.reader.XMLReaderNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.writer.XMLWriterNodeFactory"
             id="org.knime.xml.node.writer.XMLWriterNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.writer.XMLWriterNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
             id="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory">
       </node> 
       <node
             after="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
             id="org.knime.xml.node.xpath.XPathNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.xpath.XPathNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.xslt.XSLTNodeFactory"
             id="org.knime.xml.node.xslt.XSLTNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.xslt.XSLTNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
             id="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
             id="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
             id="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory">
       </node> 
       <node
             after="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
             category-path="/xml"
-            expert-flag="false"
             factory-class="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory"
             id="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory">
       </node>      
