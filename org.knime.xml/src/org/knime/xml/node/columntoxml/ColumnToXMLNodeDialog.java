@@ -70,19 +70,21 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.StringValue;
-import org.knime.core.data.xml.XMLValue;
+import org.knime.core.data.DataValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
+import org.knime.core.node.util.ColumnSelectionPanel;
+import org.knime.core.node.util.DataValueColumnFilter;
 import org.knime.core.node.util.KeyValuePanel;
 
 /**
@@ -96,10 +98,10 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
     private ColumnSelectionComboxBox m_elementNameColumn;
     private JRadioButton m_useCustomElementName;
     private JTextField m_elementName;
-    private ColumnSelectionComboxBox m_elementContentColumn;
     private KeyValuePanel m_dataBoundAttributes;
     private KeyValuePanel m_attributes;
     private JCheckBox m_removeSourceColumns;
+    private ColumnSelectionPanel m_elementContentColumn;
 
     /**
      * Creates a new dialog.
@@ -141,8 +143,9 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         p.add(new JLabel(" Content column:"), c);
         c.gridx++;
         c.weightx = 1;
-        m_elementContentColumn = new ColumnSelectionComboxBox(
-                StringValue.class, XMLValue.class);
+        m_elementContentColumn = new ColumnSelectionPanel((Border)null,
+                new DataValueColumnFilter(DataValue.class),
+                true);
         m_elementContentColumn.setBorder(null);
         p.add(m_elementContentColumn, c);
         c.weightx = 0;
@@ -238,7 +241,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
         p.add(m_useDataBoundElementName, c);
         c.gridx++;
         c.weightx = 1;
-        m_elementNameColumn = new ColumnSelectionComboxBox(StringValue.class);
+        m_elementNameColumn = new ColumnSelectionComboxBox(DataValue.class);
         m_elementNameColumn.setBorder(null);
         p.add(m_elementNameColumn, c);
 
@@ -290,7 +293,7 @@ public class ColumnToXMLNodeDialog extends NodeDialogPane {
             .getColumnModel().getColumn(1);
         @SuppressWarnings("unchecked")
         ColumnSelectionComboxBox valueEditor =
-            new ColumnSelectionComboxBox(StringValue.class);
+            new ColumnSelectionComboxBox(DataValue.class);
         valueEditor.setBorder(null);
         valueEditor.update(specs[0], null);
         valueColumn.setCellEditor(

@@ -65,7 +65,7 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.StringValue;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.xml.XMLCell;
@@ -123,7 +123,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
             if (null == m_settings.getElementNameColumn()) {
                 List<String> compatibleCols = new ArrayList<String>();
                 for (DataColumnSpec c : inSpecs[0]) {
-                    if (c.getType().isCompatible(StringValue.class)) {
+                    if (c.getType().isCompatible(DataValue.class)) {
                         compatibleCols.add(c.getName());
                     }
                 }
@@ -151,29 +151,6 @@ public class ColumnToXMLNodeModel extends NodeModel {
                         + "the element.");
             } else {
                 m_settings.setElementName(m_settings.getElementName().trim());
-            }
-        }
-
-        if (null == m_settings.getElementContentColumn()) {
-            // validate settings for the content column name
-            List<String> compatibleCols = new ArrayList<String>();
-            for (DataColumnSpec c : inSpecs[0]) {
-                if (c.getType().isCompatible(StringValue.class)
-                        || c.getType().isCompatible(XMLValue.class)) {
-                    compatibleCols.add(c.getName());
-                }
-            }
-            if (compatibleCols.size() == 1) {
-                // auto-configure
-                m_settings.setElementContentColumn(compatibleCols.get(0));
-            } else if (compatibleCols.size() > 1) {
-                // auto-guessing
-                m_settings.setElementContentColumn(compatibleCols.get(0));
-                setWarningMessage("Auto guessing: using column \""
-                        + compatibleCols.get(0) + "\" for elements content.");
-            } else {
-                throw new InvalidSettingsException("No String "
-                        + "column in input table for the elements content.");
             }
         }
 
@@ -230,8 +207,9 @@ public class ColumnToXMLNodeModel extends NodeModel {
                     spec, toRemove);
         }
 
-        int contentColumn = validateColumn(
-                m_settings.getElementContentColumn(), spec, toRemove);
+        int contentColumn = null != m_settings.getElementContentColumn() ?
+        validateColumn(
+                m_settings.getElementContentColumn(), spec, toRemove) : -1;
 
         String[] attrColumnNames = m_settings.getDataBoundAttributeValues();
         int[] attrColumns = new int[attrColumnNames.length];
@@ -365,9 +343,11 @@ public class ColumnToXMLNodeModel extends NodeModel {
                     ? row.getCell(m_nameColumn).toString()
                     : m_settings.getElementName();
 
-            boolean hasXMLContent = row.getCell(m_contentColumn).getType()
-                .isCompatible(XMLValue.class);
-            String cellContent = !hasXMLContent
+            boolean hasContentColumn = -1 != m_contentColumn;
+            boolean hasXMLContent = hasContentColumn
+            && row.getCell(m_contentColumn).getType().isCompatible(
+            XMLValue.class);
+            String cellContent = !hasXMLContent && hasContentColumn
                 ? row.getCell(m_contentColumn).toString() : "";
 
             StringBuilder content = new StringBuilder();
