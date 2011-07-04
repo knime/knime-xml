@@ -5,8 +5,8 @@
     <shortDescription>Writes XML cells in a file.</shortDescription>
     <fullDescription>
         <intro>
-            The node takes the XML Documents of the selected column combines 
-            them to a single documents an writes it to the selected file.
+            The node takes the XML Documents of the selected column, combines 
+            them into a single document and writes it to the selected file.
 		</intro>
         <option name="XML column">The column containing the XML cells.</option>
         <option name="Selected file">Select the output file here.</option>
