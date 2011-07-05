@@ -13,12 +13,12 @@
 <![CDATA[    <book year="1999">]]><br/>
 <![CDATA[        <title>Harry Potter and the Sorcerer's Stone</title>]]><br/>
 <![CDATA[        <author>J. K. Rowling</author>]]><br/>
-<![CDATA[        <isbn>0439708184</isbn>]]><br/>
+<!-- <![CDATA[        <isbn>0439708184</isbn>]]><br/> -->
 <![CDATA[    </book>]]><br/>
 <![CDATA[    <book year="2000">]]><br/>
 <![CDATA[        <title>Harry Potter and the Chamber of Secrets</title>]]><br/>
 <![CDATA[        <author>J. K. Rowling</author>]]><br/>
-<![CDATA[        <isbn>0439064872</isbn>]]><br/>
+<!-- <![CDATA[        <isbn>0439064872</isbn>]]><br/> -->
 <![CDATA[    </book>]]><br/>
 <![CDATA[</inventory>]]><br/>
 <br/>
