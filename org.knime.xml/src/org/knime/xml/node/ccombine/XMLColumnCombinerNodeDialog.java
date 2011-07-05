@@ -75,7 +75,7 @@ import javax.swing.table.TableColumn;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.StringValue;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -257,7 +257,7 @@ public class XMLColumnCombinerNodeDialog extends NodeDialogPane {
         p.add(m_useDataBoundElementName, c);
         c.gridx++;
         c.weightx = 1;
-        m_elementNameColumn = new ColumnSelectionComboxBox(StringValue.class);
+        m_elementNameColumn = new ColumnSelectionComboxBox(DataValue.class);
         m_elementNameColumn.setBorder(null);
         p.add(m_elementNameColumn, c);
 
@@ -312,7 +312,7 @@ public class XMLColumnCombinerNodeDialog extends NodeDialogPane {
             .getColumnModel().getColumn(1);
         @SuppressWarnings("unchecked")
         ColumnSelectionComboxBox valueEditor =
-            new ColumnSelectionComboxBox(StringValue.class);
+            new ColumnSelectionComboxBox(DataValue.class);
         valueEditor.setBorder(null);
         valueEditor.update(specs[0], null);
         valueColumn.setCellEditor(

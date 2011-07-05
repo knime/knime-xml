@@ -65,7 +65,7 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.StringValue;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.xml.XMLCell;
@@ -123,7 +123,7 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
             if (null == m_settings.getElementNameColumn()) {
                 List<String> compatibleCols = new ArrayList<String>();
                 for (DataColumnSpec c : inSpecs[0]) {
-                    if (c.getType().isCompatible(StringValue.class)) {
+                    if (c.getType().isCompatible(DataValue.class)) {
                         compatibleCols.add(c.getName());
                     }
                 }
@@ -136,7 +136,7 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
                     setWarningMessage("Auto guessing: using column \""
                             + compatibleCols.get(0) + "\" for element name.");
                 } else {
-                    throw new InvalidSettingsException("No String "
+                    throw new InvalidSettingsException("No "
                             + "column in input table for the element name.");
                 }
             }
