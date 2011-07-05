@@ -7,6 +7,35 @@
         <intro>
             The node takes the XML Documents of the selected column and 
             performs a XPath query on them. The node supports XPath 1.0.
+    <h3>XPath Examples</h3>
+    Consider the XML document: 
+<![CDATA[<inventory>]]><br/>
+<![CDATA[    <book year="1999">]]><br/>
+<![CDATA[        <title>Harry Potter and the Sorcerer's Stone</title>]]><br/>
+<![CDATA[        <author>J. K. Rowling</author>]]><br/>
+<![CDATA[        <isbn>0439708184</isbn>]]><br/>
+<![CDATA[    </book>]]><br/>
+<![CDATA[    <book year="2000">]]><br/>
+<![CDATA[        <title>Harry Potter and the Chamber of Secrets</title>]]><br/>
+<![CDATA[        <author>J. K. Rowling</author>]]><br/>
+<![CDATA[        <isbn>0439064872</isbn>]]><br/>
+<![CDATA[    </book>]]><br/>
+<![CDATA[</inventory>]]><br/>
+<br/>
+With the  <b>Return type</b> "Node-Set" and the denoted XPath query you can get
+<ul>
+<li>all books : <i>//book</i></li>
+<li>all author element within book :<i>//book/author</i></li>
+<li>the books from 1999 : <i>//book[@year='1999']</i></li>
+</ul>
+
+With the <b>Return type</b> "String" you can get the value of the first year 
+attribute with <i>//@year</i>. If you want all publishing dates you can use a flow of
+two XPath nodes and own Ungroup node. Use an XPath 
+node with query <i>//book</i> and return type "Node-Set" then the Ungroup node followed by
+an XPath with query <i>//@year</i> and return type "String".
+       
+            
 		</intro>
         <option name="XML column">The column containing the XML cells.</option>
         <option name="New column name">
@@ -23,7 +52,7 @@
               <li>Number -> Double cell type</li>
               <li>String -> String cell type</li>
               <li>Node -> XML cell type</li>
-              <li>NodeList -> Collection cell type (Collection of XML cells)</li>  
+              <li>Node-Set -> Collection cell type (Collection of XML cells)</li>  
             </ul>  
         </option>
         <option name="Namespaces">
