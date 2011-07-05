@@ -13,8 +13,8 @@
             Name of the new column in the output table.
         </option>
         <option name="Content column">
-            Data bound content of the XML element. A column with XML or string data
-            can be chose here. In the latter case XML special characters are 
+            Data bound content of the XML element. A column with XML, numeric or string data
+            can be chosen here. In the latter case XML special characters are 
             automatically escaped in order to get valid XML.
         </option>
         <option name="Element name">
@@ -42,7 +42,7 @@
             Input table.
         </inPort>
         <outPort index="0" name="Output Table">
-            The input table with additional column containing the XML.
+            The input table with an additional column containing the XML.
         </outPort>        
     </ports>
 </knimeNode>
