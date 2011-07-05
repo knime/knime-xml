@@ -29,11 +29,13 @@ With the  <b>Return type</b> "Node-Set" and the denoted XPath query you can get
 <li>the books from 1999 : <i>//book[@year='1999']</i></li>
 </ul>
 
-With the <b>Return type</b> "String" you can get the value of the first year 
+<p>With the <b>Return type</b> "String" you can get the value of the first year 
 attribute with <i>//@year</i>. If you want all publishing dates you can use a flow of
 two XPath nodes and own Ungroup node. Use an XPath 
 node with query <i>//book</i> and return type "Node-Set" then the Ungroup node followed by
-an XPath with query <i>//@year</i> and return type "String".
+an XPath with query <i>//@year</i> and return type "String".</p>
+
+<p>You can find more examples at <a href="http://www.w3schools.com/XPath/xpath_syntax.asp">w3cschools.com</a>. </p>
        
             
 		</intro>
