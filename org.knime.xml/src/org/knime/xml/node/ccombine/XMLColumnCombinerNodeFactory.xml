@@ -5,18 +5,21 @@
     <shortDescription>Merges XML columns in a single column.</shortDescription>
     <fullDescription>
         <intro>
-            Does a row wise conversion of input data to XML. The created XML
-            cells consist of a single XML element with custom name, 
-            content and attributes.
+            Does a row wise merge of XML columns. The created XML
+            cells consist of a single XML element with custom name and attributes.
+            The children of this element are the merged XML columns.
 		</intro>
         <option name="New column name">
             Name of the new column in the output table.
         </option>
-        <option name="Content column">
-            Data bound content of the XML element. A column with XML or string data
-            can be chose here. In the latter case XML special characters are 
-            automatically escaped in order to get valid XML.
+        <option name="Exclude / Include">
+            The XML columns in the include list will be merged by this node.
         </option>
+        <option name="Remove source columns">
+            Check when the source columns should not show up in the output 
+            table. Source columns are the the columns in the include list and the columns
+            used for the <b>data bound name</b> and the <b>data bound attributes</b>.
+        </option>        
         <option name="Element name">
             Name of the created XML element. A <b>custom name</b> will be equal
             for every row whereas <b>data bound name</b> takes its value from
@@ -30,11 +33,7 @@
         	Attributes added to the XML element can be 
             defined here.
         </option>
-        <option name="Remove source columns">
-            Check when the source columns should not show up in the output 
-            table. Source columns are the <b>content column</b> and the columns
-            used for the <b>data bound name</b> and the <b>data bound attributes</b>.
-        </option>
+
     </fullDescription>
 
     <ports>
@@ -42,7 +41,7 @@
             Input table.
         </inPort>
         <outPort index="0" name="Output Table">
-            The input table with additional column containing the XML.
+            The input table with additional column containing the merged XML columns.
         </outPort>        
     </ports>
 </knimeNode>
