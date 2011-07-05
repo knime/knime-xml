@@ -207,8 +207,8 @@ public class ColumnToXMLNodeModel extends NodeModel {
                     spec, toRemove);
         }
 
-        int contentColumn = null != m_settings.getElementContentColumn() ?
-        validateColumn(
+        int contentColumn = null != m_settings.getElementContentColumn()
+                ? validateColumn(
                 m_settings.getElementContentColumn(), spec, toRemove) : -1;
 
         String[] attrColumnNames = m_settings.getDataBoundAttributeValues();
