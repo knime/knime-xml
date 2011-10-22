@@ -33,7 +33,7 @@ With the  <b>Return type</b> "Node-Set" and the denoted XPath query you can get
 <p>With the <b>Return type</b> "String" you can get the value of the first year 
 attribute with <i>//@year</i>. If you want all publishing dates you can use a flow of
 two XPath nodes and own Ungroup node. Use an XPath 
-node with query <i>//book</i> and return type "Node-Set" then the Ungroup node followed by
+node with query <i>//@year</i> and return type "Node-Set" then the Ungroup node followed by
 an XPath with query <i>//@year</i> and return type "String".</p>
 
 <p>You can find more examples at <a href="http://www.w3schools.com/XPath/xpath_syntax.asp">w3cschools.com</a>. </p>
@@ -49,14 +49,13 @@ an XPath with query <i>//@year</i> and return type "String".</p>
         </option>
         <option name="XPath query">Define the XPath query here.</option>
         <option name="Return type">Choose the result type of your XPath query.
-            The result type will be match to a KNIME type with this mapping.
-            <ul>
-              <li>Boolean -> Boolean cell type</li>
-              <li>Number -> Double cell type</li>
-              <li>String -> String cell type</li>
-              <li>Node -> XML cell type</li>
-              <li>Node-Set -> Collection cell type (Collection of XML cells)</li>  
-            </ul>  
+            The result type will be match to a KNIME type denoted in braces.
+            There are return type specific <b>Options</b>. 
+            You can define if missing cells
+            should be written to the output for extreme values of this type.
+            If the returned node is an attribute you must embed this attribute
+            in an element, since XML cells must have an root element. For the
+            <b>Node</b> return type you can define the name of this element.
         </option>
         <option name="Namespaces">
             The prefices and the namespaces used in the XPath query. For the

@@ -69,6 +69,18 @@ public class XPathNodeSettings {
     private static final String NAMESPACES = "namespaces";
     private static final String USE_ROOTS_NS = "useRootsNameSpace";
     private static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
+    private static final String MISSING_CELL_ON_FALSE = "missingCellOnFalse";
+    private static final String MISSING_CELL_ON_EMPTY_STRING =
+        "missingCellOnEmptyString";
+    private static final String MISSING_CELL_ON_INF_OR_NAN =
+        "missingCellOnInfinityNaN";
+    private static final String VALUE_ON_INF_OR_NAN =
+        "valueOnInfinityOrNaN";
+    private static final String DEFAULT_NUMBER = "defaultNumber";
+    private static final String MISSING_CELL_ON_EMPTY_SET =
+        "missingCellOnEmptySet";
+    private static final String XML_FRAGMENT_NAME = "xmlFragmentName";
+
 
     /**
      * This enum holds all possible output types for XPath 1.0.
@@ -80,6 +92,8 @@ public class XPathNodeSettings {
         Boolean,
         /** XPath numeric type. */
         Number,
+        /** XPath numeric (type cast to integer). */
+        Integer,
         /** XPath string type. */
         String,
         /** XPath xml node type. */
@@ -97,6 +111,13 @@ public class XPathNodeSettings {
     private String[] m_namespaces = new String[0];
     private boolean m_useRootsNS = true;
     private String m_rootsNSPrefix = "dns";
+    private boolean m_missingCellOnFalse = false;
+    private boolean m_missingCellOnEmptyString = true;
+    private boolean m_missingCellOnInfinityOrNaN = true;
+    private boolean m_valueOnInfinityOrNaN = false;
+    private double m_defaultNumber = 0.0;
+    private boolean m_missingCellOnEmptySet = true;
+    private String m_xmlFragmentName = "fragment";
 
     /**
      * @return the inputColumn
@@ -224,6 +245,107 @@ public class XPathNodeSettings {
         m_rootsNSPrefix = rootsNSPrefix;
     }
 
+    /**
+     * @return the missingCellOnFalse
+     */
+    boolean getMissingCellOnFalse() {
+        return m_missingCellOnFalse;
+    }
+
+    /**
+     * @param missingCellOnFalse the missingCellOnFalse to set
+     */
+    void setMissingCellOnFalse(final boolean missingCellOnFalse) {
+        m_missingCellOnFalse = missingCellOnFalse;
+    }
+
+    /**
+     * @return the missingCellOnEmptyString
+     */
+    boolean getMissingCellOnEmptyString() {
+        return m_missingCellOnEmptyString;
+    }
+
+    /**
+     * @param missingCellOnEmptyString the missingCellOnEmptyString to set
+     */
+    void setMissingCellOnEmptyString(final boolean missingCellOnEmptyString) {
+        m_missingCellOnEmptyString = missingCellOnEmptyString;
+    }
+
+
+    /**
+     * @return the missingCellOnInfinityOrNaN
+     */
+    boolean getMissingCellOnInfinityOrNaN() {
+        return m_missingCellOnInfinityOrNaN;
+    }
+
+    /**
+     * @param missingCellOnInfinityOrNaN the missingCellOnInfinityOrNaN to set
+     */
+    void setMissingCellOnInfinityOrNaN(
+            final boolean missingCellOnInfinityOrNaN) {
+        m_missingCellOnInfinityOrNaN = missingCellOnInfinityOrNaN;
+    }
+
+    /**
+     * @return the zeroOnInfinityOrNaN
+     */
+    boolean getValueOnInfinityOrNaN() {
+        return m_valueOnInfinityOrNaN;
+    }
+
+    /**
+     * @param zeroOnInfinityOrNaN the zeroOnInfinityOrNaN to set
+     */
+    void setValueOnInfinityOrNaN(final boolean zeroOnInfinityOrNaN) {
+        m_valueOnInfinityOrNaN = zeroOnInfinityOrNaN;
+    }
+
+    /**
+     * @return the defaultNumber
+     */
+    double getDefaultNumber() {
+        return m_defaultNumber;
+    }
+
+    /**
+     * @param defaultNumber the defaultNumber to set
+     */
+    void setDefaultNumber(final double defaultNumber) {
+        m_defaultNumber = defaultNumber;
+    }
+
+
+    /**
+     * @return the missingCellOnEmptySet
+     */
+    boolean getMissingCellOnEmptySet() {
+        return m_missingCellOnEmptySet;
+    }
+
+    /**
+     * @param missingCellOnEmptySet the missingCellOnEmptySet to set
+     */
+    void setMissingCellOnEmptySet(final boolean missingCellOnEmptySet) {
+        m_missingCellOnEmptySet = missingCellOnEmptySet;
+    }
+
+    /**
+     * @return the xmlFragmentName
+     */
+    String getXmlFragmentName() {
+        return m_xmlFragmentName;
+    }
+
+    /**
+     * @param xmlFragmentName the xmlFragmentName to set
+     */
+    void setXmlFragmentName(final String xmlFragmentName) {
+        m_xmlFragmentName = xmlFragmentName;
+    }
+
     /** Called from dialog when settings are to be loaded.
      * @param settings To load from
      * @param inSpec Input spec
@@ -241,6 +363,20 @@ public class XPathNodeSettings {
         m_namespaces = settings.getStringArray(NAMESPACES, new String[0]);
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, true);
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
+        m_missingCellOnEmptySet = settings.getBoolean(
+                MISSING_CELL_ON_EMPTY_SET, true);
+        m_missingCellOnEmptyString = settings.getBoolean(
+                MISSING_CELL_ON_EMPTY_STRING, true);
+        m_missingCellOnFalse = settings.getBoolean(
+                MISSING_CELL_ON_FALSE, false);
+        m_valueOnInfinityOrNaN = settings.getBoolean(
+                VALUE_ON_INF_OR_NAN, false);
+        m_defaultNumber = settings.getDouble(DEFAULT_NUMBER, 0.0);
+        m_missingCellOnInfinityOrNaN = settings.getBoolean(
+                MISSING_CELL_ON_INF_OR_NAN,
+                true);
+        m_xmlFragmentName = settings.getString(XML_FRAGMENT_NAME, "fragment");
+
 
     }
 
@@ -260,6 +396,27 @@ public class XPathNodeSettings {
         // default is false to keep backward compatibility
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, false);
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
+        // default is false to keep backward compatibility
+        m_missingCellOnEmptySet = settings.getBoolean(
+                MISSING_CELL_ON_EMPTY_SET, false);
+        // default is false to keep backward compatibility
+        m_missingCellOnEmptyString = settings.getBoolean(
+                MISSING_CELL_ON_EMPTY_STRING, false);
+        // default is false to keep backward compatibility
+        m_missingCellOnFalse = settings.getBoolean(
+                MISSING_CELL_ON_FALSE, false);
+        // For return type number the backward compatiblity is broken.
+        // A backward compatible setting
+        // is not possible since NaN and inf values are discouraged in KNIME
+        m_valueOnInfinityOrNaN = settings.getBoolean(
+                VALUE_ON_INF_OR_NAN, false);
+        m_defaultNumber = settings.getDouble(DEFAULT_NUMBER, 0.0);
+        // default is false to keep backward compatibility
+        m_missingCellOnInfinityOrNaN = settings.getBoolean(
+                MISSING_CELL_ON_INF_OR_NAN,
+                true);
+        m_xmlFragmentName = settings.getString(XML_FRAGMENT_NAME, "fragment");
+
     }
 
     /** Called from model and dialog to save current settings.
@@ -275,6 +432,17 @@ public class XPathNodeSettings {
         settings.addStringArray(NAMESPACES, m_namespaces);
         settings.addBoolean(USE_ROOTS_NS, m_useRootsNS);
         settings.addString(ROOTS_NS_PREFIX, m_rootsNSPrefix);
+        settings.addBoolean(MISSING_CELL_ON_EMPTY_SET,
+                m_missingCellOnEmptySet);
+        settings.addBoolean(MISSING_CELL_ON_EMPTY_STRING,
+                m_missingCellOnEmptyString);
+        settings.addBoolean(MISSING_CELL_ON_FALSE, m_missingCellOnFalse);
+        settings.addBoolean(VALUE_ON_INF_OR_NAN, m_valueOnInfinityOrNaN);
+        settings.addBoolean(MISSING_CELL_ON_INF_OR_NAN,
+                m_missingCellOnInfinityOrNaN);
+        settings.addDouble(DEFAULT_NUMBER, m_defaultNumber);
+        settings.addString(XML_FRAGMENT_NAME, m_xmlFragmentName);
+
     }
 
 }

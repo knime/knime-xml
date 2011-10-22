@@ -1,0 +1,507 @@
+/*
+ * ------------------------------------------------------------------------
+ *
+ *  Copyright (C) 2003 - 2011
+ *  University of Konstanz, Germany and
+ *  KNIME GmbH, Konstanz, Germany
+ *  Website: http://www.knime.org; Email: contact@knime.org
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License, Version 3, as
+ *  published by the Free Software Foundation.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses>.
+ *
+ *  Additional permission under GNU GPL version 3 section 7:
+ *
+ *  KNIME interoperates with ECLIPSE solely via ECLIPSE's plug-in APIs.
+ *  Hence, KNIME and ECLIPSE are both independent programs and are not
+ *  derived from each other. Should, however, the interpretation of the
+ *  GNU GPL Version 3 ("License") under any applicable laws result in
+ *  KNIME and ECLIPSE being a combined program, KNIME GMBH herewith grants
+ *  you the additional permission to use and propagate KNIME together with
+ *  ECLIPSE with only the license terms in place for ECLIPSE applying to
+ *  ECLIPSE and the GNU GPL Version 3 applying for KNIME, provided the
+ *  license terms of ECLIPSE themselves allow for the respective use and
+ *  propagation of ECLIPSE together with KNIME.
+ *
+ *  Additional permission relating to nodes for KNIME that extend the Node
+ *  Extension (and in particular that are based on subclasses of NodeModel,
+ *  NodeDialog, and NodeView) and that only interoperate with KNIME through
+ *  standard APIs ("Nodes"):
+ *  Nodes are deemed to be separate and independent programs and to not be
+ *  covered works.  Notwithstanding anything to the contrary in the
+ *  License, the License does not apply to Nodes, you are not required to
+ *  license Nodes under the License, and you are granted a license to
+ *  prepare and propagate Nodes, in each case even if such Nodes are
+ *  propagated with or for interoperation with KNIME. The owner of a Node
+ *  may freely choose the license terms applicable to such Node, including
+ *  when such Node is propagated with or for interoperation with KNIME.
+ * ------------------------------------------------------------------------
+ *
+ * History
+ *   04.10.2011 (hofer): created
+ */
+package org.knime.xml.node.xpath;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.RowKey;
+import org.knime.core.data.collection.CollectionCellFactory;
+import org.knime.core.data.collection.ListCell;
+import org.knime.core.data.container.CellFactory;
+import org.knime.core.data.def.BooleanCell;
+import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.StringCell;
+import org.knime.core.data.xml.XMLCell;
+import org.knime.core.data.xml.XMLCellFactory;
+import org.knime.core.data.xml.XMLValue;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+/**
+ * SingleCellFactory for the XPath node.
+ *
+ * @author Heiko Hofer
+ */
+public class XPathCellFactory implements CellFactory {
+
+    private XPathNodeSettings m_settings;
+    private DataColumnSpec[] m_colSpec;
+    private int m_xmlIndex;
+    private XPathExpression m_xpathExpr;
+
+    /**
+     * @param spec the DataTabelSpec of the input
+     * @param settings settings for the XPath node
+     * @throws InvalidSettingsException when settings are inconsistent with
+     * the spec
+     *
+     */
+    public XPathCellFactory(final DataTableSpec spec,
+            final XPathNodeSettings settings)
+            throws InvalidSettingsException {
+        m_settings = settings;
+        // check user settings against input spec here
+        String xmlColumn = m_settings.getInputColumn();
+        m_xmlIndex = spec.findColumnIndex(xmlColumn);
+        if (m_xmlIndex < 0) {
+            throw new InvalidSettingsException(
+                    "No such column in input table: " + xmlColumn);
+        }
+        String newName = m_settings.getNewColumn();
+        if ((spec.containsName(newName) && !newName.equals(xmlColumn))
+                || (spec.containsName(newName) && newName.equals(xmlColumn)
+                && !m_settings.getRemoveInputColumn())) {
+            throw new InvalidSettingsException("Cannot create column "
+                    + newName + "since it is already in the input.");
+        }
+        initXPathExpression();
+
+        DataType newCellType = null;
+        final XPathOutput returnType = m_settings.getReturnType();
+        if (returnType.equals(XPathOutput.Boolean)) {
+            newCellType = BooleanCell.TYPE;
+        } else if (returnType.equals(XPathOutput.Number)) {
+            newCellType = DoubleCell.TYPE;
+        } else if (returnType.equals(XPathOutput.Integer)) {
+            newCellType = IntCell.TYPE;
+        } else if (returnType.equals(XPathOutput.String)) {
+            newCellType = StringCell.TYPE;
+        } else if (returnType.equals(XPathOutput.Node)) {
+            newCellType = XMLCell.TYPE;
+        } else if (returnType.equals(XPathOutput.NodeSet)) {
+            newCellType = DataType.getType(ListCell.class, XMLCell.TYPE);
+        }
+
+        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName,
+                newCellType);
+        m_colSpec = new DataColumnSpec[] {appendSpec.createSpec()};
+    }
+
+    /**
+     * @throws InvalidSettingsException
+     *
+     */
+    private void initXPathExpression() throws InvalidSettingsException {
+         XPathFactory factory = XPathFactory.newInstance();
+         XPath xpath = factory.newXPath();
+         xpath.setNamespaceContext(new XPathNamespaceContext(m_settings
+                 .getNsPrefixes(), m_settings.getNamespaces()));
+         try {
+             XPathExpression xpathExpr = xpath.compile(m_settings
+                     .getXpathQuery());
+
+             if (m_settings.getUseRootsNS()
+                     && Arrays.binarySearch(m_settings.getNsPrefixes(),
+                             m_settings.getRootsNSPrefix()) >= 0) {
+                 throw new InvalidSettingsException(
+                         "The namespace table uses the prefix "
+                                 + "reserved for the " + "roots namespace.");
+             } else {
+                 m_xpathExpr = xpathExpr;
+             }
+         } catch (XPathExpressionException e) {
+             if (m_settings.getUseRootsNS()) {
+                 // try to compile it with roots default prefix
+                 createXPathExpr(null);
+                 // the xpath compiles with the roots default prefix
+                 m_xpathExpr = null;
+             } else {
+                 throw new InvalidSettingsException(
+                         "XPath expression cannot be compiled.", e);
+             }
+         }
+    }
+
+    private XPathExpression createXPathExpr(final XMLValue xmlValue)
+            throws InvalidSettingsException {
+        List<String> nsPrefixes = new ArrayList<String>();
+        nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
+        if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
+            throw new InvalidSettingsException(
+                    "The namespace table uses the prefix reserved for the "
+                            + "roots namespace.");
+        }
+        nsPrefixes.add(m_settings.getRootsNSPrefix());
+        List<String> namespaces = new ArrayList<String>();
+        namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
+        if (xmlValue == null) {
+            String nsTemplate = "roots_ns_";
+            int counter = 0;
+            String ns = nsTemplate + counter;
+            while (namespaces.contains(ns)) {
+                counter++;
+                ns = nsTemplate + counter;
+            }
+            namespaces.add(ns);
+        } else {
+            Node root = xmlValue.getDocument().getFirstChild();
+            while (root.getNodeType() != Node.ELEMENT_NODE) {
+                root = root.getNextSibling();
+            }
+            String rootNSUri = root.getNamespaceURI();
+            if (rootNSUri != null) {
+                namespaces.add(rootNSUri);
+            } else {
+                throw new InvalidSettingsException(
+                        "The root node does not have a namesapce URI.");
+            }
+        }
+
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext(new XPathNamespaceContext(nsPrefixes
+                .toArray(new String[nsPrefixes.size()]), namespaces
+                .toArray(new String[namespaces.size()])));
+        try {
+            return xpath.compile(m_settings.getXpathQuery());
+        } catch (XPathExpressionException e) {
+            throw new InvalidSettingsException("XPath query cannot be parsed.",
+                    e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DataCell[] getCells(final DataRow row) {
+        return new DataCell[]{getCell(row)};
+    }
+
+    private DataCell getCell(final DataRow row) {
+        DataCell xmlCell = row.getCell(m_xmlIndex);
+        if (xmlCell.isMissing()) {
+            return DataType.getMissingCell();
+        }
+        XMLValue xmlValue = (XMLValue) xmlCell;
+        DataCell newCell = null;
+        try {
+            final XPathOutput returnType = m_settings.getReturnType();
+            XPathExpression xpathExpr = m_xpathExpr == null
+            ? createXPathExpr(xmlValue)
+                    : m_xpathExpr;
+            if (returnType.equals(XPathOutput.Boolean)) {
+                newCell = evaluateBoolean(xpathExpr, xmlValue);
+            } else if (returnType.equals(XPathOutput.Number)) {
+                newCell = evaluateNumber(xpathExpr, xmlValue);
+            } else if (returnType.equals(XPathOutput.Integer)) {
+                newCell = evaluateNumber(xpathExpr, xmlValue);
+                // Type cast to int
+                if (newCell instanceof DoubleCell) {
+                    DoubleCell value = (DoubleCell)newCell;
+                    newCell = new IntCell((int)value.getDoubleValue());
+                }
+            } else if (returnType.equals(XPathOutput.String)) {
+                newCell = evaluateString(xpathExpr, xmlValue);
+            } else if (returnType.equals(XPathOutput.Node)) {
+                newCell = evaluateNode(xpathExpr, xmlValue);
+            } else if (returnType.equals(XPathOutput.NodeSet)) {
+                newCell = evaluateNodeSet(xpathExpr, xmlValue);
+            }
+        } catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return newCell;
+    }
+
+    /**
+     * Evaluate XPath expression expecting a boolean as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     */
+    private DataCell evaluateBoolean(final XPathExpression xpathExpr,
+            final XMLValue xmlValue) throws XPathExpressionException {
+        DataCell newCell;
+        Object result = xpathExpr.evaluate(
+                xmlValue.getDocument(), XPathConstants.BOOLEAN);
+        Boolean value = (Boolean) result;
+        if (!value.booleanValue()
+                && m_settings.getMissingCellOnFalse()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            if (value.booleanValue()) {
+                newCell = BooleanCell.TRUE;
+            } else {
+                newCell = BooleanCell.FALSE;
+            }
+        }
+        return newCell;
+    }
+
+    /**
+     * Evaluate XPath expression expecting a boolean as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     */
+    private DataCell evaluateNumber(final XPathExpression xpathExpr,
+            final XMLValue xmlValue) throws XPathExpressionException {
+        DataCell newCell;
+        Object result = xpathExpr.evaluate(
+                xmlValue.getDocument(), XPathConstants.NUMBER);
+        Double value = (Double) result;
+        if ((value.isNaN() || value.isInfinite())
+                && m_settings.getMissingCellOnInfinityOrNaN()) {
+            newCell = DataType.getMissingCell();
+        } else if ((value.isNaN() || value.isInfinite())
+                && m_settings.getValueOnInfinityOrNaN()) {
+            newCell = new DoubleCell(m_settings.getDefaultNumber());
+        } else {
+            newCell = new DoubleCell(value.doubleValue());
+        }
+        return newCell;
+    }
+
+    /**
+     * Evaluate XPath expression expecting a String as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     */
+    private DataCell evaluateString(final XPathExpression xpathExpr,
+            final XMLValue xmlValue) throws XPathExpressionException {
+        DataCell newCell;
+        Object result = xpathExpr.evaluate(
+                xmlValue.getDocument(), XPathConstants.STRING);
+        String value = (String) result;
+        if (value.isEmpty()
+                && m_settings.getMissingCellOnEmptyString()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = new StringCell(value);
+        }
+        return newCell;
+    }
+
+    /**
+     * Evaluate XPath expression expecting a Node as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell evaluateNode(final XPathExpression xpathExpr,
+            final XMLValue xmlValue) throws XPathExpressionException,
+            ParserConfigurationException {
+        DataCell newCell;
+        Object result = xpathExpr.evaluate(
+                xmlValue.getDocument(), XPathConstants.NODE);
+        Node value = (Node) result;
+        if (null == value) {
+            newCell = DataType.getMissingCell();
+        } else {
+            DocumentBuilderFactory domFactory =
+            DocumentBuilderFactory.newInstance();
+            domFactory.setNamespaceAware(true);
+            DocumentBuilder docBuilder = domFactory
+                    .newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+            if (value.getNodeType() == Node.ATTRIBUTE_NODE) {
+                Element elem = doc.createElement(
+                        m_settings.getXmlFragmentName());
+                elem.setAttribute(value.getNodeName(),
+                        value.getNodeValue());
+                doc.appendChild(elem);
+            } else {
+                Node node = doc.importNode(value, true);
+                doc.appendChild(node);
+            }
+            newCell = XMLCellFactory.create(doc);
+        }
+        return newCell;
+    }
+
+
+    /**
+     * Evaluate XPath expression expecting a NodeSet as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell evaluateNodeSet(final XPathExpression xpathExpr,
+            final XMLValue xmlValue) throws XPathExpressionException,
+            ParserConfigurationException {
+        DataCell newCell;
+        Object result = xpathExpr.evaluate(
+                xmlValue.getDocument(), XPathConstants.NODESET);
+
+        NodeList nodes = (NodeList) result;
+        if (nodes.getLength() == 0
+                && m_settings.getMissingCellOnEmptySet()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            List<DataCell> cells = new ArrayList<DataCell>();
+            DocumentBuilderFactory domFactory =
+            DocumentBuilderFactory.newInstance();
+            domFactory.setNamespaceAware(true);
+            DocumentBuilder docBuilder = domFactory
+                    .newDocumentBuilder();
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node value = nodes.item(i);
+                Document doc = docBuilder.newDocument();
+                if (value.getNodeType()
+                        == Node.ATTRIBUTE_NODE) {
+                    Element elem = doc.createElement(
+                            m_settings.getXmlFragmentName());
+                    elem.setAttribute(value.getNodeName(),
+                            value.getNodeValue());
+                    doc.appendChild(elem);
+                } else {
+                    Node node = doc.importNode(value, true);
+                    doc.appendChild(node);
+                }
+                cells.add(XMLCellFactory.create(doc));
+            }
+            newCell = CollectionCellFactory.createListCell(
+                    cells);
+        }
+        return newCell;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public DataColumnSpec[] getColumnSpecs() {
+        return m_colSpec;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setProgress(final int curRowNr, final int rowCount,
+            final RowKey lastKey, final ExecutionMonitor exec) {
+        exec.setProgress(curRowNr / (double)rowCount, "Processed row "
+                + curRowNr + " (\"" + lastKey + "\")");
+    }
+
+    private static class XPathNamespaceContext implements NamespaceContext {
+        private final Map<String, String> m_namespaces;
+
+        public XPathNamespaceContext(final String[] prefixes,
+                final String[] namespaces) {
+            m_namespaces = new HashMap<String, String>();
+            for (int i = 0; i < prefixes.length; i++) {
+                if (prefixes[i].isEmpty()) {
+                    throw new IllegalArgumentException("There are empty "
+                            + "namespace prefixes. Please provide a "
+                            + "prefix for every namespace.");
+                }
+                m_namespaces.put(prefixes[i], namespaces[i]);
+            }
+        }
+
+        @Override
+        public String getNamespaceURI(final String prefix) {
+            if (prefix == null) {
+                throw new NullPointerException("Null prefix");
+            }
+            if ("xml".equals(prefix)) {
+                return XMLConstants.XML_NS_URI;
+            } else if (m_namespaces.containsKey(prefix)) {
+                return m_namespaces.get(prefix);
+            } else {
+                return XMLConstants.NULL_NS_URI;
+            }
+        }
+
+        @Override
+        public String getPrefix(final String uri) {
+            // This method isn't necessary for XPath processing.
+            throw new UnsupportedOperationException();
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        public Iterator getPrefixes(final String uri) {
+            // This method isn't necessary for XPath processing.
+            throw new UnsupportedOperationException();
+        }
+
+    }
+}
