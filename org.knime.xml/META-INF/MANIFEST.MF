@@ -13,7 +13,7 @@ Export-Package: org.knime.xml.node.ccombine,
  org.knime.xml.node.writer,
  org.knime.xml.node.xpath,
  org.knime.xml.node.xslt
-Require-Bundle: org.knime.base;bundle-version="2.4.0",
+Require-Bundle: org.knime.base;bundle-version="2.5.0",
  org.apache.xerces;bundle-version="2.9.0",
  org.apache.xalan;bundle-version="2.7.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
