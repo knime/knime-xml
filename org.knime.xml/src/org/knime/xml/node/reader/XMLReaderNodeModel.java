@@ -91,6 +91,7 @@ import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.util.FileUtil;
 
 /**
  * This is the model for the XML Reader node.
@@ -371,7 +372,7 @@ public class XMLReaderNodeModel extends NodeModel {
             } catch (MalformedURLException ex) {
                 throw new InvalidSettingsException("Invalid URL: " + loc, ex);
             }
-            return url.openStream();
+            return FileUtil.openStreamWithTimeout(url);
         } else {
             File file = new File(loc);
             if (!file.exists()) {
