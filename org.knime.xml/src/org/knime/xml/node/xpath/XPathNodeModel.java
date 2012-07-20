@@ -65,7 +65,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
 
 /**
  * This is the model for the XPath node. It takes an XML column from the input
@@ -104,27 +103,6 @@ public class XPathNodeModel extends NodeModel {
             throw new InvalidSettingsException("XML column \"" + inputColumn
                     + "\" is not of type XML");
         }
-        // don't auto-guess -- too many options to guess wrong
-        if (null == m_settings.getReturnType()) {
-            throw new InvalidSettingsException("No return type defined.");
-        }
-        if (m_settings.getUseRootsNS()
-                && (m_settings.getRootsNSPrefix() == null || m_settings
-                        .getRootsNSPrefix().trim().isEmpty())) {
-            throw new InvalidSettingsException(
-                    "The prefix of root's default namespace is not set.");
-        }
-        if (null == m_settings.getXpathQuery()) {
-            throw new InvalidSettingsException("No XPath query defined.");
-        }
-
-        if ((m_settings.getReturnType() == XPathOutput.Node
-                || m_settings.getReturnType() == XPathOutput.NodeSet)
-                && m_settings.getXmlFragmentName().trim().isEmpty()) {
-            throw new InvalidSettingsException("The XML fragment name is "
-                    + "empty. Please define a valid name.");
-        }
-
         ColumnRearranger rearranger = createColumnRearranger(inSpecs[0]);
         return new DataTableSpec[] {
                 rearranger.createSpec()
@@ -186,10 +164,7 @@ public class XPathNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        if (m_settings.getInputColumn() != null) {
-            // no settings available, ignore
-            m_settings.saveSettings(settings);
-        }
+        m_settings.saveSettings(settings);
     }
 
     /**

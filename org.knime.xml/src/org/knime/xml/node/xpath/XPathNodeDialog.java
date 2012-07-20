@@ -573,7 +573,7 @@ public class XPathNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final DataTableSpec[] specs) throws NotConfigurableException {
         XPathNodeSettings s = new XPathNodeSettings();
-        s.loadSettingsDialog(settings, null);
+        s.loadSettingsDialog(settings, specs[0]);
 
         m_inputColumn.update(specs[0], s.getInputColumn());
         m_newColumn.setText(s.getNewColumn());

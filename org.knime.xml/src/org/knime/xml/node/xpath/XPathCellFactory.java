@@ -128,7 +128,7 @@ public class XPathCellFactory implements CellFactory {
                 || (spec.containsName(newName) && newName.equals(xmlColumn)
                 && !m_settings.getRemoveInputColumn())) {
             throw new InvalidSettingsException("Cannot create column "
-                    + newName + "since it is already in the input.");
+                    + newName + " since it is already in the input.");
         }
         initXPathExpression();
 

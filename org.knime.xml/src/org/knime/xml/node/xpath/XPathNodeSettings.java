@@ -354,6 +354,11 @@ public class XPathNodeSettings {
             final DataTableSpec inSpec) {
         m_inputColumn = settings.getString(INPUT_COLUMN, null);
         m_newColumn = settings.getString(NEW_COLUMN, null);
+        if (m_newColumn == null) {
+            // auto-configure
+            m_newColumn = DataTableSpec.getUniqueColumnName(inSpec,
+                            "XML - XPATH");
+        }
         m_removeInputColumn = settings.getBoolean(REMOVE_INPUT_COLUMN, false);
         m_xpathQuery = settings.getString(XPATH_QUERY, "/*");
         m_returnType =
@@ -388,14 +393,30 @@ public class XPathNodeSettings {
         throws InvalidSettingsException {
         m_inputColumn = settings.getString(INPUT_COLUMN);
         m_newColumn = settings.getString(NEW_COLUMN);
+        if (m_newColumn == null || m_newColumn.trim().isEmpty()) {
+            throw new InvalidSettingsException("Please set a name for "
+                    + "the new column.");
+        }
+        m_newColumn = m_newColumn.trim();
         m_removeInputColumn = settings.getBoolean(REMOVE_INPUT_COLUMN);
         m_xpathQuery = settings.getString(XPATH_QUERY);
+        if (null == m_xpathQuery) {
+            throw new InvalidSettingsException("No XPath query defined.");
+        }
         m_returnType = XPathOutput.valueOf(settings.getString(RETURN_TYPE));
+        if (null == m_returnType) {
+            throw new InvalidSettingsException("No return type defined.");
+        }
         m_nsPrefixes = settings.getStringArray(NS_PREFIXES);
         m_namespaces = settings.getStringArray(NAMESPACES);
         // default is false to keep backward compatibility
         m_useRootsNS = settings.getBoolean(USE_ROOTS_NS, false);
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
+        if (m_useRootsNS
+            && (m_rootsNSPrefix == null || m_rootsNSPrefix.trim().isEmpty())) {
+            throw new InvalidSettingsException(
+                    "The prefix of root's default namespace is not set.");
+        }
         // default is false to keep backward compatibility
         m_missingCellOnEmptySet = settings.getBoolean(
                 MISSING_CELL_ON_EMPTY_SET, false);
@@ -416,7 +437,12 @@ public class XPathNodeSettings {
                 MISSING_CELL_ON_INF_OR_NAN,
                 true);
         m_xmlFragmentName = settings.getString(XML_FRAGMENT_NAME, "fragment");
-
+        if ((m_returnType == XPathOutput.Node
+                || m_returnType == XPathOutput.NodeSet)
+                && m_xmlFragmentName.trim().isEmpty()) {
+            throw new InvalidSettingsException("The XML fragment name is "
+                    + "empty. Please define a valid name.");
+        }
     }
 
     /** Called from model and dialog to save current settings.
