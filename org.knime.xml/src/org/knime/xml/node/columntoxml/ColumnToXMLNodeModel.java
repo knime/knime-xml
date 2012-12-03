@@ -355,14 +355,16 @@ public class ColumnToXMLNodeModel extends NodeModel {
             content.append("<");
             content.append(cellName);
             // Add data bound attributes
-            for (int i = 0; i < m_settings.getDataBoundAttributeValues().length;
-            i++) {
-                content.append(" ");
-                content.append(m_settings.getDataBoundAttributeNames()[i]);
-                content.append("=\"");
-                String value = row.getCell(m_attrColumns[i]).toString();
-                content.append(value);
-                content.append("\"");
+            for (int i = 0; i < m_settings.getDataBoundAttributeValues().length; i++) {
+                final DataCell attrCell = row.getCell(m_attrColumns[i]);
+                if (!attrCell.isMissing()) {
+                    content.append(" ");
+                    content.append(m_settings.getDataBoundAttributeNames()[i]);
+                    content.append("=\"");
+                    String value = attrCell.toString();
+                    content.append(value);
+                    content.append("\"");
+                }
             }
             // Add attributes
             for (int i = 0; i < m_settings.getAttributeNames().length; i++) {
@@ -412,8 +414,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
         private Node getRootNode(final XMLValue cell) {
             Document doc = cell.getDocument();
             Node node = doc.getFirstChild();
-            while (node.getNodeType() != Node.ELEMENT_NODE
-                    && null != node) {
+            while (node != null && node.getNodeType() != Node.ELEMENT_NODE) {
                 node = node.getNextSibling();
             }
             return node;
