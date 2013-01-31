@@ -57,14 +57,12 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.xml.XMLValue;
-import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 
 /**
  * This is the model for the XPath node. It takes an XML column from the input
@@ -72,7 +70,7 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author Heiko Hofer
  */
-public class XPathNodeModel extends NodeModel {
+final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
     private final XPathNodeSettings m_settings;
 
@@ -80,56 +78,27 @@ public class XPathNodeModel extends NodeModel {
      * Creates a new model with no input port and one output port.
      */
     public XPathNodeModel() {
-        super(1, 1);
         m_settings = new XPathNodeSettings();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
+    protected ColumnRearranger createColumnRearranger(final DataTableSpec spec) throws InvalidSettingsException {
         String inputColumn = m_settings.getInputColumn();
         if (inputColumn == null) {
             throw new InvalidSettingsException("No settings available");
         }
-        DataColumnSpec inputColSpec = inSpecs[0].getColumnSpec(inputColumn);
+        DataColumnSpec inputColSpec = spec.getColumnSpec(inputColumn);
         if (inputColSpec == null) {
             throw new InvalidSettingsException("XML column \"" + inputColumn
-                    + "\" is not present in the input table");
+                                               + "\" is not present in the input table");
         }
         if (!inputColSpec.getType().isCompatible(XMLValue.class)) {
             throw new InvalidSettingsException("XML column \"" + inputColumn
-                    + "\" is not of type XML");
+                                               + "\" is not of type XML");
         }
-        ColumnRearranger rearranger = createColumnRearranger(inSpecs[0]);
-        return new DataTableSpec[] {
-                rearranger.createSpec()
-        };
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
-        DataTableSpec inSpec = inData[0].getDataTableSpec();
-        ColumnRearranger rearranger = createColumnRearranger(inSpec);
-        BufferedDataTable outTable = exec.createColumnRearrangeTable(inData[0],
-                rearranger, exec);
-        return new BufferedDataTable[] {
-            outTable
-        };
-    }
-
-    private ColumnRearranger createColumnRearranger(final DataTableSpec spec)
-            throws InvalidSettingsException {
-
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
-        colRearranger.append(new XPathCellFactory(spec, m_settings));
+        colRearranger.append(XPathCellFactory.create(spec, m_settings));
 
         if (m_settings.getRemoveInputColumn()) {
             String xmlColumn = m_settings.getInputColumn();

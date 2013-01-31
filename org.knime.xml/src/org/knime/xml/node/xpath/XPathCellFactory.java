@@ -74,10 +74,9 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.RowKey;
 import org.knime.core.data.collection.CollectionCellFactory;
 import org.knime.core.data.collection.ListCell;
-import org.knime.core.data.container.CellFactory;
+import org.knime.core.data.container.AbstractCellFactory;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
@@ -85,7 +84,6 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
 import org.w3c.dom.Document;
@@ -94,46 +92,43 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * SingleCellFactory for the XPath node.
+ * CellFactory for the XPath node.
  *
  * @author Heiko Hofer
  */
-public class XPathCellFactory implements CellFactory {
+final class XPathCellFactory extends AbstractCellFactory {
 
     private XPathNodeSettings m_settings;
-    private DataColumnSpec[] m_colSpec;
     private int m_xmlIndex;
     private XPathExpression m_xpathExpr;
 
     /**
      * @param spec the DataTabelSpec of the input
      * @param settings settings for the XPath node
+     * @return the new cell factory instance.
      * @throws InvalidSettingsException when settings are inconsistent with
      * the spec
-     *
      */
-    public XPathCellFactory(final DataTableSpec spec,
+    static XPathCellFactory create(final DataTableSpec spec,
             final XPathNodeSettings settings)
             throws InvalidSettingsException {
-        m_settings = settings;
         // check user settings against input spec here
-        String xmlColumn = m_settings.getInputColumn();
-        m_xmlIndex = spec.findColumnIndex(xmlColumn);
-        if (m_xmlIndex < 0) {
+        String xmlColumn = settings.getInputColumn();
+        int xmlIndex = spec.findColumnIndex(xmlColumn);
+        if (xmlIndex < 0) {
             throw new InvalidSettingsException(
                     "No such column in input table: " + xmlColumn);
         }
-        String newName = m_settings.getNewColumn();
+        String newName = settings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
                 || (spec.containsName(newName) && newName.equals(xmlColumn)
-                && !m_settings.getRemoveInputColumn())) {
+                && !settings.getRemoveInputColumn())) {
             throw new InvalidSettingsException("Cannot create column "
                     + newName + " since it is already in the input.");
         }
-        initXPathExpression();
 
         DataType newCellType = null;
-        final XPathOutput returnType = m_settings.getReturnType();
+        final XPathOutput returnType = settings.getReturnType();
         if (returnType.equals(XPathOutput.Boolean)) {
             newCellType = BooleanCell.TYPE;
         } else if (returnType.equals(XPathOutput.Number)) {
@@ -148,9 +143,17 @@ public class XPathCellFactory implements CellFactory {
             newCellType = DataType.getType(ListCell.class, XMLCell.TYPE);
         }
 
-        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName,
-                newCellType);
-        m_colSpec = new DataColumnSpec[] {appendSpec.createSpec()};
+        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName, newCellType);
+        DataColumnSpec[] colSpecs = new DataColumnSpec[] {appendSpec.createSpec()};
+        return new XPathCellFactory(settings, xmlIndex, colSpecs);
+    }
+
+    private XPathCellFactory(final XPathNodeSettings settings, final int xmlIndex,
+                             final DataColumnSpec[] colsSpecs) throws InvalidSettingsException {
+        super(true, colsSpecs);
+        m_settings = settings;
+        m_xmlIndex = xmlIndex;
+        initXPathExpression();
     }
 
     /**
@@ -444,20 +447,6 @@ public class XPathCellFactory implements CellFactory {
                     cells);
         }
         return newCell;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public DataColumnSpec[] getColumnSpecs() {
-        return m_colSpec;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setProgress(final int curRowNr, final int rowCount,
-            final RowKey lastKey, final ExecutionMonitor exec) {
-        exec.setProgress(curRowNr / (double)rowCount, "Processed row "
-                + curRowNr + " (\"" + lastKey + "\")");
     }
 
     private static class XPathNamespaceContext implements NamespaceContext {

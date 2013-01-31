@@ -79,6 +79,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.ScrollPaneConstants;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.xml.XMLValue;
@@ -96,7 +97,7 @@ import org.knime.xml.node.xpath.XPathNodeSettings.XPathOutput;
  *
  * @author Heiko Hofer
  */
-public class XPathNodeDialog extends NodeDialogPane {
+final class XPathNodeDialog extends NodeDialogPane {
     private ColumnSelectionComboxBox m_inputColumn;
     private JTextField m_newColumn;
     private JCheckBox m_removeInputColumn;
@@ -183,7 +184,7 @@ public class XPathNodeDialog extends NodeDialogPane {
 
         JScrollPane xpathScrollPane = new JScrollPane(m_xpath);
         xpathScrollPane.setVerticalScrollBarPolicy(
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         xpathScrollPane.setPreferredSize(
                 xpathScrollPane.getMinimumSize());
         xpathScrollPane.setBorder(BorderFactory.createTitledBorder(
