@@ -318,11 +318,16 @@ public class StringToXMLNodeModel extends NodeModel {
                     try {
                         newcells[i] = XMLCellFactory.create(dc.toString());
                     } catch (Exception e) {
+                        Throwable cause = e;
+                        while ((cause.getCause() != cause) && (cause.getCause() != null)) {
+                            cause = cause.getCause();
+                        }
+
                         m_error.append("Cell in row:\""
                             + row.getKey().getString()
                             + "\" and column \""
                             + m_spec.getColumnSpec(m_colindices[i]).getName()
-                            + "\" could not be parsed. Add missing value.\n");
+                            + "\" could not be parsed: " + cause.getMessage() + " Add missing value.\n");
                         newcells[i] = DataType.getMissingCell();
                     }
                 }
