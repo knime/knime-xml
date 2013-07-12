@@ -60,6 +60,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLInputFactory;
@@ -365,6 +366,7 @@ public class XMLReaderNodeModel extends NodeModel {
         if (loc == null || loc.length() == 0) {
             throw new InvalidSettingsException("No location provided");
         }
+        InputStream in;
         if (loc.matches("^[a-zA-Z]+:/.*")) { // URL style
             URL url;
             try {
@@ -372,13 +374,23 @@ public class XMLReaderNodeModel extends NodeModel {
             } catch (MalformedURLException ex) {
                 throw new InvalidSettingsException("Invalid URL: " + loc, ex);
             }
-            return FileUtil.openStreamWithTimeout(url);
+            in = FileUtil.openStreamWithTimeout(url);
         } else {
             File file = new File(loc);
             if (!file.exists()) {
                 throw new InvalidSettingsException("No such file: " + loc);
             }
-            return new BufferedInputStream(new FileInputStream(file));
+            in = new FileInputStream(file);
+        }
+        BufferedInputStream bufferedIn = new BufferedInputStream(in);
+        bufferedIn.mark(/*readLimit = */ 8 * 1024); // 8kb enough for the header
+        try {
+            GZIPInputStream gzipIn = new GZIPInputStream(bufferedIn);
+            return new BufferedInputStream(gzipIn);
+        } catch (IOException ioe) {
+            // not gzipped, read uncompressed
+            bufferedIn.reset();
+            return bufferedIn;
         }
     }
 
