@@ -155,7 +155,7 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
         }
 
         // Autoconfigure if input columns are not set
-        if (null == m_settings.getInputColumns()) {
+        if (null == m_settings.getInputColumns() && !m_settings.getIncludeAll()) {
             List<String> xmlCols = new ArrayList<String>();
             for (DataColumnSpec colSpec : inSpecs[0]) {
                 if (colSpec.getType().isCompatible(XMLValue.class)) {
@@ -218,11 +218,16 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
                     spec, toRemove);
         }
 
-        String[] includeColumnNames = m_settings.getInputColumns();
-        int[] includeColumns = new int[includeColumnNames.length];
-        for (int i = 0; i < includeColumns.length; i++) {
-            includeColumns[i] = validateColumn(includeColumnNames[i],
-                    spec, toRemove);
+        int[] includeColumns;
+        if (m_settings.getIncludeAll()) {
+            includeColumns = getAllXMLColumns(spec, toRemove);
+        } else {
+            String[] includeColumnNames = m_settings.getInputColumns();
+            includeColumns = new int[includeColumnNames.length];
+            for (int i = 0; i < includeColumns.length; i++) {
+                includeColumns[i] = validateColumn(includeColumnNames[i],
+                        spec, toRemove);
+            }
         }
 
         String[] attrColumnNames = m_settings.getDataBoundAttributeValues();
@@ -269,6 +274,24 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
             toRemove.add(index);
         }
         return index;
+    }
+
+    private int[] getAllXMLColumns(final DataTableSpec spec, final Set<Integer> toRemove) {
+        List<Integer> result = new ArrayList<Integer>();
+        for (int index = 0; index < spec.getNumColumns(); index++) {
+            DataColumnSpec column = spec.getColumnSpec(index);
+            if (column.getType().isCompatible(XMLValue.class)) {
+                result.add(index);
+            }
+            if (m_settings.getRemoveSourceColumns()) {
+                toRemove.add(index);
+            }
+        }
+        int[] asArray = new int[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            asArray[i] = result.get(i);
+        }
+        return asArray;
     }
 
     /**
