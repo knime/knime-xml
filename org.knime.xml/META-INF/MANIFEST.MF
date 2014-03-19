@@ -16,5 +16,5 @@ Export-Package: org.knime.xml.node.ccombine,
 Require-Bundle: org.knime.base;bundle-version="[2.5.0,3.0.0)",
  org.apache.xerces;bundle-version="[2.9.0,2.10.0)",
  org.apache.xalan;bundle-version="[2.7.1,2.8.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
