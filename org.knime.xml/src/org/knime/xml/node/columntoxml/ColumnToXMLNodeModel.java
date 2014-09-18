@@ -336,7 +336,7 @@ public class ColumnToXMLNodeModel extends NodeModel {
         @Override
         public DataCell getCell(final DataRow row) {
 
-            String cellName = m_nameColumn > 0
+            String cellName = m_nameColumn >= 0
                     ? row.getCell(m_nameColumn).toString()
                     : m_settings.getElementName();
 
