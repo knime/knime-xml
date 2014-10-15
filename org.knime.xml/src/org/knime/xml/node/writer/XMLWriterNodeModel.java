@@ -48,8 +48,12 @@
 package org.knime.xml.node.writer;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +73,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.util.FileUtil;
 
 /**
  * This is the model for the XML Writer node. It takes an XML column from the
@@ -101,15 +106,22 @@ public class XMLWriterNodeModel extends NodeModel {
             throw new InvalidSettingsException("No output directory selected");
         }
 
-        File dir = new File(m_settings.getFolder());
-        if (!dir.exists()) {
-            throw new InvalidSettingsException("Directory '"
-                    + dir.getAbsolutePath() + "' does not exist");
+        try {
+            URL url = FileUtil.toURL(m_settings.getFolder());
+            Path localPath = FileUtil.resolveToPath(url);
+            if (localPath != null) {
+                if (!Files.exists(localPath)) {
+                    throw new InvalidSettingsException("Directory '" + localPath + "' does not exist");
+                } else if (!Files.isDirectory(localPath)) {
+                    throw new InvalidSettingsException("'" + localPath + "' is not a directory");
+                }
+            }
+        } catch (MalformedURLException ex) {
+            throw new InvalidSettingsException("Invalid filename or URL:" + ex.getMessage(), ex);
+        } catch (IOException ex) {
+            throw new InvalidSettingsException("I/O error while checking output:" + ex.getMessage(), ex);
         }
-        if (!dir.isDirectory()) {
-            throw new InvalidSettingsException("'" + dir.getAbsolutePath()
-                    + "' is not a directory");
-        }
+
         // validate settings for the XML column
         if (null == m_settings.getInputColumn()) {
             List<String> compatibleCols = new ArrayList<String>();
@@ -146,7 +158,8 @@ public class XMLWriterNodeModel extends NodeModel {
         int count = 0;
         int missingCellCount = 0;
 
-        File dir = new File(m_settings.getFolder());
+        URL remoteBaseUrl = FileUtil.toURL(m_settings.getFolder());
+        Path localDir = FileUtil.resolveToPath(remoteBaseUrl);
 
         final int colIndex =
                 inData[0].getDataTableSpec().findColumnIndex(
@@ -157,24 +170,27 @@ public class XMLWriterNodeModel extends NodeModel {
             exec.setProgress(count / max, "Writing " + row.getKey()
                     + ".xml");
 
-            File xmlFile = new File(dir, row.getKey() + ".xml");
-            if (!m_settings.getOverwriteExistingFiles()
-                    && xmlFile.exists()) {
-                throw new IOException("File '" + xmlFile.getAbsolutePath()
-                        + "' already exists");
+            Path xmlFile = null;
+            URL xmlUrl = null;
+            if (localDir != null) {
+                xmlFile = localDir.resolve(row.getKey() + ".xml");
+                if (!m_settings.getOverwriteExistingFiles() && Files.exists(xmlFile)) {
+                    throw new IOException("File '" + xmlFile + "' already exists and overwrite is disabled");
+                }
+            } else {
+                xmlUrl = new URL(remoteBaseUrl.toString() + row.getKey() + ".xml");
             }
 
             DataCell cell = row.getCell(colIndex);
             if (!cell.isMissing()) {
-                XMLCellWriter xmlCellWriter =
-                    XMLCellWriterFactory.createXMLCellWriter(
-                        new FileOutputStream(xmlFile));
-                xmlCellWriter.write((XMLValue)cell);
-                xmlCellWriter.close();
+                try (XMLCellWriter xmlCellWriter = XMLCellWriterFactory.createXMLCellWriter(
+                        openOutputStream(xmlUrl, xmlFile))) {
+                    xmlCellWriter.write((XMLValue)cell);
+                }
             } else {
                 missingCellCount++;
-                if (xmlFile.exists()) {
-                    xmlFile.delete();
+                if (xmlFile != null) {
+                    Files.deleteIfExists(xmlFile);
                 }
                 LOGGER.debug("Skip row " + row.getKey().getString()
                         + " since the cell is a missing data cell.");
@@ -187,6 +203,14 @@ public class XMLWriterNodeModel extends NodeModel {
                     + "to missing values.");
         }
         return new BufferedDataTable[0];
+    }
+
+    private static OutputStream openOutputStream(final URL url, final Path file) throws IOException {
+        if (file != null) {
+            return Files.newOutputStream(file);
+        } else {
+            return FileUtil.openOutputConnection(url, "PUT").getOutputStream();
+        }
     }
 
     /**

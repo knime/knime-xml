@@ -51,11 +51,16 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.xml.XMLValue;
@@ -66,6 +71,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.core.util.FileUtil;
 
 /**
  * This is the dialog for the XML writer.
@@ -120,6 +126,7 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         m_folder.setBorder(null);
         p.add(m_folder, c);
 
+
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
@@ -131,6 +138,21 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.weighty = 1;
         p.add(new JPanel(), c);
 
+        m_folder.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                String selFile = m_folder.getSelectedFile();
+                if ((selFile != null) && !selFile.isEmpty()) {
+                    try {
+                        URL newUrl = FileUtil.toURL(selFile);
+                        Path path = FileUtil.resolveToPath(newUrl);
+                        m_overwriteExisting.setEnabled(path != null);
+                    } catch (IOException ex) {
+                        // ignore
+                    }
+                }
+            }
+        });
         return p;
     }
 
