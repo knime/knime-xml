@@ -52,6 +52,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 
@@ -147,7 +148,7 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
                         URL newUrl = FileUtil.toURL(selFile);
                         Path path = FileUtil.resolveToPath(newUrl);
                         m_overwriteExisting.setEnabled(path != null);
-                    } catch (IOException ex) {
+                    } catch (IOException | URISyntaxException ex) {
                         // ignore
                     }
                 }
