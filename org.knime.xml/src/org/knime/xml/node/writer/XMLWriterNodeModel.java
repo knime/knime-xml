@@ -47,6 +47,7 @@
  */
 package org.knime.xml.node.writer;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -208,9 +209,9 @@ public class XMLWriterNodeModel extends NodeModel {
 
     private static OutputStream openOutputStream(final URL url, final Path file) throws IOException {
         if (file != null) {
-            return Files.newOutputStream(file);
+            return new BufferedOutputStream(Files.newOutputStream(file));
         } else {
-            return FileUtil.openOutputConnection(url, "PUT").getOutputStream();
+            return new BufferedOutputStream(FileUtil.openOutputConnection(url, "PUT").getOutputStream());
         }
     }
 
