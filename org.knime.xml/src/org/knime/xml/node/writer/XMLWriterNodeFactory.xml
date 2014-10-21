@@ -6,7 +6,7 @@
     <fullDescription>
         <intro>
             The node takes the XML Documents of the selected column and writes
-            them, each in a separate file, into a local or remote directory (denote by a URL). The files will
+            them, each in a separate file, into a local or remote directory (denoted by a URL). The files will
             be named after the table's row IDs appended with ".xml".<br />
             Note that if the destination location is a remote URL not all options are available because in general it's
             not possible to determine whether the remote location exists. In this case it will always be overwritten.
