@@ -51,8 +51,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,6 +73,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -103,25 +102,12 @@ public class XMLWriterNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-        // validate settings for the directory
-        if (m_settings.getFolder() == null) {
-            throw new InvalidSettingsException("No output directory selected");
-        }
+        StringBuilder warnings = new StringBuilder();
 
-        try {
-            URL url = FileUtil.toURL(m_settings.getFolder());
-            Path localPath = FileUtil.resolveToPath(url);
-            if (localPath != null) {
-                if (!Files.exists(localPath)) {
-                    throw new InvalidSettingsException("Directory '" + localPath + "' does not exist");
-                } else if (!Files.isDirectory(localPath)) {
-                    throw new InvalidSettingsException("'" + localPath + "' is not a directory");
-                }
-            }
-        } catch (MalformedURLException | URISyntaxException ex) {
-            throw new InvalidSettingsException("Invalid filename or URL:" + ex.getMessage(), ex);
-        } catch (IOException ex) {
-            throw new InvalidSettingsException("I/O error while checking output:" + ex.getMessage(), ex);
+        // validate settings for the directory
+        String warning = CheckUtils.checkDestinationDirectory(m_settings.getFolder());
+        if (warning != null) {
+            warnings.append(warning).append('\n');
         }
 
         // validate settings for the XML column
@@ -138,13 +124,15 @@ public class XMLWriterNodeModel extends NodeModel {
             } else if (compatibleCols.size() > 1) {
                 // auto-guessing
                 m_settings.setInputColumn(compatibleCols.get(0));
-                setWarningMessage("Auto guessing: using column \""
-                        + compatibleCols.get(0) + "\".");
+                warnings.append("Auto guessing: using column \"").append(compatibleCols.get(0)).append("\".");
             } else {
-                // TODO point to node for converting Data Table to XML
-                throw new InvalidSettingsException("No XML "
-                        + "column in input table.");
+                throw new InvalidSettingsException("No XML column in input table. "
+                    + "Consider using the 'String to XML' node.");
             }
+        }
+
+        if (warnings.length() > 0) {
+            setWarningMessage(warnings.toString().trim());
         }
 
         return new DataTableSpec[0];
@@ -156,6 +144,8 @@ public class XMLWriterNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+        CheckUtils.checkDestinationDirectory(m_settings.getFolder());
+
         double max = inData[0].getRowCount();
         int count = 0;
         int missingCellCount = 0;
@@ -177,7 +167,8 @@ public class XMLWriterNodeModel extends NodeModel {
             if (localDir != null) {
                 xmlFile = localDir.resolve(row.getKey() + ".xml");
                 if (!m_settings.getOverwriteExistingFiles() && Files.exists(xmlFile)) {
-                    throw new IOException("File '" + xmlFile + "' already exists and overwrite is disabled");
+                    throw new IOException("Output file '" + xmlFile
+                        + "' exists must not be overwritten due to user settings");
                 }
             } else {
                 xmlUrl = new URL(remoteBaseUrl.toString() + row.getKey() + ".xml");
@@ -194,7 +185,7 @@ public class XMLWriterNodeModel extends NodeModel {
                 if (xmlFile != null) {
                     Files.deleteIfExists(xmlFile);
                 }
-                LOGGER.debug("Skip row " + row.getKey().getString()
+                LOGGER.debug("Skipping row " + row.getKey().getString()
                         + " since the cell is a missing data cell.");
             }
             count++;

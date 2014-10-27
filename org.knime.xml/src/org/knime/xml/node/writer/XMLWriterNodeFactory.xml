@@ -12,7 +12,7 @@
             not possible to determine whether the remote location exists. In this case it will always be overwritten.
 		</intro>
         <option name="XML column">The column containing the XML cells.</option>
-        <option name="Selected directory">Select the output directory here. You can also specify remote URLs, in this
+        <option name="Destination directory">Select the output directory here. You can also specify remote URLs, in this
         case the final destination URLs are built by directly appending the file name to this base URL.</option>
         <option name="Overwrite existing files">Choose if existing files 
             should be overwritten here. If this option is unchecked, the node

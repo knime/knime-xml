@@ -72,6 +72,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.core.node.util.FilesHistoryPanel.LocationValidation;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -100,18 +101,19 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        c.fill = GridBagConstraints.BOTH;
-        c.anchor = GridBagConstraints.WEST;
-        c.insets = new Insets(4, 4, 4, 4);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.insets = new Insets(10, 4, 4, 4);
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 1;
         c.weightx = 0;
         c.weighty = 0;
 
-        p.add(new JLabel("XML column:"), c);
+        p.add(new JLabel("XML column"), c);
         c.gridx++;
         c.weightx = 1;
+        c.insets = new Insets(4, 9, 4, 4);
         m_inputColumn = new ColumnSelectionComboxBox(XMLValue.class);
         m_inputColumn.setBorder(null);
         p.add(m_inputColumn, c);
@@ -119,10 +121,12 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
-        p.add(new JLabel("Selected Directory:"), c);
+        c.insets = new Insets(11, 4, 4, 4);
+        p.add(new JLabel("Destination Directory"), c);
         c.gridx++;
         c.weightx = 1;
-        m_folder = new FilesHistoryPanel("org.knime.xml.node.writer", false);
+        c.insets = new Insets(4, 4, 4, 0);
+        m_folder = new FilesHistoryPanel("org.knime.xml.node.writer", LocationValidation.DirectoryOutput);
         m_folder.setSelectMode(JFileChooser.DIRECTORIES_ONLY);
         m_folder.setBorder(null);
         p.add(m_folder, c);
