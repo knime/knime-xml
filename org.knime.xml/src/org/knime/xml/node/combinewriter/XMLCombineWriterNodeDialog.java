@@ -171,6 +171,7 @@ public class XMLCombineWriterNodeDialog extends NodeDialogPane {
         s.setAttributeNames(m_attributesPanel.getKeys());
         s.setAttributeValues(m_attributesPanel.getValues());
         s.saveSettings(settings);
+        m_outputFile.addToHistory();
     }
 
     /**

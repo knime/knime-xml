@@ -215,6 +215,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         s.setUseRootsNS(m_useRootsNS.isSelected());
         s.setRootsNSPrefix(m_rootNSPrefix.getText().trim());
         s.saveSettings(settings);
+        m_url.addToHistory();
     }
 
     /**

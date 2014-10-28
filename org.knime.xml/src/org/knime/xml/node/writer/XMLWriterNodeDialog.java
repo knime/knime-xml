@@ -172,6 +172,7 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         s.setFolder(m_folder.getSelectedFile());
         s.setOverwriteExisting(m_overwriteExisting.isSelected());
         s.saveSettings(settings);
+        m_folder.addToHistory();
     }
 
     /**
