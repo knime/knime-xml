@@ -75,6 +75,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
+import org.knime.core.util.PathUtils;
 
 /**
  * This is the model for the XML Writer node. It takes an XML column from the
@@ -146,9 +147,7 @@ public class XMLWriterNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
         CheckUtils.checkDestinationDirectory(m_settings.getFolder());
 
-        double max = inData[0].getRowCount();
-        int count = 0;
-        int missingCellCount = 0;
+        int max = inData[0].getRowCount();
 
         URL remoteBaseUrl = FileUtil.toURL(m_settings.getFolder());
         Path localDir = FileUtil.resolveToPath(remoteBaseUrl);
@@ -157,38 +156,35 @@ public class XMLWriterNodeModel extends NodeModel {
                 inData[0].getDataTableSpec().findColumnIndex(
                         m_settings.getInputColumn());
 
+        int count = 0;
+        int missingCellCount = 0;
         for (DataRow row : inData[0]) {
             exec.checkCanceled();
-            exec.setProgress(count / max, "Writing " + row.getKey()
-                    + ".xml");
-
-            Path xmlFile = null;
-            URL xmlUrl = null;
-            if (localDir != null) {
-                xmlFile = localDir.resolve(row.getKey() + ".xml");
-                if (!m_settings.getOverwriteExistingFiles() && Files.exists(xmlFile)) {
-                    throw new IOException("Output file '" + xmlFile
-                        + "' exists must not be overwritten due to user settings");
-                }
-            } else {
-                xmlUrl = new URL(remoteBaseUrl.toString() + row.getKey() + ".xml");
-            }
+            String name = row.getKey() + ".xml";
+            exec.setProgress(count++ / (double) max, "Writing " + name + " (" + count + " of " + max + ")");
 
             DataCell cell = row.getCell(colIndex);
-            if (!cell.isMissing()) {
+            if (cell.isMissing()) {
+                missingCellCount++;
+                LOGGER.debug("Skipping row " + row.getKey().getString() + " since the cell is missing.");
+            } else {
+                Path xmlFile = null;
+                URL xmlUrl = null;
+                if (localDir != null) {
+                    xmlFile = PathUtils.resolvePath(localDir, name);
+                    if (!m_settings.getOverwriteExistingFiles() && Files.exists(xmlFile)) {
+                        throw new IOException("Output file '" + xmlFile
+                            + "' exists and must not be overwritten due to user settings");
+                    }
+                } else {
+                    xmlUrl = new URL(remoteBaseUrl.toString() + name);
+                }
+
                 try (XMLCellWriter xmlCellWriter = XMLCellWriterFactory.createXMLCellWriter(
-                        openOutputStream(xmlUrl, xmlFile))) {
+                    openOutputStream(xmlUrl, xmlFile))) {
                     xmlCellWriter.write((XMLValue)cell);
                 }
-            } else {
-                missingCellCount++;
-                if (xmlFile != null) {
-                    Files.deleteIfExists(xmlFile);
-                }
-                LOGGER.debug("Skipping row " + row.getKey().getString()
-                        + " since the cell is a missing data cell.");
             }
-            count++;
         }
 
         if (missingCellCount > 0) {
