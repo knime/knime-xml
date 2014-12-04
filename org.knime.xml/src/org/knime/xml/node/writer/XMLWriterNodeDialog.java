@@ -73,6 +73,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.FilesHistoryPanel;
 import org.knime.core.node.util.FilesHistoryPanel.LocationValidation;
+import org.knime.core.node.workflow.FlowVariable.Type;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -126,7 +127,9 @@ public class XMLWriterNodeDialog extends NodeDialogPane {
         c.gridx++;
         c.weightx = 1;
         c.insets = new Insets(4, 4, 4, 0);
-        m_folder = new FilesHistoryPanel("org.knime.xml.node.writer", LocationValidation.DirectoryOutput);
+        m_folder =
+            new FilesHistoryPanel(createFlowVariableModel("folder", Type.STRING), "org.knime.xml.node.writer",
+                LocationValidation.DirectoryOutput);
         m_folder.setSelectMode(JFileChooser.DIRECTORIES_ONLY);
         m_folder.setBorder(null);
         p.add(m_folder, c);
