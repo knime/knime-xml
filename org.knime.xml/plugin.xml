@@ -41,11 +41,11 @@
       <node
             after="org.knime.xml.node.columntoxml.ColumnToXMLNodeFactory"
             category-path="/xml"
-            factory-class="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
-            id="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory">
+            factory-class="org.knime.xml.node.ccombine2.XMLColumnCombinerNodeFactory"
+            id="org.knime.xml.node.ccombine2.XMLColumnCombinerNodeFactory">
       </node>
       <node
-            after="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
+            after="org.knime.xml.node.ccombine2.XMLColumnCombinerNodeFactory"
             category-path="/xml"
             factory-class="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory"
             id="org.knime.xml.node.rcombine.XMLRowCombinerNodeFactory">
