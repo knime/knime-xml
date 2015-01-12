@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Manipulator" icon="./xpath.png" deprecated="true">
+    <name>XPath</name>
+    <shortDescription>Performs a XPath query on a XML column.</shortDescription>
+    <fullDescription>
+        <intro>
+            The node takes the XML Documents of the selected column and 
+            performs a XPath query on them. The node supports XPath 1.0.
+    <h3>XPath Examples</h3>
+<p>    
+    Consider the XML document:<br/> 
+&lt;inventory&gt;<br/>
+    &lt;book year="1999"&gt;<br/>
+        &lt;title&gt;Harry Potter and the Sorcerer's Stone&lt;/title&gt;<br/>
+        &lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
+    &lt;/book&gt;<br/>
+    &lt;book year="2000"&gt;<br/>
+        &lt;title&gt;Harry Potter and the Chamber of Secrets&lt;/title&gt;<br/>
+        &lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
+    &lt;/book&gt;<br/>
+&lt;/inventory&gt;
+</p>
+<p>
+With the  <b>Return type</b> "Node-Set" and the denoted XPath query you can get
+<ul>
+  <li>all books : //book</li>
+  <li>all author element within book : //book/author</li>
+  <li>the books from 1999 : //book[@year='1999']</li>
+</ul>
+</p>
+
+<p>With the <b>Return type</b> "String" you can get the value of the first year 
+attribute with <i>//@year</i>. If you want all publishing dates you can use a flow of
+two XPath nodes and own Ungroup node. Use an XPath 
+node with query <i>//@year</i> and return type "Node-Set" then the Ungroup node followed by
+an XPath with query <i>//@year</i> and return type "String".</p>
+
+<p>You can find more examples at <a href="http://www.w3schools.com/XPath/xpath_syntax.asp">w3cschools.com</a>. </p>
+       
+            
+		</intro>
+        <option name="XML column">The column containing the XML cells.</option>
+        <option name="New column name">
+            Name of the new column in the output table.
+        </option>
+        <option name="Remove source column">
+            Check when the source column should not show up in the output table.
+        </option>
+        <option name="XPath query">Define the XPath query here.</option>
+        <option name="Return type">Choose the result type of your XPath query.
+            The result type will be match to a KNIME type denoted in braces.
+            There are return type specific <b>Options</b>. 
+            You can define if missing cells
+            should be written to the output for extreme values of this type.
+            If the returned node is an attribute you must embed this attribute
+            in an element, since XML cells must have an root element. For the
+            <b>Node</b> return type you can define the name of this element.
+        </option>
+        <option name="Namespaces">
+            The prefixes and the namespaces used in the XPath query. For the
+            example when querying XHTML documents with the XPath Query:<br/>
+            <i>//pre:h1</i><br/> 
+            the following namespace must be defined:
+            <br/>
+            Prefix: <i>pre</i>
+            <br/>
+            Namespace: <i>http://www.w3.org/1999/xhtml</i>         
+        </option>
+        <option name="Incorporate namespace of the root element.">
+            <p>This option is useful when you do not have the default
+            namespace of your document at hand.</p>
+        	<p>If checked, the namespace of the root element is added to the 
+        	<b>Namespaces</b> table during runtime. Please define a prefix for this 
+        	namespace in <b>Prefix of root's namespace</b>.</p>
+        	<p>For the example of XHTML documents the namespace of the root 
+        	element is http://www.w3.org/1999/xhtml so that with the
+        	root's prefix of <i>pre</i> you can leave
+        	the <b>Namespaces</b> table empty.</p>     
+        </option>          
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Input Table">
+            Input table containing at least one XML column.
+        </inPort>
+        <outPort index="0" name="Output Table">
+            The input table with additional column containing the result of the XPath query.
+        </outPort>        
+    </ports>
+</knimeNode>
+
+

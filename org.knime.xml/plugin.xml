@@ -15,6 +15,11 @@
             id="org.knime.xml.node.writer.XMLWriterNodeFactory">
       </node>
       <node
+            category-path="/xml"
+            factory-class="org.knime.xml.node.tablereaderadvanced.XMLTableReaderNodeFactory"
+            id="org.knime.xml.node.tablereaderadvanced.XMLTableReaderNodeFactory">
+      </node>
+      <node
             after="org.knime.xml.node.writer.XMLWriterNodeFactory"
             category-path="/xml"
             factory-class="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
@@ -23,8 +28,8 @@
       <node
             after="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
             category-path="/xml"
-            factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
-            id="org.knime.xml.node.xpath.XPathNodeFactory">
+            factory-class="org.knime.xml.node.xpath2.XPathNodeFactory"
+            id="org.knime.xml.node.xpath2.XPathNodeFactory">
       </node>
       <node
             after="org.knime.xml.node.xpath.XPathNodeFactory"
