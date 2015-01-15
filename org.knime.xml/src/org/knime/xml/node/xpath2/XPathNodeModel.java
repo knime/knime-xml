@@ -55,16 +55,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import org.knime.base.collection.list.split.SplitCellFactory;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.RowKey;
+import org.knime.core.data.collection.CollectionDataValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLValue;
@@ -77,7 +76,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
-import org.w3c.dom.NodeList;
 
 /**
  * This is the model for the XPath node. It takes an XML column from the input table and performs a XPath query on every
@@ -88,6 +86,10 @@ import org.w3c.dom.NodeList;
 final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
     private final XPathNodeSettings m_settings;
+
+    private List<Integer> m_multiColPos = new ArrayList<Integer>();
+
+    private RowKey m_firstRowKey;
 
     /**
      * Creates a new model with no input port and one output port.
@@ -122,8 +124,22 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
         ArrayList<XPathSettings> list = m_settings.getXPathQueryList();
 
+        int offset = spec.getNumColumns();
+        if (m_settings.getRemoveInputColumn()) {
+            offset--;
+        }
+        m_multiColPos = new ArrayList<Integer>();
         for (XPathSettings xps : list) {
-            colRearranger.append(XPathCellFactory.create(spec, m_settings, xps));
+
+            XPathMultiColOption multipleTagOption = xps.getMultipleTagOption();
+            if (multipleTagOption.equals(XPathMultiColOption.SingleCell)) {
+                colRearranger.append(XPathSingleCellFactory.create(spec, m_settings, xps));
+            } else {
+                if (multipleTagOption.equals(XPathMultiColOption.MultipleColumns)) {
+                    m_multiColPos.add(list.indexOf(xps) + offset);
+                }
+                colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps, m_firstRowKey));
+            }
         }
 
         if (m_settings.getRemoveInputColumn()) {
@@ -141,6 +157,11 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
         throws Exception {
         int inputColIndex = inData[0].getSpec().findColumnIndex(m_settings.getInputColumn());
+        // find first XMLCell in input table which is not missing
+        DataRow row = getFirstRow(inData[0].iterator(), inputColIndex);
+        XMLValue value = (XMLValue)row.getCell(inputColIndex);
+        m_firstRowKey = row.getKey();
+
         boolean colNameFromAttribute = false;
 
         List<String> columnNames = Arrays.asList(inData[0].getSpec().getColumnNames());
@@ -157,19 +178,6 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             }
         }
 
-        m_settings.setXPathQueryList(expandMultiColOption(inData, inputColIndex, colnames));
-
-        // find first XMLCell in input table which is not missing
-        Iterator<DataRow> it = inData[0].iterator();
-        XMLValue value = null;
-        while (it.hasNext()) {
-            XMLCell cell = (XMLCell)it.next().getCell(inputColIndex);
-            if (!cell.isMissing()) {
-                value = cell;
-                break;
-            }
-        }
-
         // reset column names if at least one column name comes from an attribute.
         if (colNameFromAttribute) {
             // add all column names from input table
@@ -178,60 +186,101 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         }
 
         // now execute with all new settings
-        return super.execute(inData, exec);
+        BufferedDataTable in = inData[0];
+        ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
+        BufferedDataTable intermediateResult = exec.createColumnRearrangeTable(in, r, exec);
+
+        intermediateResult = setCollectionElementNamesFromAttributes(intermediateResult, exec);
+
+        if (m_multiColPos.isEmpty()) {
+            return new BufferedDataTable[]{intermediateResult};
+        } else {
+            ColumnRearranger colRearranger = insertMultiColumns(intermediateResult, m_multiColPos);
+            return new BufferedDataTable[]{exec.createColumnRearrangeTable(intermediateResult, colRearranger, exec)};
+        }
     }
 
     /**
-     * Expands all MultiColumn option XPathSettings to SingleCell option XPathSettings.
-     * @param inData input data table
-     * @param inputColIndex column index of xml input column
-     * @param colnames column names of all user defined columns and all columns from the input data table
-     * @return List which only contains single-/collectioncell XPathSettings
-     * @throws XPathExpressionException the thrown XPathExpressionException
+     * @param it Table row iterator
+     * @param index of xml cell in data row
+     * @return first datarow with not missing xml cell at {@index}
+     * @throws InvalidSettingsException
      */
-    private ArrayList<XPathSettings> expandMultiColOption(final BufferedDataTable[] inData, final int inputColIndex,
-        final HashSet<String> colnames) throws XPathExpressionException {
-
-        ArrayList<XPathSettings> newList = new ArrayList<XPathSettings>();
-        for (int i = 0; i < m_settings.getXPathQueryList().size(); i++) {
-            XPathSettings xps = m_settings.getXPathQueryList().get(i);
-
-            if (xps.getMultipleTagOption().equals(XPathMultiColOption.MultipleColumns)) {
-                // get xpath expression for this xml tag
-                XPathFactory factory = XPathFactory.newInstance();
-                XPath xpath = factory.newXPath();
-                XPathExpression xpathExpr = xpath.compile(xps.getXpathQuery());
-
-                // iterate over all rows and determine max row width
-                int m = 0;
-                for (DataRow r : inData[0]) {
-
-                    DataCell c = r.getCell(inputColIndex);
-
-                    if (!c.isMissing()) {
-                        XMLValue xmlValue = (XMLValue)c;
-
-                        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-
-                        NodeList nodes = (NodeList)result;
-                        m = Math.max(m, nodes.getLength());
-                    }
-                }
-
-                // add as man XPathSettings with SingleCell Option as possible based on input table
-                for (int j = 0; j < m; j++) {
-                    String name = xps.getNewColumn();
-                    name = m_settings.uniqueName(name, "", 0, colnames);
-                    XPathSettings x = new XPathSettings(xps, j + 1, name, XPathMultiColOption.SingleCell);
-                    newList.add(x);
-                    colnames.add(name);
-                }
-            } else {
-                // if SingleCell or CollectionCell just add to newList
-                newList.add(xps);
+    private DataRow getFirstRow(final Iterator<DataRow> it, final int index) throws InvalidSettingsException {
+        while (it.hasNext()) {
+            DataRow row = it.next();
+            XMLCell cell = (XMLCell)row.getCell(index);
+            if (!cell.isMissing()) {
+                return row;
             }
         }
-        return newList;
+        throw new InvalidSettingsException("All XMLCells in column " + index + "are missing.");
+    }
+
+    private ColumnRearranger insertMultiColumns(final BufferedDataTable in, final List<Integer> positions) {
+        DataTableSpec spec = in.getDataTableSpec();
+        ColumnRearranger colRearranger = new ColumnRearranger(spec);
+        String[] names = spec.getColumnNames();
+
+        HashSet<String> colnames = new HashSet<String>();
+        for (int j = 0; j < names.length; j++) {
+            if (!positions.contains(j)) {
+                colnames.add(names[j]);
+            }
+        }
+        int insertAt = positions.get(0);
+        for (int i : positions) {
+
+            List<String> elementNames = spec.getColumnSpec(i).getElementNames();
+            DataType newCellType = spec.getColumnSpec(i).getType().getCollectionElementType();
+
+
+            int m = 0;
+            for (DataRow row : in) {
+                DataCell cell = row.getCell(i);
+                if (!cell.isMissing()) {
+                    m = Math.max(m, ((CollectionDataValue)cell).size());
+                }
+            }
+
+            DataColumnSpec[] colSpecs = new DataColumnSpec[m];
+            String name = "";
+            for (int j = 0; j < m; j++) {
+                if (elementNames.size() > j) {
+                    name = elementNames.get(j);
+                } else {
+                    name = "column(#" + j + ")";
+                }
+                DataColumnSpec dcs =
+                    new DataColumnSpecCreator(XPathNodeSettings.uniqueName(name, "", 0, colnames), newCellType)
+                        .createSpec();
+                colSpecs[j] = dcs;
+                colnames.add(dcs.getName());
+            }
+            SplitCellFactory spf = new SplitCellFactory(i, colSpecs);
+            colRearranger.remove(insertAt);
+            colRearranger.insertAt(insertAt, spf);
+            insertAt += spf.getColumnSpecs().length;
+        }
+        return colRearranger;
+    }
+
+    private BufferedDataTable setCollectionElementNamesFromAttributes(final BufferedDataTable in,
+        final ExecutionContext exec) {
+        DataTableSpec dataTableSpec = in.getDataTableSpec();
+        DataColumnSpec[] specs = new DataColumnSpec[dataTableSpec.getNumColumns()];
+
+        for (int i = 0; i < specs.length; i++) {
+            DataColumnSpecCreator dcsc = new DataColumnSpecCreator(dataTableSpec.getColumnSpec(i));
+            if (dataTableSpec.getColumnSpec(i).getType().isCollectionType()) {
+                dcsc.setElementNames(m_settings.getNextElementNames());
+            }
+            specs[i] = dcsc.createSpec();
+        }
+
+        DataTableSpec newSpec = new DataTableSpec(null, specs);
+
+        return exec.createSpecReplacerTable(in, newSpec);
     }
 
     /**
@@ -241,15 +290,16 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
         // Find first XML column
-        Iterator<DataColumnSpec> it = inSpecs[0].iterator();
-        while (it.hasNext()) {
-            DataColumnSpec spec = it.next();
-            if (spec.getType().equals(XMLCell.TYPE)) {
-                m_settings.setInputColumn(spec.getName());
-                break;
+        if (m_settings.getInputColumn() == null) {
+            Iterator<DataColumnSpec> it = inSpecs[0].iterator();
+            while (it.hasNext()) {
+                DataColumnSpec spec = it.next();
+                if (spec.getType().equals(XMLCell.TYPE)) {
+                    m_settings.setInputColumn(spec.getName());
+                    break;
+                }
             }
         }
-
         if (m_settings.getInputColumn() == null) {
             throw new InvalidSettingsException("No XML column available.");
         }

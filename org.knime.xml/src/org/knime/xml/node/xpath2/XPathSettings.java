@@ -89,7 +89,7 @@ public class XPathSettings {
 
     private String m_xmlFragmentName = "fragment";
 
-    private double m_defaultNumber = 0.0;
+    private int m_defaultNumber = 0;
 
     private String m_columnName = "column";
 
@@ -117,16 +117,13 @@ public class XPathSettings {
      * XPathSettings object for a xpath query which selects one tag of many.
      * Ex.: /table/tr/td[1]
      * @param xps setting to copy
-     * @param i index of XML tag
      * @param name column name
-     * @param multiTagOption option for multi tag
      */
-    public XPathSettings(final XPathSettings xps, final int i, final String name,
-        final XPathMultiColOption multiTagOption) {
+    public XPathSettings(final XPathSettings xps, final String name) {
         m_xmlFragmentName = xps.getXmlFragmentName();
         m_defaultNumber = xps.getDefaultNumber();
         m_columnName = name;
-        m_xpathQuery = xps.getXpathQuery() + "[" + i + "]";
+        m_xpathQuery = xps.getXpathQuery();
         m_type = xps.getReturnType();
         m_missingCellOnEmptySet = xps.getMissingCellOnEmptySet();
         m_missingCellOnEmptyString = xps.getMissingCellOnEmptyString();
@@ -134,7 +131,7 @@ public class XPathSettings {
         m_missingCellOnInfinityOrNaN = xps.getMissingCellOnInfinityOrNaN();
         m_valueOnInfinityOrNaN = xps.getValueOnInfinityOrNaN();
         m_useAttributeForColName = xps.getUseAttributeForColName();
-        m_multiTagOption = multiTagOption;
+        m_multiTagOption = xps.getMultipleTagOption();
         m_attributeForColName = xps.getAttributeForColName();
     }
 
@@ -204,7 +201,7 @@ public class XPathSettings {
     /**
      * @param valueOf default number
      */
-    public void setDefaultNumber(final Double valueOf) {
+    public void setDefaultNumber(final int valueOf) {
         m_defaultNumber = valueOf;
     }
 
@@ -220,7 +217,11 @@ public class XPathSettings {
      */
     public Object[] getRow() {
         Object[] row = new Object[3];
-        row[0] = m_columnName;
+        if (m_useAttributeForColName) {
+            row[0] = "Value of \"@" + m_attributeForColName + "\"";
+        } else {
+            row[0] = m_columnName;
+        }
         row[1] = m_xpathQuery;
         row[2] = m_type;
         return row;
@@ -285,7 +286,7 @@ public class XPathSettings {
     /**
      * @return default number
      */
-    public double getDefaultNumber() {
+    public int getDefaultNumber() {
         return m_defaultNumber;
     }
 
@@ -317,7 +318,7 @@ public class XPathSettings {
         m_missingCellOnEmptyString = settings.getBoolean(MISSING_CELL_ON_EMPTY_STRING + index, true);
         m_missingCellOnFalse = settings.getBoolean(MISSING_CELL_ON_FALSE + index, false);
         m_valueOnInfinityOrNaN = settings.getBoolean(VALUE_ON_INF_OR_NAN + index, false);
-        m_defaultNumber = settings.getDouble(DEFAULT_NUMBER + index, 0.0);
+        m_defaultNumber = settings.getInt(DEFAULT_NUMBER + index, 0);
         m_missingCellOnInfinityOrNaN = settings.getBoolean(MISSING_CELL_ON_INF_OR_NAN + index, true);
         m_xmlFragmentName = settings.getString(XML_FRAGMENT_NAME + index, "fragment");
 
@@ -355,7 +356,7 @@ public class XPathSettings {
         m_missingCellOnEmptyString = settings.getBoolean(MISSING_CELL_ON_EMPTY_STRING + index);
         m_missingCellOnFalse = settings.getBoolean(MISSING_CELL_ON_FALSE + index);
         m_valueOnInfinityOrNaN = settings.getBoolean(VALUE_ON_INF_OR_NAN + index);
-        m_defaultNumber = settings.getDouble(DEFAULT_NUMBER + index);
+        m_defaultNumber = settings.getInt(DEFAULT_NUMBER + index);
         m_missingCellOnInfinityOrNaN = settings.getBoolean(MISSING_CELL_ON_INF_OR_NAN + index);
         m_xmlFragmentName = settings.getString(XML_FRAGMENT_NAME + index);
         if ((m_type == XPathOutput.Node) && m_xmlFragmentName.trim().isEmpty()) {
@@ -384,7 +385,7 @@ public class XPathSettings {
         settings.addBoolean(MISSING_CELL_ON_FALSE + index, m_missingCellOnFalse);
         settings.addBoolean(VALUE_ON_INF_OR_NAN + index, m_valueOnInfinityOrNaN);
         settings.addBoolean(MISSING_CELL_ON_INF_OR_NAN + index, m_missingCellOnInfinityOrNaN);
-        settings.addDouble(DEFAULT_NUMBER + index, m_defaultNumber);
+        settings.addInt(DEFAULT_NUMBER + index, m_defaultNumber);
         settings.addString(XML_FRAGMENT_NAME + index, m_xmlFragmentName);
         settings.addString(MULTI_TAG_OPTION + index, m_multiTagOption.toString());
     }

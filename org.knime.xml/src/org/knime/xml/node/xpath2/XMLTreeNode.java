@@ -63,6 +63,8 @@ public class XMLTreeNode {
 
     private final String m_path;
 
+    private final String m_prefix;
+
     private String m_columnName;
 
     private final XMLTreeNode m_parent;
@@ -73,10 +75,16 @@ public class XMLTreeNode {
 
     /**
      * Use this constructor for the root element.
+     * @param prefix namespace prefix.
      * @param tag name
      */
-    public XMLTreeNode(final String tag) {
-        m_tag = tag;
+    public XMLTreeNode(final String prefix, final String tag) {
+        if (prefix.isEmpty()) {
+            m_tag = tag;
+        } else {
+            m_tag = prefix + ":" + tag;
+        }
+        m_prefix = prefix;
         m_attributes = null;
         m_path = "";
         m_linenumber = -1;
@@ -88,15 +96,21 @@ public class XMLTreeNode {
     /**
      * @param tag XML tag
      * @param attributes XML attributes
+     * @param prefix namespace prefix
      * @param path path to this XML tag
      * @param linenumber of this tag in the preview
      * @param parent parent of this tag
      */
-    public XMLTreeNode(final String tag, final ArrayList<String> attributes, final String path, final int linenumber,
-        final XMLTreeNode parent) {
+    public XMLTreeNode(final String tag, final ArrayList<String> attributes, final String prefix, final String path,
+        final int linenumber, final XMLTreeNode parent) {
         m_tag = tag;
         m_attributes = attributes;
-        m_path = path + "/" + tag;
+        if (prefix.isEmpty()) {
+            m_path = path + "/" + tag;
+        } else {
+            m_path = path + "/" + prefix + ":" + tag;
+        }
+        m_prefix = prefix;
         m_linenumber = linenumber;
         m_children = new ArrayList<XMLTreeNode>();
         m_columnName = m_tag;
@@ -252,5 +266,12 @@ public class XMLTreeNode {
             return null;
         }
         return m_attributes.get(i);
+    }
+
+    /**
+     * @return namespase prefix
+     */
+    public String getPrefix() {
+        return m_prefix;
     }
 }

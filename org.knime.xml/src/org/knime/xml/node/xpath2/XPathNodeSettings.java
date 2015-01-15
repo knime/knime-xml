@@ -49,6 +49,7 @@ package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -61,7 +62,6 @@ import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.xml.node.xpath2.XPathCellFactory.XPathNamespaceContext;
 
 /**
  *
@@ -181,6 +181,11 @@ public class XPathNodeSettings {
      * Number of different xpath queries.
      */
     private int m_numberOfQueries = 0;
+
+    /**
+     * Element names for collections.
+     */
+    private List<List<String>> m_listOfElementNames = new ArrayList<List<String>>();
 
     /**
      * @return the inputColumn
@@ -370,7 +375,13 @@ public class XPathNodeSettings {
         // extract new column name from attribute
         for (XPathSettings xps : m_xpathQueryList) {
             if (xps.getUseAttributeForColName()) {
-                String q = xps.getXpathQuery() + "/@" + xps.getAttributeForColName();
+                String q = xps.getXpathQuery();
+                int pos = q.indexOf('@');
+                if (pos != -1) {
+                    q = q.substring(0, pos) + "/@" + xps.getAttributeForColName();
+                } else {
+                    q = q + "/@" + xps.getAttributeForColName();
+                }
                 XPathExpression xpathExpr;
                 XPathFactory factory = XPathFactory.newInstance();
                 XPath xpath = factory.newXPath();
@@ -404,11 +415,32 @@ public class XPathNodeSettings {
      * @param names all current used names
      * @return unique column name
      */
-    public String uniqueName(final String name, final String suffix, final int i, final HashSet<String> names) {
+    public static String uniqueName(final String name, final String suffix, final int i, final HashSet<String> names) {
         String n = name + suffix;
         if (names.contains(n)) {
             return uniqueName(name, "(#" + i + ")", i + 1, names);
         }
         return n;
+    }
+
+    /**
+     * @param elementNames the elementNames to set
+     */
+    public void addElementNames(final List<String> elementNames) {
+        m_listOfElementNames.add(elementNames);
+    }
+
+    /**
+     * @return first List<String> of element names in this list. Removes the returned list.
+     */
+    public String[] getNextElementNames() {
+        if (!m_listOfElementNames.isEmpty()) {
+            List<String> elementNames = m_listOfElementNames.get(0);
+            String[] result = elementNames.toArray(new String[elementNames.size()]);
+            m_listOfElementNames.remove(0);
+            return result;
+        } else {
+            return new String[]{};
+        }
     }
 }

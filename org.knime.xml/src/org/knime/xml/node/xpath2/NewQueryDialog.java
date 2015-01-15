@@ -62,8 +62,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -114,21 +114,13 @@ public final class NewQueryDialog extends JDialog {
 
     private JPanel m_typeOptions;
 
-    private JCheckBox m_missingCellOnFalse;
-
     private JCheckBox m_missingCellOnEmptyString;
 
     private JRadioButton m_valueOnInfOrNaN;
 
-    private JRadioButton m_valueOnInfOrNaNClone;
-
     private JTextField m_defaultNumber;
 
-    private JTextField m_defaultNumberClone;
-
     private JRadioButton m_missingCellOnInfOrNaN;
-
-    private JRadioButton m_missingCellOnInfOrNaNClone;
 
     private JCheckBox m_missingCellOnEmptySet;
 
@@ -136,7 +128,7 @@ public final class NewQueryDialog extends JDialog {
 
     private JTextField m_xmlFragmentNameClone;
 
-    private ArrayList<String> m_colNames;
+    private HashSet<String> m_colNames;
 
     private JButton m_cancel;
 
@@ -144,13 +136,13 @@ public final class NewQueryDialog extends JDialog {
 
     private XPathSettings m_result;
 
-    private int m_index;
+    private boolean m_edit;
 
     private Frame m_parent;
 
     private RadionButtonPanel<String> m_multiTagOption;
 
-    private JCheckBox m_useAttributeForColName;
+    private JRadioButton m_useAttributeForColName;
 
     private JTextField m_attributeForColName;
 
@@ -158,8 +150,8 @@ public final class NewQueryDialog extends JDialog {
 
     private HashMap<String, XPathMultiColOption> m_multiTagOptionMapReverse;
 
-    private NewQueryDialog(final Frame parent, final XPathSettings settings, final int index,
-        final ArrayList<String> colNames) {
+    private NewQueryDialog(final Frame parent, final XPathSettings settings, final boolean edit,
+        final HashSet<String> colNames) {
 
         super(parent, true);
 
@@ -168,7 +160,7 @@ public final class NewQueryDialog extends JDialog {
         m_settings = settings;
         m_colNames = colNames;
 
-        m_index = index;
+        m_edit = edit;
 
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -192,7 +184,6 @@ public final class NewQueryDialog extends JDialog {
 
         JScrollPane xpathScrollPane = new JScrollPane(m_xpath);
         xpathScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        //xpathScrollPane.setPreferredSize(xpathScrollPane.getMinimumSize());
         xpathScrollPane.setBorder(BorderFactory.createTitledBorder("XPath query"));
         c.weighty = 0.5;
         p.add(xpathScrollPane, c);
@@ -241,8 +232,6 @@ public final class NewQueryDialog extends JDialog {
         c.gridx++;
         p.add(m_cancel, c);
 
-        updateClones();
-
         // add dialog and control panel to the content pane
         Container cont = getContentPane();
         cont.setLayout(new BoxLayout(cont, BoxLayout.Y_AXIS));
@@ -258,10 +247,13 @@ public final class NewQueryDialog extends JDialog {
         JPanel p = new JPanel(new GridBagLayout());
         p.setBorder(BorderFactory.createTitledBorder("Column name: "));
         m_newColumn = new JTextField(8);
-        final JLabel columnNameLabel = new JLabel("New column name:");
-        m_useAttributeForColName = new JCheckBox("Use column name from attribute: ");
         m_attributeForColName = new JTextField(8);
+        m_attributeForColName.setEnabled(false);
 
+
+        JRadioButton hardcodedName = new JRadioButton("New column name: ");
+        hardcodedName.setSelected(true);
+        m_useAttributeForColName = new JRadioButton("Use column name from attribute: ");
         m_useAttributeForColName.addItemListener(new ItemListener() {
 
             @Override
@@ -269,9 +261,13 @@ public final class NewQueryDialog extends JDialog {
                 boolean selected = m_useAttributeForColName.isSelected();
                 m_attributeForColName.setEnabled(selected);
                 m_newColumn.setEnabled(!selected);
-                columnNameLabel.setEnabled(!selected);
             }
         });
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(hardcodedName);
+        bg.add(m_useAttributeForColName);
+
+
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
@@ -280,7 +276,7 @@ public final class NewQueryDialog extends JDialog {
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 1;
-        p.add(columnNameLabel, c);
+        p.add(hardcodedName, c);
         c.gridx++;
         p.add(m_newColumn, c);
         c.gridx = 0;
@@ -289,8 +285,6 @@ public final class NewQueryDialog extends JDialog {
         c.gridx++;
         p.add(m_attributeForColName, c);
 
-        m_useAttributeForColName.doClick();
-        m_useAttributeForColName.doClick();
         return p;
     }
 
@@ -304,17 +298,15 @@ public final class NewQueryDialog extends JDialog {
         }
         m_result.setNewColumn(m_newColumn.getText());
         m_result.setUseAttributeForColName(m_useAttributeForColName.isSelected());
-        // TODO check attribute format
-        checkAttribute(m_attributeForColName.getText());
+
         m_result.setAttributeForColName(m_attributeForColName.getText());
         m_result.setXpathQuery(m_xpath.getText());
         m_result.setReturnType(m_returnTypes.get(m_returnType.getSelectedItem()));
         m_result.setMissingCellOnEmptySet(m_missingCellOnEmptySet.isSelected());
         m_result.setMissingCellOnEmptyString(m_missingCellOnEmptyString.isSelected());
-        m_result.setMissingCellOnFalse(m_missingCellOnFalse.isSelected());
         m_result.setMissingCellOnInfinityOrNaN(m_missingCellOnInfOrNaN.isSelected());
         m_result.setValueOnInfinityOrNaN(m_valueOnInfOrNaN.isSelected());
-        m_result.setDefaultNumber(Double.valueOf(m_defaultNumber.getText()));
+        m_result.setDefaultNumber(Integer.valueOf(m_defaultNumber.getText()));
         m_result.setXmlFragmentName(m_xmlFragmentName.getText());
         m_result.setMultipleTagOption(m_multiTagOptionMapReverse.get(m_multiTagOption.getSelectedValue()));
 
@@ -327,8 +319,8 @@ public final class NewQueryDialog extends JDialog {
     private void loadSettings() {
         String name = m_settings.getNewColumn();
 
-        if (m_index == m_colNames.size()) {
-            name = uniqueName(name, "", 0);
+        if (!m_edit) {
+            name = XPathNodeSettings.uniqueName(name, "", 0, m_colNames);
         }
 
         m_newColumn.setText(name);
@@ -338,14 +330,12 @@ public final class NewQueryDialog extends JDialog {
         m_returnType.setSelectedItem(m_returnTypesReverse.get(m_settings.getReturnType()));
         m_missingCellOnEmptySet.setSelected(m_settings.getMissingCellOnEmptySet());
         m_missingCellOnEmptyString.setSelected(m_settings.getMissingCellOnEmptyString());
-        m_missingCellOnFalse.setSelected(m_settings.getMissingCellOnFalse());
         m_missingCellOnInfOrNaN.setSelected(m_settings.getMissingCellOnInfinityOrNaN());
         m_valueOnInfOrNaN.setSelected(m_settings.getValueOnInfinityOrNaN());
-        m_defaultNumber.setText(Double.toString(m_settings.getDefaultNumber()));
+        m_defaultNumber.setText(Integer.toString(m_settings.getDefaultNumber()));
         m_defaultNumber.setEnabled(m_valueOnInfOrNaN.isSelected());
         m_xmlFragmentName.setText(m_settings.getXmlFragmentName());
         m_multiTagOption.setSelectedValue(m_multiTagOptionMap.get(m_settings.getMultipleTagOption()));
-        updateClones();
     }
 
     private JPanel createReturnTypePanel() {
@@ -373,16 +363,11 @@ public final class NewQueryDialog extends JDialog {
             }
         });
 
-        m_missingCellOnFalse = new JCheckBox("Return missing cell on FALSE.");
-        m_missingCellOnEmptyString = new JCheckBox("Return missing cell on empty string and no match.");
+        m_missingCellOnEmptyString = new JCheckBox("Return missing cell on empty string.");
         m_valueOnInfOrNaN = new JRadioButton("Return NaN/Infty as:");
-        m_valueOnInfOrNaNClone = new JRadioButton(m_valueOnInfOrNaN.getText());
-        bondClones(m_valueOnInfOrNaN, m_valueOnInfOrNaNClone);
         m_defaultNumber = new JTextField();
-        m_defaultNumberClone = new JTextField();
-        bondClones(m_defaultNumber, m_defaultNumberClone);
+        bondClones(m_defaultNumber, m_defaultNumber);
         m_missingCellOnInfOrNaN = new JRadioButton("Return NaN/Infinity as Missing.");
-        m_missingCellOnInfOrNaNClone = new JRadioButton(m_missingCellOnInfOrNaN.getText());
         ButtonGroup numberButtonGroup = new ButtonGroup();
         numberButtonGroup.add(m_valueOnInfOrNaN);
         numberButtonGroup.add(m_missingCellOnInfOrNaN);
@@ -393,17 +378,6 @@ public final class NewQueryDialog extends JDialog {
                 m_defaultNumber.setEnabled(!m_missingCellOnInfOrNaN.isSelected());
             }
         });
-        ButtonGroup numberButtonGroupClone = new ButtonGroup();
-        numberButtonGroupClone.add(m_valueOnInfOrNaNClone);
-        numberButtonGroupClone.add(m_missingCellOnInfOrNaNClone);
-        m_missingCellOnInfOrNaNClone.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                m_defaultNumberClone.setEnabled(!m_missingCellOnInfOrNaNClone.isSelected());
-            }
-        });
-        bondClones(m_missingCellOnInfOrNaN, m_missingCellOnInfOrNaNClone);
         m_missingCellOnEmptySet =
             new JCheckBox("Return missing cell on no match. If unchecked an empty list " + "will be returned.");
         m_xmlFragmentName = new JTextField();
@@ -412,12 +386,11 @@ public final class NewQueryDialog extends JDialog {
         JPanel fragmentNamePanel = createLabelPanel("XML fragment name:", m_xmlFragmentName);
         bondClones(m_xmlFragmentName, m_xmlFragmentNameClone);
         JPanel defaultNumberPanel = createOptinalComponentPanel(m_valueOnInfOrNaN, m_defaultNumber);
-        JPanel defaultNumberClonePanel = createOptinalComponentPanel(m_valueOnInfOrNaNClone, m_defaultNumberClone);
 
         m_typeOptions = new JPanel(new CardLayout());
-        m_typeOptions.add(createTypeOptionsPanel(m_missingCellOnFalse), booleanLabel);
-        m_typeOptions.add(createTypeOptionsPanel(defaultNumberPanel, m_missingCellOnInfOrNaN), numberLabel);
-        m_typeOptions.add(createTypeOptionsPanel(defaultNumberClonePanel, m_missingCellOnInfOrNaNClone), integerLabel);
+        m_typeOptions.add(new JPanel().add(new JLabel("No other options available.")), booleanLabel);
+        m_typeOptions.add(new JPanel().add(new JLabel("No other options available.")), numberLabel);
+        m_typeOptions.add(createTypeOptionsPanel(defaultNumberPanel, m_missingCellOnInfOrNaN), integerLabel);
         m_typeOptions.add(createTypeOptionsPanel(m_missingCellOnEmptyString), stringLabel);
         m_typeOptions.add(
             createTypeOptionsPanel(new JLabel("Node returns missing cell on no match."), fragmentNamePanel), nodeLabel);
@@ -467,40 +440,22 @@ public final class NewQueryDialog extends JDialog {
                 "Invalid column name", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        for (String xps : m_colNames) {
-            if (name.equals(xps) && m_colNames.indexOf(xps) != m_index) {
+            if (m_settings.getUseAttributeForColName()) {
+                if (m_colNames.contains(name)) {
+
                 JOptionPane.showMessageDialog(this, "Column name allready taken. Enter valid name or press cancel.",
                     "Column name taken", JOptionPane.ERROR_MESSAGE);
                 return false;
+                }
+            } else {
+                if (!name.equals(m_settings.getNewColumn()) && m_colNames.contains(name)) {
+                    JOptionPane.showMessageDialog(this, "Column name allready taken. Enter valid name or press cancel.",
+                        "Column name taken", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
             }
-        }
+
         return true;
-    }
-
-    /**
-     * Make sure that the two JChockBoxes always have the same value. Use the focus lost event.
-     */
-    private void bondClones(final JToggleButton checkBox, final JToggleButton checkBoxClone) {
-        checkBox.addFocusListener(new FocusAdapter() {
-
-            @Override
-            public void focusLost(final FocusEvent e) {
-                if (checkBox.isSelected() != checkBoxClone.isSelected()) {
-                    checkBoxClone.doClick();
-                }
-            }
-        });
-
-        checkBoxClone.addFocusListener(new FocusAdapter() {
-
-            @Override
-            public void focusLost(final FocusEvent e) {
-                if (checkBox.isSelected() != checkBoxClone.isSelected()) {
-                    checkBox.doClick();
-                }
-            }
-        });
-
     }
 
     /**
@@ -527,15 +482,6 @@ public final class NewQueryDialog extends JDialog {
     private void updateReturnTypeOptions() {
         CardLayout cl = (CardLayout)(m_typeOptions.getLayout());
         cl.show(m_typeOptions, (String)m_returnType.getSelectedItem());
-    }
-
-    private void updateClones() {
-        m_missingCellOnInfOrNaNClone.setSelected(m_missingCellOnInfOrNaN.isSelected());
-        m_valueOnInfOrNaNClone.setSelected(m_valueOnInfOrNaN.isSelected());
-        m_defaultNumberClone.setEnabled(m_valueOnInfOrNaNClone.isSelected());
-        m_defaultNumberClone.setText(m_defaultNumber.getText());
-        m_xmlFragmentNameClone.setText(m_xmlFragmentName.getText());
-        updateReturnTypeOptions();
     }
 
     private JPanel createLabelPanel(final String label, final JComponent comp) {
@@ -660,13 +606,13 @@ public final class NewQueryDialog extends JDialog {
     /**
      * @param parent parent of this dialog
      * @param settings dialog settings
-     * @param index of the xpath settings in the xpath settings list
+     * @param edit this settings object
      * @param colNames all column names which are already in use
      * @return new column properties or null (on cancel)
      */
-    public static XPathSettings openUserDialog(final Frame parent, final XPathSettings settings, final int index,
-        final ArrayList<String> colNames) {
-        NewQueryDialog queryDlg = new NewQueryDialog(parent, settings, index, colNames);
+    public static XPathSettings openUserDialog(final Frame parent, final XPathSettings settings, final boolean edit,
+        final HashSet<String> colNames) {
+        NewQueryDialog queryDlg = new NewQueryDialog(parent, settings, edit, colNames);
         return queryDlg.showDialog();
 
     }
@@ -688,17 +634,6 @@ public final class NewQueryDialog extends JDialog {
     /* blows away the dialog */
     private void shutDown() {
         setVisible(false);
-    }
-
-    private String uniqueName(final String name, final String suffix, final int i) {
-        String n = name + suffix;
-        for (String colName : m_colNames) {
-            if (n.equals(colName)) {
-                return uniqueName(name, "(#" + i + ")", i + 1);
-
-            }
-        }
-        return n;
     }
 
     private XPathSettings showDialog() {

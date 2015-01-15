@@ -63,6 +63,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -75,6 +76,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
@@ -159,7 +161,9 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
     private int m_offset;
 
-    private ArrayList<String> m_allColNames;
+    private HashSet<String> m_allColNames;
+
+    private boolean m_loadSettings;
 
     /**
      * Creates a new dialog.
@@ -168,7 +172,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         super();
 
         m_xpathSettingsList = new ArrayList<XPathSettings>();
-        m_allColNames = new ArrayList<String>();
+        m_allColNames = new HashSet<String>();
 
         m_tableModel = new DefaultTableModel(QUERY_SUMMARY_COLUMN_NAMES, 0);
         m_table = new JTable(m_tableModel);
@@ -227,14 +231,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         c.gridx = 0;
         c.gridy++;
-        c.gridwidth = 2;
-        c.weightx = 1;
-        c.weighty = 0.8;
-
-        p.add(createXMLPreview(), c);
-
-        c.gridx = 0;
-        c.gridy++;
         c.weightx = 0;
         c.weighty = 0;
         c.gridwidth = 2;
@@ -269,29 +265,24 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             }
         });
 
-        c.fill = GridBagConstraints.BOTH;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 1;
-        c.weighty = 0.2;
-        c.gridwidth = 2;
-        p.add(createXPathQueryTable(), c);
-
-        c.gridx = 0;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 2;
-        c.weightx = 1;
-        c.weighty = 0;
-        c.gridy++;
-
         JPanel listButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         listButtons.add(m_add);
         listButtons.add(m_edit);
         listButtons.add(m_remove);
 
-        p.add(listButtons, c);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setTopComponent(createXPathQueryTable(listButtons));
+        splitPane.setRightComponent(createXMLPreview());
+        splitPane.setResizeWeight(0.3);
 
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridwidth = 2;
+
+        p.add(splitPane, c);
         return p;
     }
 
@@ -318,11 +309,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 XMLTreeNode node = m_allTags.get(linenumber + m_offset);
                 String xmlPath = null;
 
-                if (node.getTag().equals(xmlTag)) {
                     List<XMLTreeNode> sameLevelTags = node.getParent().getChildren();
 
                     Iterator<XMLTreeNode> it = sameLevelTags.iterator();
 
+                String xmlPathSuffix = "";
+                if (node.getTag().equals(xmlTag)) {
                     int i = 1;
                     while (it.hasNext()) {
                         XMLTreeNode n = it.next();
@@ -338,20 +330,24 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
                     if (i == 1) {
                         xmlPath = node.getPath();
+                        xmlPathSuffix = "";
                     } else {
                         xmlPath = node.getPath() + "[" + i + "]";
                     }
 
                 } else {
-                    int i = 0;
-                    String attr = node.getAttributeName(i++);
+                    while (it.hasNext()) {
+                        int i = 0;
+                        XMLTreeNode n = it.next();
+                        String attr = n.getAttributeName(i++);
 
-                    while (attr != null) {
-                        if (xmlTag.equals(attr)) {
-                            xmlPath = node.getPath() + "/@" + attr;
-                            break;
+                        while (attr != null) {
+                            if (xmlTag.equals(attr)) {
+                                xmlPath = node.getPath() + "/@" + attr;
+                                break;
+                            }
+                            attr = n.getAttributeName(i++);
                         }
-                        attr = node.getAttributeName(i++);
                     }
                 }
                 if (xmlPath == null) {
@@ -366,14 +362,14 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 XPathSettings x = new XPathSettings();
 
                 String name = xmlTag;
-                name = uniqueName(name, "", 0);
+                name = XPathNodeSettings.uniqueName(name, "", 0, m_allColNames);
 
                 x.setNewColumn(name);
                 x.setReturnType(XPathOutput.String);
                 x.setXpathQuery(xmlPath);
 
                 XPathSettings s =
-                    NewQueryDialog.openUserDialog(getFrame(), x, m_table.getRowCount() + m_inSpec.getNumColumns(),
+                    NewQueryDialog.openUserDialog(getFrame(), x, false,
                         m_allColNames);
 
                 if (s != null) {
@@ -416,24 +412,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         return panel;
     }
 
-    private String uniqueName(final String name, final String suffix, final int i) {
-        String n = name + suffix;
-        for (XPathSettings s : m_xpathSettingsList) {
-            if (n.equals(s.getNewColumn())) {
-                return uniqueName(name, "(#" + i + ")", i + 1);
-
-            }
-        }
-        return n;
-    }
-
-    private JPanel createXPathQueryTable() {
+    private JPanel createXPathQueryTable(final JPanel listButtons) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("XPath summary"));
 
         m_table.getTableHeader().setVisible(true);
-
         JScrollPane scrollPane = new JScrollPane(m_table);
         scrollPane.setPreferredSize(new Dimension(panel.getPreferredSize().width, 100));
 
@@ -441,7 +425,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1;
         c.weighty = 1;
+        c.gridx = 0;
+        c.gridy = 0;
         panel.add(scrollPane, c);
+
+        c.weighty = 0;
+        c.gridy++;
+        panel.add(listButtons, c);
         return panel;
     }
 
@@ -479,36 +469,42 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     }
 
     private void onAdd() {
-
-        int rowCount = m_table.getRowCount();
         XPathSettings setting = new XPathSettings();
         XPathSettings s =
-            NewQueryDialog.openUserDialog(getFrame(), setting, rowCount + m_inSpec.getNumColumns(), m_allColNames);
+            NewQueryDialog.openUserDialog(getFrame(), setting, false, m_allColNames);
 
         if (s != null) {
             m_tableModel.addRow(s.getRow());
 
             m_xpathSettingsList.add(s);
 
-            m_allColNames.add(s.getNewColumn());
+            if (!s.getUseAttributeForColName()) {
+                m_allColNames.add(s.getNewColumn());
+            }
 
             updateEnables();
         }
     }
 
     private void onEdit(final int selectedRow) {
+        XPathSettings xps = m_xpathSettingsList.get(selectedRow);
         XPathSettings s =
-            NewQueryDialog.openUserDialog(getFrame(), m_xpathSettingsList.get(selectedRow),
-                selectedRow + m_inSpec.getNumColumns(), m_allColNames);
+            NewQueryDialog.openUserDialog(getFrame(), xps,
+                true, m_allColNames);
         if (s != null) {
+
+            if (!xps.getUseAttributeForColName()) {
+                m_allColNames.remove(xps.getNewColumn());
+            }
+            if (!s.getUseAttributeForColName()) {
+                m_allColNames.add(s.getNewColumn());
+            }
             m_tableModel.removeRow(selectedRow);
             m_xpathSettingsList.remove(selectedRow);
 
             m_tableModel.insertRow(selectedRow, s.getRow());
             m_xpathSettingsList.add(selectedRow, s);
 
-            m_allColNames.remove(selectedRow);
-            m_allColNames.add(selectedRow, s.getNewColumn());
         }
 
         updateEnables();
@@ -517,9 +513,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     private void onRemove(final int index) {
         m_tableModel.removeRow(index);
 
+        XPathSettings xps = m_xpathSettingsList.get(index);
+        if (!xps.getUseAttributeForColName()) {
+            String oldName = xps.getNewColumn();
+            m_allColNames.remove(oldName);
+        }
         m_xpathSettingsList.remove(index);
 
-        m_allColNames.remove(index + m_inSpec.getNumColumns());
 
         m_table.getSelectionModel().setSelectionInterval(index - 1, index - 1);
         updateEnables();
@@ -531,18 +531,25 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      * @param xml String of a XML cell
      */
     private void createHierarchyTree(final String xml) {
+        if (m_loadSettings) {
+            return;
+        }
         SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
+            factory.setNamespaceAware(true);
+            factory.setValidating(true);
             SAXParser saxParser = factory.newSAXParser();
+            m_root = new XMLTreeNode("", "root");
 
-            m_root = new XMLTreeNode("root");
-
-            SaxHandler handler = new SaxHandler(m_root);
-
+            SaxHandler handler = new SaxHandler(m_root, true);
             saxParser.parse(new InputSource(new StringReader(xml)), handler);
 
             m_allTags = new HashMap<Integer, XMLTreeNode>();
-
+            if (m_nsPanel.getKeys().length == 0) {
+                m_nsPanel.setTableData(handler.getKeys(), handler.getValues());
+                m_useRootsNS.setSelected(false);
+                m_rootNSPrefix.setEnabled(false);
+            }
             createAllTagsLookUp(m_root);
             m_offset = m_root.getChildren().get(0).getLinenumber() - 1;
 
@@ -655,12 +662,25 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         m_rootNSPrefix.setEnabled(m_useRootsNS.isSelected());
 
         m_xpathSettingsList = s.getXPathQueryList();
-        m_tableModel = new DefaultTableModel(QUERY_SUMMARY_COLUMN_NAMES, 0);
+        m_tableModel = createTableModel();
         for (XPathSettings xps : m_xpathSettingsList) {
             m_tableModel.addRow(xps.getRow());
-            m_allColNames.add(xps.getNewColumn());
+            if (!xps.getUseAttributeForColName()) {
+                m_allColNames.add(xps.getNewColumn());
+            }
         }
         m_table.setModel(m_tableModel);
+    }
+
+    @SuppressWarnings("serial")
+    private DefaultTableModel createTableModel() {
+        return new DefaultTableModel(QUERY_SUMMARY_COLUMN_NAMES, 0) {
+            @Override
+            public boolean isCellEditable(final int row, final int column) {
+                //all cells false
+                return false;
+            }
+        };
     }
 
     /**
@@ -669,15 +689,15 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObject[] input)
         throws NotConfigurableException {
+        m_loadSettings = true;
         XPathNodeSettings s = new XPathNodeSettings();
         m_inputDataTable = (BufferedDataTable)input[0];
         m_inSpec = m_inputDataTable.getDataTableSpec();
-        m_allColNames = new ArrayList<String>();
+        m_allColNames = new HashSet<String>();
         m_allColNames.addAll(Arrays.asList(m_inSpec.getColumnNames()));
         s.loadSettingsDialog(settings, m_inSpec);
 
         m_inputColumn.update(m_inSpec, s.getInputColumn());
-        updateText(s.getInputColumn());
         m_hasData = true;
 
         m_removeInputColumn.setSelected(s.getRemoveInputColumn());
@@ -689,12 +709,16 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         m_xpathSettingsList = s.getXPathQueryList();
 
-        m_tableModel = new DefaultTableModel(QUERY_SUMMARY_COLUMN_NAMES, 0);
+        m_tableModel = createTableModel();
         for (XPathSettings xps : m_xpathSettingsList) {
             m_tableModel.addRow(xps.getRow());
-            m_allColNames.add(xps.getNewColumn());
+            if (!xps.getUseAttributeForColName()) {
+                m_allColNames.add(xps.getNewColumn());
+            }
         }
         m_table.setModel(m_tableModel);
+        m_loadSettings = false;
+        updateText(s.getInputColumn());
     }
 
     private void updateText(final String inputColumn) {

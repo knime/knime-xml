@@ -62,19 +62,49 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SaxHandler extends DefaultHandler {
 
+    /**
+     * XML hierarchy root.
+     */
     private XMLTreeNode m_root;
 
+    /**
+     * Current node in the XML hierarchy.
+     */
     private XMLTreeNode m_currentNode;
 
+    /**
+     * The document locator {@link Locator}.
+     */
     private Locator m_locator;
 
     /**
-     * @param root XML hierarchy tree root
+     * Namespace keys.
      */
-    public SaxHandler(final XMLTreeNode root) {
+    private ArrayList<String> m_keys;
+
+    /**
+     * Namespace uris.
+     */
+    private ArrayList<String> m_values;
+
+    /**
+     * Collect namespace information.
+     */
+    private boolean m_collectNS;
+
+
+    /**
+     * @param root XML hierarchy tree root
+     * @param collectNS collect namespace information
+     */
+    public SaxHandler(final XMLTreeNode root, final boolean collectNS) {
         super();
+
         m_root = root;
         m_currentNode = root;
+        m_keys = new ArrayList<String>();
+        m_values = new ArrayList<String>();
+        m_collectNS = collectNS;
     }
 
     @Override
@@ -94,8 +124,24 @@ public class SaxHandler extends DefaultHandler {
             attr.add(attributes.getQName(i));
         }
 
+        String ns = m_currentNode.getPrefix();
+
+        if (m_collectNS) {
+            if (!uri.isEmpty()) {
+                if (localName.equals(qName)) {
+                    ns = "dns";
+                } else {
+                    ns = qName.substring(0, qName.indexOf(':'));
+                }
+                if (!m_keys.contains(ns)) {
+                    m_keys.add(ns);
+                    m_values.add(uri);
+                }
+            }
+        }
+
         XMLTreeNode newChild =
-            new XMLTreeNode(qName, attr, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
+            new XMLTreeNode(localName, attr, ns, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
         m_currentNode = m_currentNode.add(newChild);
     }
 
@@ -112,5 +158,19 @@ public class SaxHandler extends DefaultHandler {
      */
     public XMLTreeNode getRoot() {
         return m_root;
+    }
+
+    /**
+     * @return namespace prefixes
+     */
+    public String[] getKeys() {
+        return m_keys.toArray(new String[m_keys.size()]);
+    }
+
+    /**
+     * @return namespace uris
+     */
+    public String[] getValues() {
+        return m_values.toArray(new String[m_values.size()]);
     }
 }
