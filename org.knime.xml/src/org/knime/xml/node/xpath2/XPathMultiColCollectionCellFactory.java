@@ -1,5 +1,6 @@
 /*
  * ------------------------------------------------------------------------
+ *
  *  Copyright by KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
  *
@@ -40,10 +41,10 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ------------------------------------------------------------------------
+ * ---------------------------------------------------------------------
  *
  * History
- *   04.10.2011 (hofer): created
+ *   15.01.2015 (tibuch): created
  */
 package org.knime.xml.node.xpath2;
 
@@ -66,6 +67,8 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.collection.CollectionCellFactory;
+import org.knime.core.data.collection.ListCell;
 import org.knime.core.data.container.AbstractCellFactory;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
@@ -75,7 +78,6 @@ import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -83,13 +85,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * CellFactory for the XPath node.
  *
- * @author Heiko Hofer
+ * @author tibuch
  */
-final class XPathSingleCellFactory extends AbstractCellFactory {
-
-    private static NodeLogger LOGGER = NodeLogger.getLogger(XPathSingleCellFactory.class);
+public final class XPathMultiColCollectionCellFactory extends AbstractCellFactory {
 
     private XPathNodeSettings m_settings;
 
@@ -105,11 +104,13 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
      * @param spec the DataTabelSpec of the input
      * @param settings settings for the XPath node
      * @param xpathSettings settings for one xpath query
+     * @param firstRowKey row key of first row with a not missing xmlcell
      * @return the new cell factory instance.
      * @throws InvalidSettingsException when settings are inconsistent with the spec
      */
-    static XPathSingleCellFactory create(final DataTableSpec spec, final XPathNodeSettings settings,
+    static XPathMultiColCollectionCellFactory create(final DataTableSpec spec, final XPathNodeSettings settings,
         final XPathSettings xpathSettings) throws InvalidSettingsException {
+
         // check user settings against input spec here
         String xmlColumn = settings.getInputColumn();
         int xmlIndex = spec.findColumnIndex(xmlColumn);
@@ -124,25 +125,35 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
 
         DataType newCellType = null;
         final XPathOutput returnType = xpathSettings.getReturnType();
-        xpathSettings.getMultipleTagOption();
+
         if (returnType.equals(XPathOutput.Boolean)) {
-            newCellType = BooleanCell.TYPE;
+            newCellType = ListCell.getCollectionType(BooleanCell.TYPE);
         } else if (returnType.equals(XPathOutput.Double)) {
-            newCellType = DoubleCell.TYPE;
+            newCellType = ListCell.getCollectionType(DoubleCell.TYPE);
         } else if (returnType.equals(XPathOutput.Integer)) {
-            newCellType = IntCell.TYPE;
+            newCellType = ListCell.getCollectionType(IntCell.TYPE);
         } else if (returnType.equals(XPathOutput.String)) {
-            newCellType = StringCell.TYPE;
+            newCellType = ListCell.getCollectionType(StringCell.TYPE);
         } else if (returnType.equals(XPathOutput.Node)) {
-            newCellType = XMLCell.TYPE;
+            newCellType = ListCell.getCollectionType(XMLCell.TYPE);
         }
 
-        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName, newCellType);
-        DataColumnSpec[] colSpecs = new DataColumnSpec[]{appendSpec.createSpec()};
-        return new XPathSingleCellFactory(settings, xpathSettings, xmlIndex, colSpecs);
+        String values = DataTableSpec.getUniqueColumnName(spec, "values" + Math.random());
+
+        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(values, newCellType);
+        String colName = DataTableSpec.getUniqueColumnName(spec, "value_names" + Math.random());
+        String base = colName;
+        int i = 0;
+        while (colName.equals(values)) {
+            colName = base + "(#" + i++ + ")";
+        }
+        DataColumnSpecCreator nameSpec =
+            new DataColumnSpecCreator(colName, ListCell.getCollectionType(StringCell.TYPE));
+        DataColumnSpec[] colSpecs = new DataColumnSpec[]{appendSpec.createSpec(), nameSpec.createSpec()};
+        return new XPathMultiColCollectionCellFactory(settings, xpathSettings, xmlIndex, colSpecs);
     }
 
-    private XPathSingleCellFactory(final XPathNodeSettings settings, final XPathSettings xpathSettings,
+    private XPathMultiColCollectionCellFactory(final XPathNodeSettings settings, final XPathSettings xpathSettings,
         final int xmlIndex, final DataColumnSpec[] colsSpecs) throws InvalidSettingsException {
         super(true, colsSpecs);
         m_settings = settings;
@@ -150,7 +161,7 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
         m_xpathSettings = xpathSettings;
         String xpathQuery = m_xpathSettings.getXpathQuery();
         m_xpathExpr = initXPathExpression(xpathQuery);
-        if (m_xpathSettings.getUseAttributeForColName()) {
+        if (xpathSettings.getUseAttributeForColName()) {
             xpathQuery = xpathSettings.buildXPathForColNames(xpathQuery);
             m_colNameXPathExpr = initXPathExpression(xpathQuery);
         }
@@ -235,65 +246,30 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
      */
     @Override
     public DataCell[] getCells(final DataRow row) {
-
-        String name = m_xpathSettings.getNewColumn();
-        if (m_xpathSettings.getUseAttributeForColName()) {
-            DataCell xmlCell = row.getCell(m_xmlIndex);
-            if (xmlCell.isMissing()) {
-                return new DataCell[]{DataType.getMissingCell()};
-            }
-            XMLValue xmlValue = (XMLValue)xmlCell;
-
-            XPathExpression xpathExpr;
-            XPathFactory factory = XPathFactory.newInstance();
-            XPath xpath = factory.newXPath();
-            xpath
-                .setNamespaceContext(new XPathNamespaceContext(m_settings.getNsPrefixes(), m_settings.getNamespaces()));
-
-            try {
-                xpathExpr = xpath.compile(m_xpathSettings.buildXPathForColNames(m_xpathSettings.getXpathQuery()));
-                Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
-                name = (String)result;
-
-            } catch (XPathExpressionException e) {
-
-            }
-
-        }
-        if (!m_xpathSettings.addSingleColname(name)) {
-            LOGGER.warn("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
-                + " found more than one column name.");
-            throw new IllegalStateException("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
-                + " found more than one column name.");
-        }
-        return new DataCell[]{getCell(row)};
+        return getCell(row);
     }
 
-    private DataCell getCell(final DataRow row) {
+    private DataCell[] getCell(final DataRow row) {
         DataCell xmlCell = row.getCell(m_xmlIndex);
         if (xmlCell.isMissing()) {
-            return DataType.getMissingCell();
+            return new DataCell[]{DataType.getMissingCell(), DataType.getMissingCell()};
         }
         XMLValue xmlValue = (XMLValue)xmlCell;
-        DataCell newCell = null;
+        DataCell[] newCell = null;
         try {
             final XPathOutput returnType = m_xpathSettings.getReturnType();
             XPathExpression xpathExpr = m_xpathExpr == null ? createXPathExpr(xmlValue) : m_xpathExpr;
+
             if (returnType.equals(XPathOutput.Boolean)) {
-                newCell = evaluateBoolean(xpathExpr, xmlValue);
+                newCell = evaluateBooleanSet(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Double)) {
-                newCell = evaluateDouble(xpathExpr, xmlValue);
+                newCell = evaluateDoubleSet(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Integer)) {
-                newCell = evaluateInteger(xpathExpr, xmlValue);
-                // Type cast to int
-                if (newCell instanceof DoubleCell) {
-                    DoubleCell value = (DoubleCell)newCell;
-                    newCell = new IntCell((int)value.getDoubleValue());
-                }
+                newCell = evaluateIntegerSet(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.String)) {
-                newCell = evaluateString(xpathExpr, xmlValue);
+                newCell = evaluateStringSet(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Node)) {
-                newCell = evaluateNode(xpathExpr, xmlValue);
+                newCell = evaluateNodeSet(xpathExpr, xmlValue);
             }
 
         } catch (final Exception e) {
@@ -303,129 +279,7 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
     }
 
     /**
-     * Evaluate XPath expression expecting a boolean as result.
-     *
-     * @param xpathExpr the XPath expression
-     * @param xmlValue the XML where the XPath expression is applied on
-     * @return the result of the XPath expression
-     * @throws XPathExpressionException If the expression cannot be evaluated.
-     */
-    private DataCell evaluateBoolean(final XPathExpression xpathExpr, final XMLValue xmlValue)
-        throws XPathExpressionException {
-        DataCell newCell;
-        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.BOOLEAN);
-        Boolean value = (Boolean)result;
-        if (!value.booleanValue() && m_xpathSettings.getMissingCellOnFalse()) {
-            newCell = DataType.getMissingCell();
-        } else {
-            if (value.booleanValue()) {
-                newCell = BooleanCell.TRUE;
-            } else {
-                newCell = BooleanCell.FALSE;
-            }
-        }
-        return newCell;
-    }
-
-    /**
-     * Evaluate XPath expression expecting a boolean as result.
-     *
-     * @param xpathExpr the XPath expression
-     * @param xmlValue the XML where the XPath expression is applied on
-     * @return the result of the XPath expression
-     * @throws XPathExpressionException If the expression cannot be evaluated.
-     */
-    private DataCell evaluateInteger(final XPathExpression xpathExpr, final XMLValue xmlValue)
-        throws XPathExpressionException {
-        DataCell newCell = null;
-        NodeList nodeList = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-        if (nodeList.getLength() == 0) {
-            return DataType.getMissingCell();
-        }
-        String result = nodeList.item(0).getTextContent();
-        int value = 0;
-        try {
-            value = Integer.parseInt(result);
-            newCell = new IntCell(value);
-        } catch (NumberFormatException e) {
-            if (result.isEmpty()) {
-                return DataType.getMissingCell();
-            }
-            if (m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
-                String s = result;
-                if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
-                    newCell = DataType.getMissingCell();
-                }
-            } else {
-                String s = result;
-                if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
-                    newCell = new IntCell(m_xpathSettings.getDefaultNumber());
-                }
-            }
-            if (newCell == null) {
-                throw new XPathExpressionException(e);
-            }
-        }
-
-        return newCell;
-    }
-
-    /**
-     * Evaluate XPath expression expecting a boolean as result.
-     *
-     * @param xpathExpr the XPath expression
-     * @param xmlValue the XML where the XPath expression is applied on
-     * @return the result of the XPath expression
-     * @throws XPathExpressionException If the expression cannot be evaluated.
-     */
-    private DataCell evaluateDouble(final XPathExpression xpathExpr, final XMLValue xmlValue)
-        throws XPathExpressionException {
-        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
-        try {
-            return new DoubleCell(Double.parseDouble((String)result));
-        } catch (NumberFormatException e) {
-            if (((String)result).equals("NaN")) {
-                return new DoubleCell(Double.NaN);
-            } else if (((String)result).toLowerCase().equals("inf")) {
-                return new DoubleCell(Double.POSITIVE_INFINITY);
-            } else if (((String)result).toLowerCase().equals("-inf")) {
-                return new DoubleCell(Double.NEGATIVE_INFINITY);
-            } else if (((String)result).trim().isEmpty()) {
-                return DataType.getMissingCell();
-            }
-            throw new XPathExpressionException(e);
-        }
-    }
-
-    /**
-     * Evaluate XPath expression expecting a String as result.
-     *
-     * @param xpathExpr the XPath expression
-     * @param xmlValue the XML where the XPath expression is applied on
-     * @return the result of the XPath expression
-     * @throws XPathExpressionException If the expression cannot be evaluated.
-     * @throws InvalidSettingsException
-     */
-    private DataCell evaluateString(final XPathExpression xpathExpr, final XMLValue xmlValue)
-        throws XPathExpressionException, InvalidSettingsException {
-        DataCell newCell;
-        NodeList result = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-
-        if (result.getLength() == 0) {
-            newCell = DataType.getMissingCell();
-        } else {
-            String value = result.item(0).getTextContent();
-            if (value.isEmpty() && m_xpathSettings.getMissingCellOnEmptyString()) {
-                newCell = DataType.getMissingCell();
-            } else {
-                newCell = new StringCell(value);
-            }
-        }
-        return newCell;
-    }
-
-    /**
-     * Evaluate XPath expression expecting a Node as result.
+     * Evaluate XPath expression expecting a IntegerSet as result.
      *
      * @param xpathExpr the XPath expression
      * @param xmlValue the XML where the XPath expression is applied on
@@ -433,17 +287,266 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell evaluateNode(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateBooleanSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
         DataCell newCell;
-        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODE);
-        Node value = (Node)result;
-        if (null == value) {
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
+
+        NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
+
+            @Override
+            public DataCell parse(final String str) {
+                boolean value = Boolean.parseBoolean(str);
+
+                if (value) {
+                    return BooleanCell.TRUE;
+                } else {
+                    return BooleanCell.FALSE;
+                }
+            }
+        };
+        ArrayList<DataCell> values = nlr.getValues();
+
+        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+
+        if (values.size() != colNames.size()) {
+            throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            m_xpathSettings.addMultiColName(colNames.get(i).getStringValue());
+        }
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
             newCell = DataType.getMissingCell();
         } else {
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
-            DocumentBuilder docBuilder = domFactory.newDocumentBuilder();
+            newCell = CollectionCellFactory.createListCell(values);
+        }
+
+        DataCell nameCell = CollectionCellFactory.createListCell(colNames);
+
+        return new DataCell[]{newCell, nameCell};
+    }
+
+    private ArrayList<StringCell> getColumnNameCollection(final XMLValue xmlValue, final ArrayList<DataCell> values)
+        throws XPathExpressionException {
+        ArrayList<StringCell> colNames = null;
+        if (m_xpathSettings.getUseAttributeForColName()) {
+            Object nameResult = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+            NodeList nameNodes = (NodeList)nameResult;
+            NodeListReader<StringCell> nlrNames = new NodeListReader<StringCell>(nameNodes) {
+
+                @Override
+                public StringCell parse(final String value) {
+                    return new StringCell(value);
+                }
+            };
+            colNames = nlrNames.getValues();
+        } else {
+            colNames = new ArrayList<StringCell>();
+            for (int i = 0; i < values.size(); i++) {
+                colNames.add(new StringCell("column(#" + i + ")"));
+            }
+        }
+        return colNames;
+    }
+
+    /**
+     * Evaluate XPath expression expecting a IntegerSet as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell[] evaluateDoubleSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+        throws XPathExpressionException, ParserConfigurationException {
+        DataCell newCell;
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
+
+        NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
+
+            @Override
+            public DataCell parse(final String str) {
+                double value = 0;
+                try {
+                    value = Double.parseDouble(str);
+                } catch (NumberFormatException e) {
+                    if ((str).equals("NaN")) {
+                        value = Double.NaN;
+                    } else if ((str).toLowerCase().equals("inf")) {
+                        value = Double.POSITIVE_INFINITY;
+                    } else if ((str).toLowerCase().equals("-inf")) {
+                        value = Double.NEGATIVE_INFINITY;
+                    }
+                }
+                if (!str.trim().isEmpty()) {
+                    return new DoubleCell(value);
+                }
+                return DataType.getMissingCell();
+            }
+        };
+
+        ArrayList<DataCell> values = nlr.getValues();
+        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+
+        if (values.size() != colNames.size()) {
+            throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            m_xpathSettings.addMultiColName(colNames.get(i).getStringValue());
+        }
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = CollectionCellFactory.createListCell(values);
+        }
+
+        DataCell nameCell = CollectionCellFactory.createListCell(colNames);
+
+        return new DataCell[]{newCell, nameCell};
+    }
+
+    /**
+     * Evaluate XPath expression expecting a IntegerSet as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell[] evaluateIntegerSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+        throws XPathExpressionException, ParserConfigurationException {
+        DataCell newCell;
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
+
+        NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
+
+            @Override
+            public DataCell parse(final String str) {
+                int value;
+                try {
+                    value = Integer.parseInt(str);
+                    return new IntCell(value);
+                } catch (NumberFormatException e) {
+                    if (str.equals("NaN") || str.toLowerCase().equals("inf") || str.toLowerCase().equals("-inf")) {
+                        if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
+                            return new IntCell(m_xpathSettings.getDefaultNumber());
+                        }
+                    }
+                }
+                return DataType.getMissingCell();
+            }
+        };
+
+
+
+        ArrayList<DataCell> values = nlr.getValues();
+        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+
+        if (values.size() != colNames.size()) {
+            throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            m_xpathSettings.addMultiColName(colNames.get(i).getStringValue());
+        }
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = CollectionCellFactory.createListCell(values);
+        }
+
+        DataCell nameCell = CollectionCellFactory.createListCell(colNames);
+
+        return new DataCell[]{newCell, nameCell};
+    }
+
+    /**
+     * Evaluate XPath expression expecting a StringSet as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell[] evaluateStringSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+        throws XPathExpressionException, ParserConfigurationException {
+        DataCell newCell;
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
+
+        NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
+
+            @Override
+            public DataCell parse(final String value) {
+                if (m_xpathSettings.getMissingCellOnEmptyString()) {
+                    if (!value.isEmpty()) {
+                        return new StringCell(value);
+                    } else {
+                        return DataType.getMissingCell();
+                    }
+                } else {
+                    return new StringCell(value);
+                }
+            }
+        };
+
+
+
+        ArrayList<DataCell> values = nlr.getValues();
+        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+
+        if (values.size() != colNames.size()) {
+            // TODO LOGGER!!!!
+            throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            m_xpathSettings.addMultiColName(colNames.get(i).getStringValue());
+        }
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = CollectionCellFactory.createListCell(values);
+        }
+
+        DataCell nameCell = CollectionCellFactory.createListCell(colNames);
+
+        return new DataCell[]{newCell, nameCell};
+    }
+
+    /**
+     * Evaluate XPath expression expecting a NodeSet as result.
+     *
+     * @param xpathExpr the XPath expression
+     * @param xmlValue the XML where the XPath expression is applied on
+     * @return the result of the XPath expression
+     * @throws XPathExpressionException If the expression cannot be evaluated.
+     * @throws ParserConfigurationException
+     */
+    private DataCell[] evaluateNodeSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+        throws XPathExpressionException, ParserConfigurationException {
+        DataCell newCell;
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
+
+        ArrayList<DataCell> values = new ArrayList<DataCell>();
+        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+        domFactory.setNamespaceAware(true);
+        DocumentBuilder docBuilder = domFactory.newDocumentBuilder();
+        for (int i = 0; i < valNodes.getLength(); i++) {
+            Node value = valNodes.item(i);
             Document doc = docBuilder.newDocument();
             if (value.getNodeType() == Node.ATTRIBUTE_NODE) {
                 Element elem = doc.createElement(m_xpathSettings.getXmlFragmentName());
@@ -453,8 +556,27 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
                 Node node = doc.importNode(value, true);
                 doc.appendChild(node);
             }
-            newCell = XMLCellFactory.create(doc);
+            values.add(XMLCellFactory.create(doc));
         }
-        return newCell;
+
+        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+
+        if (values.size() != colNames.size()) {
+            throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            m_xpathSettings.addMultiColName(colNames.get(i).getStringValue());
+        }
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = CollectionCellFactory.createListCell(values);
+        }
+
+        DataCell nameCell = CollectionCellFactory.createListCell(colNames);
+
+        return new DataCell[]{newCell, nameCell};
     }
 }

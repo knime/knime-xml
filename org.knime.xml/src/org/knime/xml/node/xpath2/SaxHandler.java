@@ -49,6 +49,7 @@
 package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -83,7 +84,7 @@ public class SaxHandler extends DefaultHandler {
     private ArrayList<String> m_keys;
 
     /**
-     * Namespace uris.
+     * Namespace URIs.
      */
     private ArrayList<String> m_values;
 
@@ -91,6 +92,11 @@ public class SaxHandler extends DefaultHandler {
      * Collect namespace information.
      */
     private boolean m_collectNS;
+
+    /**
+     * Indicate if namespace has changed.
+     */
+    private boolean m_namespaceHasChanged = false;
 
 
     /**
@@ -105,6 +111,7 @@ public class SaxHandler extends DefaultHandler {
         m_keys = new ArrayList<String>();
         m_values = new ArrayList<String>();
         m_collectNS = collectNS;
+        new HashMap<String, Integer>();
     }
 
     @Override
@@ -118,6 +125,7 @@ public class SaxHandler extends DefaultHandler {
     @Override
     public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
         throws SAXException {
+        String localQNmae = qName;
         ArrayList<String> attr = new ArrayList<String>();
 
         for (int i = 0; i < attributes.getLength(); i++) {
@@ -128,20 +136,32 @@ public class SaxHandler extends DefaultHandler {
 
         if (m_collectNS) {
             if (!uri.isEmpty()) {
-                if (localName.equals(qName)) {
+                if (localName.equals(localQNmae)) {
                     ns = "dns";
+                    localQNmae = ns + ":" + localQNmae;
                 } else {
-                    ns = qName.substring(0, qName.indexOf(':'));
+                    ns = localQNmae.substring(0, localQNmae.indexOf(':'));
                 }
                 if (!m_keys.contains(ns)) {
                     m_keys.add(ns);
                     m_values.add(uri);
                 }
             }
+        } else {
+            if (!m_keys.contains(ns)) {
+                m_namespaceHasChanged  = true;
+            }
+        }
+
+        int m = m_currentNode.getCountOf(localQNmae);
+        String p = localName;
+        if (m > 0) {
+            m++;
+            p += "[" + m + "]";
         }
 
         XMLTreeNode newChild =
-            new XMLTreeNode(localName, attr, ns, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
+            new XMLTreeNode(p, attr, ns, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
         m_currentNode = m_currentNode.add(newChild);
     }
 
@@ -172,5 +192,12 @@ public class SaxHandler extends DefaultHandler {
      */
     public String[] getValues() {
         return m_values.toArray(new String[m_values.size()]);
+    }
+
+    /**
+     * @return namespace has changed
+     */
+    public boolean getNamespaceHasChanged() {
+        return m_namespaceHasChanged;
     }
 }

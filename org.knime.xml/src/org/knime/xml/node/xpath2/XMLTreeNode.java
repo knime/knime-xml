@@ -52,25 +52,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Node for the XML hierarchy tree.
  *
- * @author tibuch
+ * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
  */
 public class XMLTreeNode {
 
+    /**
+     * List of childes.
+     */
     private List<XMLTreeNode> m_children;
 
+    /**
+     * XML element tag.
+     */
     private final String m_tag;
 
+    /**
+     * Path to this tag.
+     */
     private final String m_path;
 
+    /**
+     * Namespace as prefix.
+     */
     private final String m_prefix;
 
-    private String m_columnName;
-
+    /**
+     * Parent node.
+     */
     private final XMLTreeNode m_parent;
 
+    /**
+     * Linenumber of XML element in RichTextArea.
+     */
     private int m_linenumber;
 
+    /**
+     * Attribute list.
+     */
     private ArrayList<String> m_attributes;
 
     /**
@@ -88,7 +108,6 @@ public class XMLTreeNode {
         m_attributes = null;
         m_path = "";
         m_linenumber = -1;
-        m_columnName = null;
         m_parent = null;
         m_children = new ArrayList<XMLTreeNode>();
     }
@@ -113,8 +132,22 @@ public class XMLTreeNode {
         m_prefix = prefix;
         m_linenumber = linenumber;
         m_children = new ArrayList<XMLTreeNode>();
-        m_columnName = m_tag;
         m_parent = parent;
+    }
+
+    /**
+     * @param tag XML element tag
+     * @return count of this tag in his namespace
+     */
+    public int getCountOf(final String tag) {
+        int count = 0;
+        for (int i = 0; i < m_children.size(); i++) {
+            String pt = m_children.get(i).getPrefix() + ":" + m_children.get(i).getTag();
+            if (pt.startsWith(tag)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -134,7 +167,6 @@ public class XMLTreeNode {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((m_children == null) ? 0 : m_children.hashCode());
-        result = prime * result + ((m_columnName == null) ? 0 : m_columnName.hashCode());
         result = prime * result + m_linenumber;
         result = prime * result + ((m_parent == null) ? 0 : m_parent.hashCode());
         result = prime * result + ((m_path == null) ? 0 : m_path.hashCode());
@@ -162,13 +194,6 @@ public class XMLTreeNode {
                 return false;
             }
         } else if (!m_children.equals(other.m_children)) {
-            return false;
-        }
-        if (m_columnName == null) {
-            if (other.m_columnName != null) {
-                return false;
-            }
-        } else if (!m_columnName.equals(other.m_columnName)) {
             return false;
         }
         if (m_linenumber != other.m_linenumber) {
@@ -225,20 +250,6 @@ public class XMLTreeNode {
     @Override
     public String toString() {
         return m_tag;
-    }
-
-    /**
-     * @return the columnName
-     */
-    public String getColumnName() {
-        return m_columnName;
-    }
-
-    /**
-     * @param columnName the columnName to set
-     */
-    public void setColumnName(final String columnName) {
-        m_columnName = columnName;
     }
 
     /**

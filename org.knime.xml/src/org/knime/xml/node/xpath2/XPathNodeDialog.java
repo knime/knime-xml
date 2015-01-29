@@ -48,6 +48,7 @@
 package org.knime.xml.node.xpath2;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -59,13 +60,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -97,7 +98,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
-import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.DataAwareNodeDialogPane;
@@ -115,55 +115,138 @@ import org.xml.sax.InputSource;
 /**
  * This is the dialog for the XPath node.
  *
- * @author Heiko Hofer
+ * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
  */
 final class XPathNodeDialog extends DataAwareNodeDialogPane {
+
+    /*
+     * Configuration Tab.
+     */
     /**
-     *
+     * XML input column selection combobox.
+     */
+    private ColumnSelectionComboxBox m_inputColumn = null;
+
+    /**
+     * Alert if namesspaces have changed.
+     */
+    private JPanel m_nsChangedPanel = null;
+
+    /**
+     * Remove XML input column option.
+     */
+    private JCheckBox m_removeInputColumn = null;
+
+    /**
+     * Add button for new XPath query.
+     */
+    private JButton m_add = null;
+
+    /**
+     * Remove button of a XPath query.
+     */
+    private JButton m_remove = null;
+
+    /**
+     * Edit button of a XPath query.
+     */
+    private JButton m_edit = null;
+
+    /**
+     * XPath query summary table column names.
      */
     private static final Object[] QUERY_SUMMARY_COLUMN_NAMES = new Object[]{"Column name", "XPath query", "Type"};
 
-    private ColumnSelectionComboxBox m_inputColumn;
+    /**
+     * Table model of XPath query summary.
+     */
+    private DefaultTableModel m_tableModel = null;
 
-    private JCheckBox m_removeInputColumn;
+    /**
+     * XPath query summary.
+     */
+    private JTable m_table = null;
 
-    private KeyValuePanel m_nsPanel;
+    /**
+     * Rich syntax area for input xml value.
+     */
+    private RSyntaxTextArea m_textfield = null;
 
-    private JCheckBox m_useRootsNS;
-
-    private JTextField m_rootNSPrefix;
-
-    private JButton m_add;
-
-    private JButton m_remove;
-
-    private DefaultTableModel m_tableModel;
-
-    private ArrayList<XPathSettings> m_xpathSettingsList;
-
-    private JTable m_table;
-
-    private JButton m_edit;
-
+    /**
+     * Rich syntax document for RSyntaxTextArea.
+     */
     private RSyntaxDocument m_text = new RSyntaxDocument("");
 
-    private RSyntaxTextArea m_textfield;
+    /*
+     * Internal data structures
+     */
+    /**
+     * List of all created XPath queries.
+     */
+    private ArrayList<XPathSettings> m_xpathSettingsList = null;
 
-    private BufferedDataTable m_inputDataTable;
+    /**
+     * Root of XML input value hierarchy tree.
+     */
+    private XMLTreeNode m_root = null;
 
-    private boolean m_hasData = false;
+    /**
+     * Map which maps {@link XPathNodeDialog#m_textfield.getCaretLineNumber()} to an XML element.
+     */
+    private HashMap<Integer, XMLTreeNode> m_allTags = null;
 
-    private DataTableSpec m_inSpec;
+    /**
+     * Set of all entered column names.
+     */
+    private HashSet<String> m_allColNames = null;
 
-    private XMLTreeNode m_root;
+    /**
+     * Linenumber of first XML element.
+     */
+    private int m_offset = 0;
 
-    private HashMap<Integer, XMLTreeNode> m_allTags;
+    /**
+     * Is input data available.
+     */
+    private boolean m_hasInputData = false;
 
-    private int m_offset;
+    /**
+     * Is loading settings.
+     */
+    private boolean m_loadSettings = false;
 
-    private HashSet<String> m_allColNames;
+    /**
+     * Namespace has changed.
+     */
+    private boolean m_namesspaceHasChanged = false;
 
-    private boolean m_loadSettings;
+    /**
+     * Input data table.
+     */
+    private BufferedDataTable m_inputDataTable = null;
+
+    /**
+     * Input table spec.
+     */
+    private DataTableSpec m_inSpec = null;
+
+    /*
+     * Namespace Tab.
+     */
+    /**
+     * Namespace panel.
+     */
+    private KeyValuePanel m_nsPanel = null;
+
+    /**
+     * Use root namespace option.
+     */
+    private JCheckBox m_useRootsNS = null;
+
+    /**
+     * Root namespace prefix.
+     */
+    private JTextField m_rootNSPrefix = null;
 
     /**
      * Creates a new dialog.
@@ -176,10 +259,40 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         m_tableModel = new DefaultTableModel(QUERY_SUMMARY_COLUMN_NAMES, 0);
         m_table = new JTable(m_tableModel);
+
         m_table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(final ListSelectionEvent e) {
                 updateEnables();
+            }
+        });
+
+        m_table.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    onEdit(m_table.getSelectedRow());
+                }
+            }
+
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                // nothing
+            }
+
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                // nothing
+            }
+
+            @Override
+            public void mouseEntered(final MouseEvent e) {
+                // nothing
+            }
+
+            @Override
+            public void mouseExited(final MouseEvent e) {
+                // nothing
             }
         });
 
@@ -200,9 +313,44 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
     @SuppressWarnings("unchecked")
     private JPanel createSettingsPanel() {
+
+        // input column selection combobox
+        m_inputColumn = new ColumnSelectionComboxBox(XMLValue.class);
+        m_inputColumn.setBorder(null);
+        m_inputColumn.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(final ItemEvent e) {
+                updateEnables();
+                if (m_inputColumn.getSelectedColumn() != null && m_hasInputData) {
+                    try {
+                        updateText(m_inputColumn.getSelectedColumn());
+                    } catch (NotConfigurableException e1) {
+                        JOptionPane.showMessageDialog(getPanel(), e1.getMessage());
+                    }
+                }
+            }
+        });
+
+        // namespace changed alert panel
+        m_nsChangedPanel = new JPanel();
+        JLabel msg = new JLabel("Namespace has probably changed.");
+        msg.setForeground(Color.red);
+        m_nsChangedPanel.add(msg);
+        m_nsChangedPanel.setVisible(false);
+
+        // remove input column
+        m_removeInputColumn = new JCheckBox("Remove source column.");
+
+        // splitpane for summary and xml preview
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setTopComponent(createXPathQueryTable());
+        splitPane.setRightComponent(createXMLPreview());
+        splitPane.setResizeWeight(0.3);
+
+        // build panel
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(2, 4, 2, 4);
@@ -213,20 +361,10 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         c.weighty = 0;
 
         p.add(new JLabel("XML column:"), c);
+
         c.gridx++;
         c.weightx = 1;
-        m_inputColumn = new ColumnSelectionComboxBox(XMLValue.class);
-        m_inputColumn.addItemListener(new ItemListener() {
 
-            @Override
-            public void itemStateChanged(final ItemEvent e) {
-                updateEnables();
-                if (m_inputColumn.getSelectedColumn() != null && m_hasData) {
-                    updateText(m_inputColumn.getSelectedColumn());
-                }
-            }
-        });
-        m_inputColumn.setBorder(null);
         p.add(m_inputColumn, c);
 
         c.gridx = 0;
@@ -234,9 +372,29 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         c.weightx = 0;
         c.weighty = 0;
         c.gridwidth = 2;
-        m_removeInputColumn = new JCheckBox("Remove source column.");
+
+        p.add(m_nsChangedPanel, c);
+
+        c.gridy++;
+
         p.add(m_removeInputColumn, c);
 
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridwidth = 2;
+
+        p.add(splitPane, c);
+
+        return p;
+    }
+
+    /**
+     * @return panel with add-, edit- and remove xpath buttons
+     */
+    private JPanel createSummaryTableButtons() {
         m_add = new JButton("Add XPath");
         m_edit = new JButton("Edit XPath");
         m_remove = new JButton("Remove XPath");
@@ -269,23 +427,14 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         listButtons.add(m_add);
         listButtons.add(m_edit);
         listButtons.add(m_remove);
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(createXPathQueryTable(listButtons));
-        splitPane.setRightComponent(createXMLPreview());
-        splitPane.setResizeWeight(0.3);
-
-        c.fill = GridBagConstraints.BOTH;
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.gridwidth = 2;
-
-        p.add(splitPane, c);
-        return p;
+        return listButtons;
     }
 
+    /**
+     * RSyntaxtTextArea is not editable. But you can select text and do a right click to add a new XPath query.
+     * Selection is checked against XML hierarchy tree.
+     * @return panel with RSyntaxTextArea
+     */
     private JPanel createXMLPreview() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -295,6 +444,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         m_textfield.setEditable(false);
         m_textfield.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
         m_textfield.setCodeFoldingEnabled(true);
+
+        // add "Add XPath" option to popup menu
         JPopupMenu popup = m_textfield.getPopupMenu();
         popup.addSeparator();
         @SuppressWarnings("serial")
@@ -307,70 +458,43 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 String xmlTag = m_textfield.getSelectedText();
 
                 XMLTreeNode node = m_allTags.get(linenumber + m_offset);
-                String xmlPath = null;
+                String xmlPath = node.getPath();
 
-                    List<XMLTreeNode> sameLevelTags = node.getParent().getChildren();
+                // if selection != node tag it probably is an attribute
+                if (!node.getTag().equals(xmlTag)) {
+                    int i = 0;
+                    String attr = node.getAttributeName(i++);
 
-                    Iterator<XMLTreeNode> it = sameLevelTags.iterator();
-
-                String xmlPathSuffix = "";
-                if (node.getTag().equals(xmlTag)) {
-                    int i = 1;
-                    while (it.hasNext()) {
-                        XMLTreeNode n = it.next();
-
-                        if (n.getLinenumber() >= node.getLinenumber()) {
+                    // check all attributes
+                    while (attr != null) {
+                        if (xmlTag.equals(attr)) {
+                            xmlPath = node.getPath() + "/@" + attr;
                             break;
                         }
-
-                        if (n.getTag().equals(node.getTag())) {
-                            i++;
-                        }
-                    }
-
-                    if (i == 1) {
-                        xmlPath = node.getPath();
-                        xmlPathSuffix = "";
-                    } else {
-                        xmlPath = node.getPath() + "[" + i + "]";
-                    }
-
-                } else {
-                    while (it.hasNext()) {
-                        int i = 0;
-                        XMLTreeNode n = it.next();
-                        String attr = n.getAttributeName(i++);
-
-                        while (attr != null) {
-                            if (xmlTag.equals(attr)) {
-                                xmlPath = node.getPath() + "/@" + attr;
-                                break;
-                            }
-                            attr = n.getAttributeName(i++);
-                        }
+                        attr = node.getAttributeName(i++);
                     }
                 }
+
+                // if selection is not a known XML element the user has selected something different.
                 if (xmlPath == null) {
-                    JOptionPane
-                        .showMessageDialog(
-                            getPanel(),
-                            "\""
-                                + xmlTag + "\" is not a starting tag or attribute. Select a start tag "
-                                    + "or attribute to add a new XPath query.");
+                    JOptionPane.showMessageDialog(getPanel(), "\"" + xmlTag
+                        + "\" is not a starting tag or attribute. Select a start tag "
+                        + "or attribute to add a new XPath query.");
                     return;
                 }
-                XPathSettings x = new XPathSettings();
 
+                // get a unique column name
                 String name = xmlTag;
                 name = XPathNodeSettings.uniqueName(name, "", 0, m_allColNames);
+                m_allColNames.add(name);
 
+                // create new XPathSettings and open dialog
+                XPathSettings x = new XPathSettings();
                 x.setNewColumn(name);
                 x.setReturnType(XPathOutput.String);
                 x.setXpathQuery(xmlPath);
 
-                XPathSettings s =
-                    NewQueryDialog.openUserDialog(getFrame(), x, false,
-                        m_allColNames);
+                XPathSettings s = NewQueryDialog.openUserDialog(getFrame(), x, false, m_allColNames);
 
                 if (s != null) {
                     m_tableModel.addRow(s.getRow());
@@ -384,11 +508,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             }
 
         });
+
+        // enable "Add XPath" only if something is selected
         m_textfield.addCaretListener(new CaretListener() {
 
             @Override
             public void caretUpdate(final CaretEvent e) {
-                // TODO Auto-generated method stub
                 if (m_textfield.getSelectedText() != null) {
                     menuItem.setEnabled(true);
                 } else {
@@ -398,6 +523,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             }
         });
         popup.add(menuItem);
+
         final RTextScrollPane sp = new RTextScrollPane(m_textfield);
         sp.setPreferredSize(new Dimension(m_textfield.getPreferredScrollableViewportSize().width, 200));
         sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -412,7 +538,10 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         return panel;
     }
 
-    private JPanel createXPathQueryTable(final JPanel listButtons) {
+    /**
+     * @return panel with summary table of all added XPath queries
+     */
+    private JPanel createXPathQueryTable() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("XPath summary"));
@@ -431,10 +560,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         c.weighty = 0;
         c.gridy++;
-        panel.add(listButtons, c);
+        panel.add(createSummaryTableButtons(), c);
         return panel;
     }
 
+    /**
+     * @return root namespace panel
+     */
     private JPanel infereRootDefaulNSPanel() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -468,10 +600,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         return p;
     }
 
+    /**
+     * Opens new XPath query dialog and adds a new row to summary if needed
+     */
     private void onAdd() {
         XPathSettings setting = new XPathSettings();
-        XPathSettings s =
-            NewQueryDialog.openUserDialog(getFrame(), setting, false, m_allColNames);
+        XPathSettings s = NewQueryDialog.openUserDialog(getFrame(), setting, false, m_allColNames);
 
         if (s != null) {
             m_tableModel.addRow(s.getRow());
@@ -486,11 +620,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         }
     }
 
+    /**
+     * Opens XPath query dialog with settings of selected row.
+     * @param selectedRow index of selected row in summary
+     */
     private void onEdit(final int selectedRow) {
         XPathSettings xps = m_xpathSettingsList.get(selectedRow);
-        XPathSettings s =
-            NewQueryDialog.openUserDialog(getFrame(), xps,
-                true, m_allColNames);
+        XPathSettings s = NewQueryDialog.openUserDialog(getFrame(), xps, true, m_allColNames);
         if (s != null) {
 
             if (!xps.getUseAttributeForColName()) {
@@ -510,6 +646,10 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         updateEnables();
     }
 
+    /**
+     * Removes the selected row.
+     * @param index of selected row
+     */
     private void onRemove(final int index) {
         m_tableModel.removeRow(index);
 
@@ -520,7 +660,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         }
         m_xpathSettingsList.remove(index);
 
-
         m_table.getSelectionModel().setSelectionInterval(index - 1, index - 1);
         updateEnables();
     }
@@ -529,8 +668,9 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      * Creates a XML hierarchy tree. This method uses the SAXParser.
      *
      * @param xml String of a XML cell
+     * @throws NotConfigurableException
      */
-    private void createHierarchyTree(final String xml) {
+    private void createHierarchyTree(final String xml) throws NotConfigurableException {
         if (m_loadSettings) {
             return;
         }
@@ -541,23 +681,29 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             SAXParser saxParser = factory.newSAXParser();
             m_root = new XMLTreeNode("", "root");
 
-            SaxHandler handler = new SaxHandler(m_root, true);
+            boolean noNSSet = m_nsPanel.getKeys().length == 0;
+            SaxHandler handler = new SaxHandler(m_root, noNSSet);
             saxParser.parse(new InputSource(new StringReader(xml)), handler);
 
+            m_namesspaceHasChanged = handler.getNamespaceHasChanged();
             m_allTags = new HashMap<Integer, XMLTreeNode>();
-            if (m_nsPanel.getKeys().length == 0) {
+            if (noNSSet) {
                 m_nsPanel.setTableData(handler.getKeys(), handler.getValues());
                 m_useRootsNS.setSelected(false);
                 m_rootNSPrefix.setEnabled(false);
             }
+
             createAllTagsLookUp(m_root);
             m_offset = m_root.getChildren().get(0).getLinenumber() - 1;
-
         } catch (Throwable err) {
-            err.printStackTrace();
+            throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
         }
     }
 
+    /**
+     * Map of every tag and corresponding line number.
+     * @param n node
+     */
     private void createAllTagsLookUp(final XMLTreeNode n) {
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
@@ -647,7 +793,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             m_text.remove(0, m_text.getLength());
             m_text.insertString(0, "No input data available. \nExecute upstream nodes.", null);
             m_textfield.revalidate();
-            m_hasData = false;
+            m_hasInputData = false;
         } catch (BadLocationException e) {
             // nothing to do
         }
@@ -665,11 +811,10 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         m_tableModel = createTableModel();
         for (XPathSettings xps : m_xpathSettingsList) {
             m_tableModel.addRow(xps.getRow());
-            if (!xps.getUseAttributeForColName()) {
-                m_allColNames.add(xps.getNewColumn());
-            }
+            m_allColNames.add(xps.getNewColumn());
         }
         m_table.setModel(m_tableModel);
+
     }
 
     @SuppressWarnings("serial")
@@ -698,7 +843,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         s.loadSettingsDialog(settings, m_inSpec);
 
         m_inputColumn.update(m_inSpec, s.getInputColumn());
-        m_hasData = true;
+        m_hasInputData = true;
 
         m_removeInputColumn.setSelected(s.getRemoveInputColumn());
 
@@ -712,16 +857,21 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         m_tableModel = createTableModel();
         for (XPathSettings xps : m_xpathSettingsList) {
             m_tableModel.addRow(xps.getRow());
-            if (!xps.getUseAttributeForColName()) {
-                m_allColNames.add(xps.getNewColumn());
-            }
+
+            m_allColNames.add(xps.getNewColumn());
+
         }
         m_table.setModel(m_tableModel);
         m_loadSettings = false;
         updateText(s.getInputColumn());
     }
 
-    private void updateText(final String inputColumn) {
+    /**
+     * Updates RSyntaxTextArea with XML value of the input column.
+     * @param inputColumn selected input column
+     * @throws NotConfigurableException thrown if XML could not be parsed.
+     */
+    private void updateText(final String inputColumn) throws NotConfigurableException {
         RowIterator it = m_inputDataTable.iterator();
         DataTableSpec inSpec = m_inputDataTable.getDataTableSpec();
         int i = inSpec.findColumnIndex(inputColumn);
@@ -730,7 +880,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             if (!row.getCell(i).isMissing()) {
                 try {
                     m_text.remove(0, m_text.getLength());
-                    String xmlString = ((XMLCell)row.getCell(i)).getStringValue();
+                    String xmlString = row.getCell(i).toString();
                     m_text.insertString(0, xmlString, null);
                     m_textfield.revalidate();
                     createHierarchyTree(xmlString);
@@ -739,6 +889,11 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 }
                 break;
             }
+        }
+        if (m_namesspaceHasChanged) {
+            m_nsChangedPanel.setVisible(true);
+        } else {
+            m_nsChangedPanel.setVisible(false);
         }
     }
 }

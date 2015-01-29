@@ -82,6 +82,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -101,11 +102,9 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
 
     private RowKey m_firstRowKey;
 
-    private boolean m_collectNames;
-
-    private boolean m_parseNameExtra;
-
     private XPathExpression m_colNameXPathExpr;
+
+    private RowKey m_rowKey;
 
     /**
      * @param spec the DataTabelSpec of the input
@@ -126,8 +125,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         String newName = xpathSettings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
-            throw new InvalidSettingsException("Cannot create column " + newName
-                + " since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");
         }
 
         DataType newCellType = null;
@@ -135,7 +133,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
 
         if (returnType.equals(XPathOutput.Boolean)) {
             newCellType = ListCell.getCollectionType(BooleanCell.TYPE);
-        } else if (returnType.equals(XPathOutput.Number)) {
+        } else if (returnType.equals(XPathOutput.Double)) {
             newCellType = ListCell.getCollectionType(DoubleCell.TYPE);
         } else if (returnType.equals(XPathOutput.Integer)) {
             newCellType = ListCell.getCollectionType(IntCell.TYPE);
@@ -151,8 +149,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
     }
 
     private XPathCollectionCellFactory(final XPathNodeSettings settings, final XPathSettings xpathSettings,
-        final int xmlIndex, final DataColumnSpec[] colsSpecs,
-        final RowKey firstRowKey) throws InvalidSettingsException {
+        final int xmlIndex, final DataColumnSpec[] colsSpecs, final RowKey firstRowKey) throws InvalidSettingsException {
         super(true, colsSpecs);
         m_settings = settings;
         m_xmlIndex = xmlIndex;
@@ -160,43 +157,50 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         m_firstRowKey = firstRowKey;
         String xpathQuery = m_xpathSettings.getXpathQuery();
         m_xpathExpr = initXPathExpression(xpathQuery);
+        if (xpathSettings.getUseAttributeForColName()) {
+        xpathQuery = buildXPathForColNames(xpathQuery);
+        m_colNameXPathExpr = initXPathExpression(xpathQuery);
+        }
+    }
+
+    private String buildXPathForColNames(String xpathQuery) {
         int pos = xpathQuery.indexOf('@');
         if (pos != -1) {
-            xpathQuery = xpathQuery.substring(0, pos) + "/@" + m_xpathSettings.getAttributeForColName();
-            m_parseNameExtra = true;
-            m_colNameXPathExpr = initXPathExpression(xpathQuery);
+            xpathQuery = xpathQuery.substring(0, pos) + m_xpathSettings.getAttributeForColName();
         }
+        if (xpathQuery.endsWith("]")) {
+            xpathQuery += "[1]";
+        }
+        xpathQuery += m_xpathSettings.getAttributeForColName();
+        return xpathQuery;
     }
 
-    /**
-     * @param xmlValue
-     * @throws InvalidSettingsException
-     *
-     */
-    private void collectColNames(final XMLValue xmlValue) throws InvalidSettingsException {
-        Object result;
-        try {
-            result = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            throw new InvalidSettingsException("XPath expression cannot be compiled.", e);
-        }
-
-        List<String> elementNames = new ArrayList<String>();
-
-        NodeList nodes = (NodeList)result;
-
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
-            for (int i = 0; i < nodes.getLength(); i++) {
-
-
-                    elementNames.add(getElementName(nodes.item(i), i));
-
-            }
-
-                m_settings.addElementNames(elementNames);
-
-    }
+//    /**
+//     * @param xmlValue
+//     * @throws InvalidSettingsException
+//     *
+//     */
+//    private void collectColNames(final XMLValue xmlValue) throws InvalidSettingsException {
+//        Object result;
+//        try {
+//            result = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+//        } catch (XPathExpressionException e) {
+//            throw new InvalidSettingsException("XPath expression cannot be compiled.", e);
+//        }
+//
+//        List<String> elementNames = new ArrayList<String>();
+//
+//        NodeList nodes = (NodeList)result;
+//
+//        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+//        domFactory.setNamespaceAware(true);
+//        for (int i = 0; i < nodes.getLength(); i++) {
+//            //NamedNodeMap attrs = ;//getAttributes();
+//            elementNames.add(nodes.item(i).getTextContent());
+//        }
+//
+//        m_settings.addElementNames(elementNames);
+//    }
 
     /**
      * @return
@@ -277,20 +281,6 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
      */
     @Override
     public DataCell[] getCells(final DataRow row) {
-        if (row.getKey().equals(m_firstRowKey)) {
-            if (m_parseNameExtra) {
-                try {
-                    collectColNames((XMLValue)row.getCell(m_xmlIndex));
-                    m_collectNames = false;
-                } catch (InvalidSettingsException e) {
-                    throw new IllegalStateException(e);
-                }
-            } else {
-                m_collectNames = true;
-            }
-        } else {
-            m_collectNames = false;
-        }
         return new DataCell[]{getCell(row)};
     }
 
@@ -299,6 +289,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         if (xmlCell.isMissing()) {
             return DataType.getMissingCell();
         }
+        m_rowKey = row.getKey();
         XMLValue xmlValue = (XMLValue)xmlCell;
         DataCell newCell = null;
         try {
@@ -307,7 +298,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
 
             if (returnType.equals(XPathOutput.Boolean)) {
                 newCell = evaluateBooleanSet(xpathExpr, xmlValue);
-            } else if (returnType.equals(XPathOutput.Number)) {
+            } else if (returnType.equals(XPathOutput.Double)) {
                 newCell = evaluateDoubleSet(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Integer)) {
                 newCell = evaluateIntegerSet(xpathExpr, xmlValue);
@@ -327,16 +318,15 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
      * @param n
      * @return
      */
-    private String getElementName(final Node n, final int i) {
-        if (m_xpathSettings.getUseAttributeForColName()) {
-            if (n != null) {
-                return n.getNodeValue();
-            } else {
-                return "column(#" + i + ")";
+    private String getElementName(final NamedNodeMap attrs, final int i) {
+        for (int j = 0; j < attrs.getLength(); j++) {
+            if (attrs.item(j).getNodeName().equals(m_xpathSettings.getAttributeForColName())) {
+                return attrs.item(j).getTextContent();
             }
-        } else {
-            return m_xpathSettings.getNewColumn() + "(#" + i + ")";
         }
+
+        return m_xpathSettings.getNewColumn() + "(#" + i + ")";
+
     }
 
     /**
@@ -353,36 +343,22 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         DataCell newCell;
         Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
 
-        List<String> elementNames = new ArrayList<String>();
-        String attr = m_xpathSettings.getAttributeForColName();
-
         NodeList nodes = (NodeList)result;
         if (nodes.getLength() == 0 && m_xpathSettings.getMissingCellOnEmptySet()) {
             newCell = DataType.getMissingCell();
         } else {
             List<BooleanCell> cells = new ArrayList<BooleanCell>();
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
             for (int i = 0; i < nodes.getLength(); i++) {
                 boolean value = Boolean.parseBoolean(nodes.item(i).getTextContent());
-                if (!value && m_xpathSettings.getMissingCellOnFalse()) {
-                    // do nothing (collection)
-                } else {
+
                     if (value) {
                         cells.add(BooleanCell.TRUE);
                     } else {
                         cells.add(BooleanCell.FALSE);
                     }
-                }
-                if (m_collectNames) {
-                    Node n = nodes.item(i).getAttributes().getNamedItem(attr);
-                    elementNames.add(getElementName(n, i));
-                }
+
             }
             newCell = CollectionCellFactory.createListCell(cells);
-            if (m_collectNames) {
-                m_settings.addElementNames(elementNames);
-            }
         }
         return newCell;
     }
@@ -400,9 +376,6 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         throws XPathExpressionException, ParserConfigurationException {
         DataCell newCell;
         Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-
-        List<String> elementNames = new ArrayList<String>();
-        String attr = m_xpathSettings.getAttributeForColName();
 
         NodeList nodes = (NodeList)result;
         if (nodes.getLength() == 0 && m_xpathSettings.getMissingCellOnEmptySet()) {
@@ -425,15 +398,14 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                         value = Double.NEGATIVE_INFINITY;
                     }
                 }
-                cells.add(new DoubleCell(value));
-                if (m_collectNames) {
-                    Node n = nodes.item(i).getAttributes().getNamedItem(attr);
-                    elementNames.add(getElementName(n, i));
+                if (!str.trim().isEmpty()) {
+                    cells.add(new DoubleCell(value));
                 }
             }
-            newCell = CollectionCellFactory.createListCell(cells);
-            if (m_collectNames) {
-                m_settings.addElementNames(elementNames);
+            if (cells.isEmpty()) {
+                newCell = DataType.getMissingCell();
+            } else {
+                newCell = CollectionCellFactory.createListCell(cells);
             }
         }
         return newCell;
@@ -453,16 +425,11 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         DataCell newCell = null;
         Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
 
-        List<String> elementNames = new ArrayList<String>();
-        String attr = m_xpathSettings.getAttributeForColName();
-
         NodeList nodes = (NodeList)result;
         if (nodes.getLength() == 0 && m_xpathSettings.getMissingCellOnEmptySet()) {
             newCell = DataType.getMissingCell();
         } else {
             List<IntCell> cells = new ArrayList<IntCell>();
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
             for (int i = 0; i < nodes.getLength(); i++) {
                 int value;
                 String str = nodes.item(i).getTextContent();
@@ -470,26 +437,17 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                     value = Integer.parseInt(str);
                     cells.add(new IntCell(value));
                 } catch (NumberFormatException e) {
-                    if (m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
-                        String s = str;
-                        if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
-                            // do nothing
-                        }
-                    } else {
-                        String s = str;
-                        if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
+                    if (str.equals("NaN") || str.toLowerCase().equals("inf") || str.toLowerCase().equals("-inf")) {
+                        if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
                             cells.add(new IntCell(m_xpathSettings.getDefaultNumber()));
                         }
                     }
                 }
-                if (m_collectNames) {
-                    Node n = nodes.item(i).getAttributes().getNamedItem(attr);
-                    elementNames.add(getElementName(n, i));
-                }
             }
-            newCell = CollectionCellFactory.createListCell(cells);
-            if (m_collectNames) {
-                m_settings.addElementNames(elementNames);
+            if (cells.isEmpty()) {
+                newCell = DataType.getMissingCell();
+            } else {
+                newCell = CollectionCellFactory.createListCell(cells);
             }
         }
         return newCell;
@@ -507,33 +465,39 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
     private DataCell evaluateStringSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
         DataCell newCell;
-        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        NodeList valNodes = (NodeList)valResult;
 
 
-        List<String> elementNames = new ArrayList<String>();
-        String attr = m_xpathSettings.getAttributeForColName();
+        NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
 
-        NodeList nodes = (NodeList)result;
-        if (nodes.getLength() == 0 && m_xpathSettings.getMissingCellOnEmptySet()) {
-            newCell = DataType.getMissingCell();
-        } else {
-            List<StringCell> cells = new ArrayList<StringCell>();
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
-            for (int i = 0; i < nodes.getLength(); i++) {
-                cells.add(new StringCell(nodes.item(i).getTextContent()));
-                if (m_collectNames) {
-                    Node n = nodes.item(i).getAttributes().getNamedItem(attr);
-                    elementNames.add(getElementName(n, i));
+            @Override
+            public DataCell parse(final String str) {
+                if (m_xpathSettings.getMissingCellOnEmptyString()) {
+                    if (!str.isEmpty()) {
+                        return new StringCell(str);
+                    } else {
+                        return DataType.getMissingCell();
+                    }
+                } else {
+                    return new StringCell(str);
                 }
             }
-            newCell = CollectionCellFactory.createListCell(cells);
-            if (m_collectNames) {
-                m_settings.addElementNames(elementNames);
-            }
+        };
+
+        ArrayList<DataCell> values = nlr.getValues();
+
+
+        if (m_xpathSettings.getMissingCellOnEmptyString() && values.isEmpty()) {
+            newCell = DataType.getMissingCell();
+        } else {
+            newCell = CollectionCellFactory.createListCell(values);
         }
+
         return newCell;
     }
+
+
 
     /**
      * Evaluate XPath expression expecting a NodeSet as result.
@@ -548,9 +512,6 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         throws XPathExpressionException, ParserConfigurationException {
         DataCell newCell;
         Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-
-        List<String> elementNames = new ArrayList<String>();
-        String attr = m_xpathSettings.getAttributeForColName();
 
         NodeList nodes = (NodeList)result;
         if (nodes.getLength() == 0 && m_xpathSettings.getMissingCellOnEmptySet()) {
@@ -572,15 +533,8 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                     doc.appendChild(node);
                 }
                 cells.add(XMLCellFactory.create(doc));
-                if (m_collectNames) {
-                    Node n = nodes.item(i).getAttributes().getNamedItem(attr);
-                    elementNames.add(getElementName(n, i));
-                }
             }
             newCell = CollectionCellFactory.createListCell(cells);
-            if (m_collectNames) {
-                m_settings.addElementNames(elementNames);
-            }
         }
         return newCell;
     }

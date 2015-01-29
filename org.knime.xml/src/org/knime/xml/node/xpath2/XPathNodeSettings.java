@@ -49,7 +49,6 @@ package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -62,6 +61,7 @@ import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.w3c.dom.Node;
 
 /**
  *
@@ -112,7 +112,7 @@ public class XPathNodeSettings {
         /** XPath boolean type. */
         Boolean,
         /** XPath numeric type. */
-        Number,
+        Double,
         /** XPath numeric (type cast to integer). */
         Integer,
         /** XPath string type. */
@@ -181,11 +181,6 @@ public class XPathNodeSettings {
      * Number of different xpath queries.
      */
     private int m_numberOfQueries = 0;
-
-    /**
-     * Element names for collections.
-     */
-    private List<List<String>> m_listOfElementNames = new ArrayList<List<String>>();
 
     /**
      * @return the inputColumn
@@ -378,10 +373,17 @@ public class XPathNodeSettings {
                 String q = xps.getXpathQuery();
                 int pos = q.indexOf('@');
                 if (pos != -1) {
-                    q = q.substring(0, pos) + "/@" + xps.getAttributeForColName();
-                } else {
-                    q = q + "/@" + xps.getAttributeForColName();
+                    q = q.substring(0, pos);
                 }
+                if (!q.endsWith("]")) {
+                    q += "[1]";
+                }
+                String attributeForColName = xps.getAttributeForColName();
+                if (attributeForColName.startsWith("..")) {
+                    q = q.substring(0, q.lastIndexOf('/'));
+                    attributeForColName = attributeForColName.substring(2);
+                }
+                q += attributeForColName;
                 XPathExpression xpathExpr;
                 XPathFactory factory = XPathFactory.newInstance();
                 XPath xpath = factory.newXPath();
@@ -390,9 +392,17 @@ public class XPathNodeSettings {
                 String name = xps.getNewColumn();
                 try {
                     xpathExpr = xpath.compile(q);
-                    Object result = xpathExpr.evaluate(value.getDocument(), XPathConstants.STRING);
-                    name = (String)result;
-
+                    Object result = xpathExpr.evaluate(value.getDocument(), XPathConstants.NODE);
+                    Node n = (Node)result;
+                    if (n != null) {
+                        name = n.getTextContent();
+                    }
+//                    NamedNodeMap attributes = n.getAttributes();
+//                    for (int i = 0; i < attributes.getLength(); i++) {
+//                        if (attributes.item(i).getNodeName().equals(xps.getAttributeForColName())) {
+//                            name = attributes.item(i).getTextContent();
+//                        }
+//                    }
 
                 } catch (XPathExpressionException e) {
                     // if no attribute value can be read use old name
@@ -423,24 +433,5 @@ public class XPathNodeSettings {
         return n;
     }
 
-    /**
-     * @param elementNames the elementNames to set
-     */
-    public void addElementNames(final List<String> elementNames) {
-        m_listOfElementNames.add(elementNames);
-    }
 
-    /**
-     * @return first List<String> of element names in this list. Removes the returned list.
-     */
-    public String[] getNextElementNames() {
-        if (!m_listOfElementNames.isEmpty()) {
-            List<String> elementNames = m_listOfElementNames.get(0);
-            String[] result = elementNames.toArray(new String[elementNames.size()]);
-            m_listOfElementNames.remove(0);
-            return result;
-        } else {
-            return new String[]{};
-        }
-    }
 }

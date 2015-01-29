@@ -44,63 +44,77 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   15.01.2015 (tibuch): created
+ *   20.01.2015 (tibuch): created
  */
 package org.knime.xml.node.xpath2;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataRow;
+import org.knime.core.data.DataType;
+import org.knime.core.data.collection.CollectionDataValue;
+import org.knime.core.data.container.AbstractCellFactory;
 
 /**
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland.
+ * @author tibuch
  */
-public class XPathNamespaceContext implements NamespaceContext {
-    private final Map<String, String> m_namespaces;
+public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
+
+    private DataColumnSpec[] m_specs;
+    private HashMap<String, Integer> m_reverseColNames;
+    private int m_index;
 
     /**
-     * @param prefixes the prefixes
-     * @param namespaces the namespaces
+     * @param reverseColNames
+     * @param spec
      */
-    public XPathNamespaceContext(final String[] prefixes, final String[] namespaces) {
-        m_namespaces = new HashMap<String, String>();
-        for (int i = 0; i < prefixes.length; i++) {
-            if (prefixes[i].isEmpty()) {
-                throw new IllegalArgumentException("There are empty " + "namespace prefixes. Please provide a "
-                    + "prefix for every namespace.");
+    public XMLSplitCollectionCellFactory(final DataColumnSpec[] specs, final HashMap<String, Integer> reverseColNames, final int index) {
+        super(true, specs);
+        m_specs = specs;
+        m_reverseColNames = reverseColNames;
+        m_index = index;
+    }
+
+    static XMLSplitCollectionCellFactory create(final DataColumnSpec[] specs, final HashMap<String, Integer> reverseColNames, final int index) {
+        return new XMLSplitCollectionCellFactory(specs, reverseColNames, index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DataCell[] getCells(final DataRow row) {
+        DataCell[] cells = new DataCell[m_specs.length];
+
+        CollectionDataValue valueCollection = (CollectionDataValue)row.getCell(m_index);
+        CollectionDataValue nameCollection = (CollectionDataValue)row.getCell(m_index + 1);
+
+        Iterator<DataCell> valIt = valueCollection.iterator();
+        Iterator<DataCell> nameIt = nameCollection.iterator();
+
+        while (valIt.hasNext()) {
+            DataCell value = valIt.next();
+            DataCell name = nameIt.next();
+
+            m_reverseColNames.keySet();
+                int index = m_reverseColNames.get(name.toString());
+                cells[index] = value;
+
+
+        }
+
+        for (int i = 0; i < cells.length; i++) {
+            if (cells[i] == null) {
+                cells[i] = DataType.getMissingCell();
             }
-            m_namespaces.put(prefixes[i], namespaces[i]);
         }
+
+        return cells;
     }
 
-    @Override
-    public String getNamespaceURI(final String prefix) {
-        if (prefix == null) {
-            throw new NullPointerException("Null prefix");
-        }
-        if ("xml".equals(prefix)) {
-            return XMLConstants.XML_NS_URI;
-        } else if (m_namespaces.containsKey(prefix)) {
-            return m_namespaces.get(prefix);
-        } else {
-            return XMLConstants.NULL_NS_URI;
-        }
-    }
 
-    @Override
-    public String getPrefix(final String uri) {
-        // This method isn't necessary for XPath processing.
-        throw new UnsupportedOperationException();
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Iterator getPrefixes(final String uri) {
-        // This method isn't necessary for XPath processing.
-        throw new UnsupportedOperationException();
-    }
 }
