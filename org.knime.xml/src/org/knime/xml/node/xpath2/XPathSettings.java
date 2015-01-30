@@ -110,8 +110,6 @@ public class XPathSettings {
 
     private boolean m_missingCellOnEmptyString = false;
 
-    private boolean m_missingCellOnFalse = false;
-
     private boolean m_missingCellOnInfinityOrNaN = true;
 
     private boolean m_valueOnInfinityOrNaN = false;
@@ -142,7 +140,6 @@ public class XPathSettings {
         m_type = xps.getReturnType();
         m_missingCellOnEmptySet = xps.getMissingCellOnEmptySet();
         m_missingCellOnEmptyString = xps.getMissingCellOnEmptyString();
-        m_missingCellOnFalse = xps.getMissingCellOnFalse();
         m_missingCellOnInfinityOrNaN = xps.getMissingCellOnInfinityOrNaN();
         m_valueOnInfinityOrNaN = xps.getValueOnInfinityOrNaN();
         m_useAttributeForColName = xps.getUseAttributeForColName();
@@ -221,13 +218,6 @@ public class XPathSettings {
      */
     public void setMissingCellOnEmptyString(final boolean selected) {
         m_missingCellOnEmptyString = selected;
-    }
-
-    /**
-     * @param selected selection
-     */
-    public void setMissingCellOnFalse(final boolean selected) {
-        m_missingCellOnFalse = selected;
     }
 
     /**
@@ -316,12 +306,6 @@ public class XPathSettings {
         return m_missingCellOnEmptyString;
     }
 
-    /**
-     * @return selection
-     */
-    public boolean getMissingCellOnFalse() {
-        return m_missingCellOnFalse;
-    }
 
     /**
      * @return selection
@@ -370,7 +354,6 @@ public class XPathSettings {
         m_type = XPathOutput.valueOf(settings.getString(RETURN_TYPE + index, XPathOutput.String.toString()));
         m_missingCellOnEmptySet = settings.getBoolean(MISSING_CELL_ON_EMPTY_SET + index, true);
         m_missingCellOnEmptyString = settings.getBoolean(MISSING_CELL_ON_EMPTY_STRING + index, true);
-        m_missingCellOnFalse = settings.getBoolean(MISSING_CELL_ON_FALSE + index, false);
         m_valueOnInfinityOrNaN = settings.getBoolean(VALUE_ON_INF_OR_NAN + index, false);
         m_defaultNumber = settings.getInt(DEFAULT_NUMBER + index, 0);
         m_missingCellOnInfinityOrNaN = settings.getBoolean(MISSING_CELL_ON_INF_OR_NAN + index, true);
@@ -408,7 +391,6 @@ public class XPathSettings {
         }
         m_missingCellOnEmptySet = settings.getBoolean(MISSING_CELL_ON_EMPTY_SET + index);
         m_missingCellOnEmptyString = settings.getBoolean(MISSING_CELL_ON_EMPTY_STRING + index);
-        m_missingCellOnFalse = settings.getBoolean(MISSING_CELL_ON_FALSE + index);
         m_valueOnInfinityOrNaN = settings.getBoolean(VALUE_ON_INF_OR_NAN + index);
         m_defaultNumber = settings.getInt(DEFAULT_NUMBER + index);
         m_missingCellOnInfinityOrNaN = settings.getBoolean(MISSING_CELL_ON_INF_OR_NAN + index);
@@ -436,7 +418,6 @@ public class XPathSettings {
         settings.addString(RETURN_TYPE + index, m_type.toString());
         settings.addBoolean(MISSING_CELL_ON_EMPTY_SET + index, m_missingCellOnEmptySet);
         settings.addBoolean(MISSING_CELL_ON_EMPTY_STRING + index, m_missingCellOnEmptyString);
-        settings.addBoolean(MISSING_CELL_ON_FALSE + index, m_missingCellOnFalse);
         settings.addBoolean(VALUE_ON_INF_OR_NAN + index, m_valueOnInfinityOrNaN);
         settings.addBoolean(MISSING_CELL_ON_INF_OR_NAN + index, m_missingCellOnInfinityOrNaN);
         settings.addInt(DEFAULT_NUMBER + index, m_defaultNumber);

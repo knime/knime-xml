@@ -142,7 +142,13 @@ public class XMLTreeNode {
     public int getCountOf(final String tag) {
         int count = 0;
         for (int i = 0; i < m_children.size(); i++) {
-            String pt = m_children.get(i).getPrefix() + ":" + m_children.get(i).getTag();
+            XMLTreeNode n = m_children.get(i);
+            String pt;
+            if (!n.getPrefix().isEmpty()) {
+                pt = n.getPrefix() + ":" + n.getTag();
+            } else {
+                pt  = n.getTag();
+            }
             if (pt.startsWith(tag)) {
                 count++;
             }

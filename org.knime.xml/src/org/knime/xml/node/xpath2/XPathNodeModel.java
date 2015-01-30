@@ -204,9 +204,13 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             throws InvalidSettingsException {
         int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
         DataTableSpec spec = intermediateResult.getDataTableSpec();
+        ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
 
         HashSet<String> usedNames = new HashSet<String>();
         usedNames.addAll(Arrays.asList(spec.getColumnNames()));
+        for (XPathSettings x : xpsList) {
+            usedNames.remove(spec.getColumnSpec(x.getCurrentColumnIndex()).getName());
+        }
 
         String[] names = new String[numColumns];
         DataType[] types = new DataType[numColumns];
@@ -217,7 +221,6 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             types[i] = columnSpec.getType();
         }
 
-        ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
         for (XPathSettings x : xpsList) {
             if (x.getMultipleTagOption().equals(XPathMultiColOption.SingleCell)) {
                 if (x.getUseAttributeForColName()) {

@@ -145,12 +145,13 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
     @Override
     public DataCell[] getCells(final DataRow row) {
 
+        DataCell xmlCell = row.getCell(m_xmlIndex);
+        if (xmlCell.isMissing()) {
+            return new DataCell[]{DataType.getMissingCell()};
+        }
+
         String name = m_xpathSettings.getNewColumn();
         if (m_xpathSettings.getUseAttributeForColName()) {
-            DataCell xmlCell = row.getCell(m_xmlIndex);
-            if (xmlCell.isMissing()) {
-                return new DataCell[]{DataType.getMissingCell()};
-            }
             XMLValue xmlValue = (XMLValue)xmlCell;
 
             XPathExpression xpathExpr;
@@ -182,11 +183,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
     }
 
     private DataCell getCell(final DataRow row) {
-        DataCell xmlCell = row.getCell(m_xmlIndex);
-        if (xmlCell.isMissing()) {
-            return DataType.getMissingCell();
-        }
-        XMLValue xmlValue = (XMLValue)xmlCell;
+        XMLValue xmlValue = (XMLValue)row.getCell(m_xmlIndex);
         DataCell newCell = null;
         try {
             final XPathOutput returnType = m_xpathSettings.getReturnType();
@@ -199,11 +196,6 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 newCell = evaluateDouble(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Integer)) {
                 newCell = evaluateInteger(xpathExpr, xmlValue);
-                // Type cast to int
-                if (newCell instanceof DoubleCell) {
-                    DoubleCell value = (DoubleCell)newCell;
-                    newCell = new IntCell((int)value.getDoubleValue());
-                }
             } else if (returnType.equals(XPathOutput.String)) {
                 newCell = evaluateString(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Node)) {
@@ -227,18 +219,12 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
     private DataCell evaluateBoolean(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException {
         DataCell newCell;
-        Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.BOOLEAN);
-        Boolean value = (Boolean)result;
-        if (!value.booleanValue() && m_xpathSettings.getMissingCellOnFalse()) {
-            newCell = DataType.getMissingCell();
-        } else {
-            if (value.booleanValue()) {
-                newCell = BooleanCell.TRUE;
-            } else {
-                newCell = BooleanCell.FALSE;
-            }
+        NodeList nodeList = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        if (nodeList.getLength() == 0) {
+            return DataType.getMissingCell();
         }
-        return newCell;
+        String result = nodeList.item(0).getTextContent();
+        return Boolean.parseBoolean(result) ? BooleanCell.TRUE : BooleanCell.FALSE;
     }
 
     /**
@@ -252,28 +238,21 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
     private DataCell evaluateInteger(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException {
         DataCell newCell = null;
-        NodeList nodeList = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-        if (nodeList.getLength() == 0) {
-            return DataType.getMissingCell();
-        }
-        String result = nodeList.item(0).getTextContent();
-        int value = 0;
+        String result = (String)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
         try {
-            value = Integer.parseInt(result);
-            newCell = new IntCell(value);
+            return new IntCell(Integer.parseInt(result));
         } catch (NumberFormatException e) {
-            if (result.isEmpty()) {
-                return DataType.getMissingCell();
-            }
             if (m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
-                String s = result;
-                if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
+                if (result.equals("NaN") || result.toLowerCase().equals("inf") || result.toLowerCase().equals("-inf")) {
                     newCell = DataType.getMissingCell();
+                } else if (result.trim().isEmpty()) {
+                    return DataType.getMissingCell();
                 }
             } else {
-                String s = result;
-                if (s.equals("NaN") || s.toLowerCase().equals("inf") || s.toLowerCase().equals("-inf")) {
+                if (result.equals("NaN") || result.toLowerCase().equals("inf") || result.toLowerCase().equals("-inf")) {
                     newCell = new IntCell(m_xpathSettings.getDefaultNumber());
+                } else if (result.trim().isEmpty()) {
+                    return DataType.getMissingCell();
                 }
             }
             if (newCell == null) {

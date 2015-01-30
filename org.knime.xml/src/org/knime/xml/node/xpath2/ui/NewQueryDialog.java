@@ -87,9 +87,9 @@ import javax.swing.WindowConstants;
 
 import org.knime.core.node.util.RadionButtonPanel;
 import org.knime.xml.node.xpath2.XPathNodeSettings;
-import org.knime.xml.node.xpath2.XPathSettings;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
+import org.knime.xml.node.xpath2.XPathSettings;
 
 /**
  * Creates a new xpath query dialog.
@@ -366,10 +366,6 @@ public final class NewQueryDialog extends JDialog {
      */
     private void loadSettings() {
         String name = m_nodeSettings.getNewColumn();
-
-        if (!m_edit) {
-            name = XPathNodeSettings.uniqueName(name, "", 0, m_columnNames);
-        }
 
         m_columnName.setText(name);
         m_useAttributeForColName.setSelected(m_nodeSettings.getUseAttributeForColName());
