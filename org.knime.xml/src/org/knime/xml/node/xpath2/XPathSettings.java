@@ -48,9 +48,16 @@
  */
 package org.knime.xml.node.xpath2;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.BooleanCell;
+import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.StringCell;
+import org.knime.core.data.xml.XMLCell;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -143,18 +150,32 @@ public class XPathSettings {
         m_attributeForColName = xps.getAttributeForColName();
     }
 
-    public String buildXPathForColNames(String q) {
+    /**
+     * Examples:
+     * value query: /root/element
+     * name query: /name
+     * result: /root/element/name
+     *
+     * value query: root/element/@attribute
+     * name query: ../@anotherAttr
+     * result: /root/element/@anotherAttr
+     * @param query relative query for column name
+     * @return absolute query for column name
+     */
+    public String buildXPathForColNames(final String query) {
+        String q = query;
         int pos = q.indexOf('@');
         if (pos != -1) {
             q = q.substring(0, pos);
         }
-        if (m_multiTagOption.equals(XPathMultiColOption.SingleCell) && !q.endsWith("]")&& !q.endsWith("/")) {
-            q += "[1]";
-        }
+
         String attributeForColName = m_attributeForColName;
-        if (attributeForColName.startsWith("..")) {
+        while (attributeForColName.startsWith("..")) {
             q = q.substring(0, q.lastIndexOf('/'));
-            attributeForColName = attributeForColName.substring(2);
+            attributeForColName = attributeForColName.substring(3);
+        }
+        if (!attributeForColName.startsWith("/")) {
+            attributeForColName = "/" + attributeForColName;
         }
         q += attributeForColName;
         return q;
@@ -466,11 +487,13 @@ public class XPathSettings {
     }
 
     /**
-     * @param string a column name
+     * @param colNames a column name
      */
-    public synchronized void addMultiColName(final String string) {
-        if (!m_colNameMap.containsValue(string)) {
-            m_colNameMap.put(m_colNameMap.size(), string);
+    public synchronized void addMultiColName(final ArrayList<StringCell> colNames) {
+        for (StringCell colName : colNames) {
+            if (!m_colNameMap.containsValue(colName.getStringValue())) {
+                m_colNameMap.put(m_colNameMap.size(), colName.getStringValue());
+            }
         }
     }
 
@@ -488,7 +511,7 @@ public class XPathSettings {
     }
 
     /**
-     * @return
+     * @return column names map
      */
     public TreeMap<Integer, String> getColumnNames() {
         return m_colNameMap;
@@ -506,5 +529,24 @@ public class XPathSettings {
      */
     public void setColIndexOfOutputTable(final int currentColumnIndex) {
         m_currentColumnIndex = currentColumnIndex;
+    }
+
+    /**
+     * @return DataType of this XPath query or null if no type matches
+     */
+    public DataType getDataCellType() {
+        if (m_type.equals(XPathOutput.Boolean)) {
+            return BooleanCell.TYPE;
+        } else if (m_type.equals(XPathOutput.Double)) {
+            return DoubleCell.TYPE;
+        } else if (m_type.equals(XPathOutput.Integer)) {
+            return IntCell.TYPE;
+        } else if (m_type.equals(XPathOutput.String)) {
+            return StringCell.TYPE;
+        } else if (m_type.equals(XPathOutput.Node)) {
+            return XMLCell.TYPE;
+        } else {
+            return null;
+        }
     }
 }

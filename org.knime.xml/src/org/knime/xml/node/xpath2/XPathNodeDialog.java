@@ -110,6 +110,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.KeyValuePanel;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
+import org.knime.xml.node.xpath2.ui.NewQueryDialog;
+import org.knime.xml.node.xpath2.ui.SaxHandler;
+import org.knime.xml.node.xpath2.ui.XMLTreeNode;
 import org.xml.sax.InputSource;
 
 /**

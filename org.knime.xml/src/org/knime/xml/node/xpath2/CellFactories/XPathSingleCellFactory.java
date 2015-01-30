@@ -45,11 +45,7 @@
  * History
  *   04.10.2011 (hofer): created
  */
-package org.knime.xml.node.xpath2;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+package org.knime.xml.node.xpath2.CellFactories;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -71,12 +67,14 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.xml.node.xpath2.XPathNodeSettings;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
+import org.knime.xml.node.xpath2.XPathSettings;
+import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -85,11 +83,11 @@ import org.w3c.dom.NodeList;
 /**
  * CellFactory for the XPath node.
  *
- * @author Heiko Hofer
+ * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
  */
-final class XPathSingleCellFactory extends AbstractCellFactory {
+public final class XPathSingleCellFactory extends AbstractCellFactory {
 
-    private static NodeLogger LOGGER = NodeLogger.getLogger(XPathSingleCellFactory.class);
+    private static NodeLogger logger = NodeLogger.getLogger(XPathSingleCellFactory.class);
 
     private XPathNodeSettings m_settings;
 
@@ -99,8 +97,6 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
 
     private XPathExpression m_xpathExpr;
 
-    private XPathExpression m_colNameXPathExpr;
-
     /**
      * @param spec the DataTabelSpec of the input
      * @param settings settings for the XPath node
@@ -108,7 +104,7 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
      * @return the new cell factory instance.
      * @throws InvalidSettingsException when settings are inconsistent with the spec
      */
-    static XPathSingleCellFactory create(final DataTableSpec spec, final XPathNodeSettings settings,
+    public static XPathSingleCellFactory create(final DataTableSpec spec, final XPathNodeSettings settings,
         final XPathSettings xpathSettings) throws InvalidSettingsException {
         // check user settings against input spec here
         String xmlColumn = settings.getInputColumn();
@@ -119,25 +115,11 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
         String newName = xpathSettings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
-            throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column " + newName
+                + " since it is already in the input.");
         }
 
-        DataType newCellType = null;
-        final XPathOutput returnType = xpathSettings.getReturnType();
-        xpathSettings.getMultipleTagOption();
-        if (returnType.equals(XPathOutput.Boolean)) {
-            newCellType = BooleanCell.TYPE;
-        } else if (returnType.equals(XPathOutput.Double)) {
-            newCellType = DoubleCell.TYPE;
-        } else if (returnType.equals(XPathOutput.Integer)) {
-            newCellType = IntCell.TYPE;
-        } else if (returnType.equals(XPathOutput.String)) {
-            newCellType = StringCell.TYPE;
-        } else if (returnType.equals(XPathOutput.Node)) {
-            newCellType = XMLCell.TYPE;
-        }
-
-        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName, newCellType);
+        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName, xpathSettings.getDataCellType());
         DataColumnSpec[] colSpecs = new DataColumnSpec[]{appendSpec.createSpec()};
         return new XPathSingleCellFactory(settings, xpathSettings, xmlIndex, colSpecs);
     }
@@ -149,86 +131,13 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
         m_xmlIndex = xmlIndex;
         m_xpathSettings = xpathSettings;
         String xpathQuery = m_xpathSettings.getXpathQuery();
-        m_xpathExpr = initXPathExpression(xpathQuery);
+        m_xpathExpr = m_settings.initXPathExpression(xpathQuery);
         if (m_xpathSettings.getUseAttributeForColName()) {
             xpathQuery = xpathSettings.buildXPathForColNames(xpathQuery);
-            m_colNameXPathExpr = initXPathExpression(xpathQuery);
+            m_settings.initXPathExpression(xpathQuery);
         }
     }
 
-    /**
-     * @return
-     * @throws InvalidSettingsException
-     *
-     */
-    private XPathExpression initXPathExpression(final String query) throws InvalidSettingsException {
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xpath = factory.newXPath();
-        xpath.setNamespaceContext(new XPathNamespaceContext(m_settings.getNsPrefixes(), m_settings.getNamespaces()));
-        try {
-            XPathExpression xpathExpr = xpath.compile(query);
-
-            if (m_settings.getUseRootsNS()
-                && Arrays.binarySearch(m_settings.getNsPrefixes(), m_settings.getRootsNSPrefix()) >= 0) {
-                throw new InvalidSettingsException("The namespace table uses the prefix " + "reserved for the "
-                    + "roots namespace.");
-            } else {
-                return xpathExpr;
-            }
-        } catch (XPathExpressionException e) {
-            if (m_settings.getUseRootsNS()) {
-                // try to compile it with roots default prefix
-                createXPathExpr(null);
-                // the xpath compiles with the roots default prefix
-                return null;
-            } else {
-                throw new InvalidSettingsException("XPath expression cannot be compiled.", e);
-            }
-        }
-    }
-
-    private XPathExpression createXPathExpr(final XMLValue xmlValue) throws InvalidSettingsException {
-        List<String> nsPrefixes = new ArrayList<String>();
-        nsPrefixes.addAll(Arrays.asList(m_settings.getNsPrefixes()));
-        if (nsPrefixes.contains(m_settings.getRootsNSPrefix())) {
-            throw new InvalidSettingsException("The namespace table uses the prefix reserved for the "
-                + "roots namespace.");
-        }
-        nsPrefixes.add(m_settings.getRootsNSPrefix());
-        List<String> namespaces = new ArrayList<String>();
-        namespaces.addAll(Arrays.asList(m_settings.getNamespaces()));
-        if (xmlValue == null) {
-            String nsTemplate = "roots_ns_";
-            int counter = 0;
-            String ns = nsTemplate + counter;
-            while (namespaces.contains(ns)) {
-                counter++;
-                ns = nsTemplate + counter;
-            }
-            namespaces.add(ns);
-        } else {
-            Node root = xmlValue.getDocument().getFirstChild();
-            while (root.getNodeType() != Node.ELEMENT_NODE) {
-                root = root.getNextSibling();
-            }
-            String rootNSUri = root.getNamespaceURI();
-            if (rootNSUri != null) {
-                namespaces.add(rootNSUri);
-            } else {
-                throw new InvalidSettingsException("The root node does not have a namesapce URI.");
-            }
-        }
-
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xpath = factory.newXPath();
-        xpath.setNamespaceContext(new XPathNamespaceContext(nsPrefixes.toArray(new String[nsPrefixes.size()]),
-            namespaces.toArray(new String[namespaces.size()])));
-        try {
-            return xpath.compile(m_xpathSettings.getXpathQuery());
-        } catch (XPathExpressionException e) {
-            throw new InvalidSettingsException("XPath query cannot be parsed.", e);
-        }
-    }
 
     /**
      * {@inheritDoc}
@@ -250,18 +159,21 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
             xpath
                 .setNamespaceContext(new XPathNamespaceContext(m_settings.getNsPrefixes(), m_settings.getNamespaces()));
 
+            String colNameQuery = "";
             try {
-                xpathExpr = xpath.compile(m_xpathSettings.buildXPathForColNames(m_xpathSettings.getXpathQuery()));
+                colNameQuery = m_xpathSettings.buildXPathForColNames(m_xpathSettings.getXpathQuery());
+                xpathExpr = xpath.compile(colNameQuery);
                 Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
                 name = (String)result;
 
             } catch (XPathExpressionException e) {
-
+                logger.warn("Could not compile XPath query for column name. XPath query: " + colNameQuery);
             }
 
         }
+        // if more than one column name was found throw exception
         if (!m_xpathSettings.addSingleColname(name)) {
-            LOGGER.warn("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
+            logger.warn("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
                 + " found more than one column name.");
             throw new IllegalStateException("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
                 + " found more than one column name.");
@@ -278,7 +190,9 @@ final class XPathSingleCellFactory extends AbstractCellFactory {
         DataCell newCell = null;
         try {
             final XPathOutput returnType = m_xpathSettings.getReturnType();
-            XPathExpression xpathExpr = m_xpathExpr == null ? createXPathExpr(xmlValue) : m_xpathExpr;
+            XPathExpression xpathExpr =
+                m_xpathExpr == null ? m_settings.createXPathExpr(xmlValue, m_xpathSettings.getXpathQuery())
+                    : m_xpathExpr;
             if (returnType.equals(XPathOutput.Boolean)) {
                 newCell = evaluateBoolean(xpathExpr, xmlValue);
             } else if (returnType.equals(XPathOutput.Double)) {

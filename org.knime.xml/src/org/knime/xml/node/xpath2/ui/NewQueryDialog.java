@@ -46,7 +46,7 @@
  * History
  *   05.01.2015 (tibuch): created
  */
-package org.knime.xml.node.xpath2;
+package org.knime.xml.node.xpath2.ui;
 
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -86,6 +86,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
 import org.knime.core.node.util.RadionButtonPanel;
+import org.knime.xml.node.xpath2.XPathNodeSettings;
+import org.knime.xml.node.xpath2.XPathSettings;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 

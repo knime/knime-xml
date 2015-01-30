@@ -46,75 +46,46 @@
  * History
  *   20.01.2015 (tibuch): created
  */
-package org.knime.xml.node.xpath2;
+package org.knime.xml.node.xpath2.CellFactories;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataType;
-import org.knime.core.data.collection.CollectionDataValue;
-import org.knime.core.data.container.AbstractCellFactory;
+import org.w3c.dom.NodeList;
 
 /**
- *
+ * Abstract class which evaluates a XPhat node list.
  * @author tibuch
+ * @param <T> type of input
  */
-public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
+public abstract class NodeListReader<T> {
 
-    private DataColumnSpec[] m_specs;
-    private HashMap<String, Integer> m_reverseColNames;
-    private int m_index;
+    private ArrayList<T> m_values;
 
     /**
-     * @param reverseColNames
-     * @param spec
+     * @param nodes node list
      */
-    public XMLSplitCollectionCellFactory(final DataColumnSpec[] specs, final HashMap<String, Integer> reverseColNames, final int index) {
-        super(true, specs);
-        m_specs = specs;
-        m_reverseColNames = reverseColNames;
-        m_index = index;
-    }
+    public NodeListReader(final NodeList nodes) {
+        m_values = new ArrayList<T>();
 
-    static XMLSplitCollectionCellFactory create(final DataColumnSpec[] specs, final HashMap<String, Integer> reverseColNames, final int index) {
-        return new XMLSplitCollectionCellFactory(specs, reverseColNames, index);
-    }
+        if (!(nodes.getLength() == 0)) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                String str = nodes.item(i).getTextContent();
+                m_values.add(parse(str));
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DataCell[] getCells(final DataRow row) {
-        DataCell[] cells = new DataCell[m_specs.length];
-
-        CollectionDataValue valueCollection = (CollectionDataValue)row.getCell(m_index);
-        CollectionDataValue nameCollection = (CollectionDataValue)row.getCell(m_index + 1);
-
-        Iterator<DataCell> valIt = valueCollection.iterator();
-        Iterator<DataCell> nameIt = nameCollection.iterator();
-
-        while (valIt.hasNext()) {
-            DataCell value = valIt.next();
-            DataCell name = nameIt.next();
-
-            m_reverseColNames.keySet();
-                int index = m_reverseColNames.get(name.toString());
-                cells[index] = value;
-
-
-        }
-
-        for (int i = 0; i < cells.length; i++) {
-            if (cells[i] == null) {
-                cells[i] = DataType.getMissingCell();
             }
         }
-
-        return cells;
     }
 
+    /**
+     * @param str text content of a xpath node
+     * @return parsed str of type T
+     */
+    public abstract T parse(String str);
 
+    /**
+     * @return list of all parsed values
+     */
+    public ArrayList<T> getValues() {
+        return m_values;
+    }
 }

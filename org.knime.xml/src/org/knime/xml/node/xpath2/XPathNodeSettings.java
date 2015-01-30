@@ -48,10 +48,11 @@
 package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -61,6 +62,7 @@ import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
 import org.w3c.dom.Node;
 
 /**
@@ -123,6 +125,7 @@ public class XPathNodeSettings {
 
     /**
      * This enum holds all possible options for the multiple tag option.
+     *
      * @author Tim-Oliver Buchholz
      */
     public enum XPathMultiColOption {
@@ -185,105 +188,105 @@ public class XPathNodeSettings {
     /**
      * @return the inputColumn
      */
-    String getInputColumn() {
+    public String getInputColumn() {
         return m_inputColumn;
     }
 
     /**
      * @param inputColumn the inputColumn to set
      */
-    void setInputColumn(final String inputColumn) {
+    public void setInputColumn(final String inputColumn) {
         m_inputColumn = inputColumn;
     }
 
     /**
      * @return the removeInputColumn
      */
-    boolean getRemoveInputColumn() {
+    public boolean getRemoveInputColumn() {
         return m_removeInputColumn;
     }
 
     /**
      * @param removeInputColumn the removeInputColumn to set
      */
-    void setRemoveInputColumn(final boolean removeInputColumn) {
+    public void setRemoveInputColumn(final boolean removeInputColumn) {
         m_removeInputColumn = removeInputColumn;
     }
 
     /**
      * @return the nsPrefixes
      */
-    String[] getNsPrefixes() {
+    public String[] getNsPrefixes() {
         return m_nsPrefixes;
     }
 
     /**
      * @param nsPrefixes the nsPrefixes to set
      */
-    void setNsPrefixes(final String[] nsPrefixes) {
+    public void setNsPrefixes(final String[] nsPrefixes) {
         m_nsPrefixes = nsPrefixes;
     }
 
     /**
      * @return the namespaces
      */
-    String[] getNamespaces() {
+    public String[] getNamespaces() {
         return m_namespaces;
     }
 
     /**
      * @param namespaces the namespaces to set
      */
-    void setNamespaces(final String[] namespaces) {
+    public void setNamespaces(final String[] namespaces) {
         m_namespaces = namespaces;
     }
 
     /**
      * @return the useRootsNS
      */
-    boolean getUseRootsNS() {
+    public boolean getUseRootsNS() {
         return m_useRootsNS;
     }
 
     /**
      * @param useRootsNS the useRootsNS to set
      */
-    void setUseRootsNS(final boolean useRootsNS) {
+    public void setUseRootsNS(final boolean useRootsNS) {
         m_useRootsNS = useRootsNS;
     }
 
     /**
      * @return the rootsNSPrefix
      */
-    String getRootsNSPrefix() {
+    public String getRootsNSPrefix() {
         return m_rootsNSPrefix;
     }
 
     /**
      * @param rootsNSPrefix the rootsNSPrefix to set
      */
-    void setRootsNSPrefix(final String rootsNSPrefix) {
+    public void setRootsNSPrefix(final String rootsNSPrefix) {
         m_rootsNSPrefix = rootsNSPrefix;
     }
 
     /**
      * @return the number of xpath queries
      */
-    int getNumberOfQueries() {
+    public int getNumberOfQueries() {
         return m_numberOfQueries;
     }
 
     /**
      * @return the list of all xpath queries.
      */
-    ArrayList<XPathSettings> getXPathQueryList() {
+    public ArrayList<XPathSettings> getXPathQueryList() {
         return m_xpathQueryList;
     }
 
     /**
      * @param list the list of xpath queries.
      */
-    void setXPathQueryList(final ArrayList<XPathSettings> list) {
+    public void setXPathQueryList(final ArrayList<XPathSettings> list) {
         m_xpathQueryList = list;
         m_numberOfQueries = list.size();
     }
@@ -354,71 +357,8 @@ public class XPathNodeSettings {
     }
 
     /**
-     * Reset column names if use attribute for column name option is set.
-     * Ensures unique column names.
-     * @param value XML
-     * @param names all column names from the input table
-     */
-    public void setNewColumnNames(final XMLValue value, final HashSet<String> names) {
-        HashSet<String> newNames = names;
-        // add all names which are user set
-        for (XPathSettings xps : m_xpathQueryList) {
-            if (!xps.getUseAttributeForColName()) {
-                names.add(xps.getNewColumn());
-            }
-        }
-        // extract new column name from attribute
-        for (XPathSettings xps : m_xpathQueryList) {
-            if (xps.getUseAttributeForColName()) {
-                String q = xps.getXpathQuery();
-                int pos = q.indexOf('@');
-                if (pos != -1) {
-                    q = q.substring(0, pos);
-                }
-                if (!q.endsWith("]")) {
-                    q += "[1]";
-                }
-                String attributeForColName = xps.getAttributeForColName();
-                if (attributeForColName.startsWith("..")) {
-                    q = q.substring(0, q.lastIndexOf('/'));
-                    attributeForColName = attributeForColName.substring(2);
-                }
-                q += attributeForColName;
-                XPathExpression xpathExpr;
-                XPathFactory factory = XPathFactory.newInstance();
-                XPath xpath = factory.newXPath();
-                xpath.setNamespaceContext(new XPathNamespaceContext(getNsPrefixes(), getNamespaces()));
-
-                String name = xps.getNewColumn();
-                try {
-                    xpathExpr = xpath.compile(q);
-                    Object result = xpathExpr.evaluate(value.getDocument(), XPathConstants.NODE);
-                    Node n = (Node)result;
-                    if (n != null) {
-                        name = n.getTextContent();
-                    }
-//                    NamedNodeMap attributes = n.getAttributes();
-//                    for (int i = 0; i < attributes.getLength(); i++) {
-//                        if (attributes.item(i).getNodeName().equals(xps.getAttributeForColName())) {
-//                            name = attributes.item(i).getTextContent();
-//                        }
-//                    }
-
-                } catch (XPathExpressionException e) {
-                    // if no attribute value can be read use old name
-                } finally {
-                    if (name != null && !name.isEmpty()) {
-                        name = uniqueName(name, "", 0, newNames);
-                        newNames.add(name);
-                        xps.setNewColumn(name);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Creates a name which is not contained in names.
+     *
      * @param name new column name
      * @param suffix the suffix
      * @param i index for the suffix
@@ -433,5 +373,85 @@ public class XPathNodeSettings {
         return n;
     }
 
+    /**
+     * @param xmlValue XML value from input cell
+     * @param query xpath query
+     * @return xpath expression
+     * @throws InvalidSettingsException thrown if xpath expression is invalid
+     */
+    public XPathExpression createXPathExpr(final XMLValue xmlValue, final String query)
+            throws InvalidSettingsException {
+        List<String> nsPrefixes = new ArrayList<String>();
+        nsPrefixes.addAll(Arrays.asList(getNsPrefixes()));
+        if (nsPrefixes.contains(getRootsNSPrefix())) {
+            throw new InvalidSettingsException("The namespace table uses the prefix reserved for the "
+                + "roots namespace.");
+        }
+        nsPrefixes.add(getRootsNSPrefix());
+        List<String> namespaces = new ArrayList<String>();
+        namespaces.addAll(Arrays.asList(getNamespaces()));
+        if (xmlValue == null) {
+            String nsTemplate = "roots_ns_";
+            int counter = 0;
+            String ns = nsTemplate + counter;
+            while (namespaces.contains(ns)) {
+                counter++;
+                ns = nsTemplate + counter;
+            }
+            namespaces.add(ns);
+        } else {
+            Node root = xmlValue.getDocument().getFirstChild();
+            while (root.getNodeType() != Node.ELEMENT_NODE) {
+                root = root.getNextSibling();
+            }
+            String rootNSUri = root.getNamespaceURI();
+            if (rootNSUri != null) {
+                namespaces.add(rootNSUri);
+            } else {
+                throw new InvalidSettingsException("The root node does not have a namesapce URI.");
+            }
+        }
 
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext(new XPathNamespaceContext(nsPrefixes.toArray(new String[nsPrefixes.size()]),
+            namespaces.toArray(new String[namespaces.size()])));
+        try {
+            return xpath.compile(query);
+        } catch (XPathExpressionException e) {
+            throw new InvalidSettingsException("XPath query cannot be parsed.", e);
+        }
+    }
+
+    /**
+     * @param query the xpath query
+     * @return xpathexpression
+     * @throws InvalidSettingsException if query is invalid
+     *
+     */
+    public XPathExpression initXPathExpression(final String query) throws InvalidSettingsException {
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext(new XPathNamespaceContext(getNsPrefixes(), getNamespaces()));
+        try {
+            XPathExpression xpathExpr = xpath.compile(query);
+
+            if (getUseRootsNS()
+                && Arrays.binarySearch(getNsPrefixes(), getRootsNSPrefix()) >= 0) {
+                throw new InvalidSettingsException("The namespace table uses the prefix " + "reserved for the "
+                    + "roots namespace.");
+            } else {
+                return xpathExpr;
+            }
+        } catch (XPathExpressionException e) {
+            if (getUseRootsNS()) {
+                // try to compile it with roots default prefix
+                createXPathExpr(null, query);
+                // the xpath compiles with the roots default prefix
+                return null;
+            } else {
+                throw new InvalidSettingsException("XPath expression cannot be compiled.", e);
+            }
+        }
+    }
 }

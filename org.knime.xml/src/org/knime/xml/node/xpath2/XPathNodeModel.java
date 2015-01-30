@@ -74,6 +74,10 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
+import org.knime.xml.node.xpath2.CellFactories.XMLSplitCollectionCellFactory;
+import org.knime.xml.node.xpath2.CellFactories.XPathCollectionCellFactory;
+import org.knime.xml.node.xpath2.CellFactories.XPathMultiColCollectionCellFactory;
+import org.knime.xml.node.xpath2.CellFactories.XPathSingleCellFactory;
 
 /**
  * This is the model for the XPath node. It takes an XML column from the input table and performs a XPath query on every
@@ -168,6 +172,10 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
         BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec);
 
+        // TableSpec
+        // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
+        // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
+
         DataTableSpec replacedNames = renameSingleCells(collectedXMLData);
         BufferedDataTable dataTableWithSingleCellColNames =
             exec.createSpecReplacerTable(collectedXMLData, replacedNames);
@@ -178,6 +186,11 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         } else {
             // expand all multiple column collections
             ColumnRearranger expandColRearranger = insertMultiColumns(dataTableWithSingleCellColNames);
+
+            // TableSpec
+            // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
+            // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
+
             return new BufferedDataTable[]{exec.createColumnRearrangeTable(dataTableWithSingleCellColNames,
                 expandColRearranger, exec)};
         }
@@ -189,17 +202,21 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
      */
     private DataTableSpec renameSingleCells(final BufferedDataTable intermediateResult)
             throws InvalidSettingsException {
-        HashSet<String> usedNames = new HashSet<String>();
         int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
         DataTableSpec spec = intermediateResult.getDataTableSpec();
+
+        HashSet<String> usedNames = new HashSet<String>();
         usedNames.addAll(Arrays.asList(spec.getColumnNames()));
+
         String[] names = new String[numColumns];
         DataType[] types = new DataType[numColumns];
+
         for (int i = 0; i < numColumns; i++) {
             DataColumnSpec columnSpec = spec.getColumnSpec(i);
             names[i] = columnSpec.getName();
             types[i] = columnSpec.getType();
         }
+
         ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
         for (XPathSettings x : xpsList) {
             if (x.getMultipleTagOption().equals(XPathMultiColOption.SingleCell)) {
@@ -213,10 +230,17 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         return new DataTableSpec(names, types);
     }
 
+    /**
+     * Expands every collection column which is marked as multiple columns. For every found column name a new
+     * column is created. Every value will be matched to its corresponding column.
+     * @param in data table with collection cells for values and names
+     * @return data table with expanded collection cells
+     */
     private ColumnRearranger insertMultiColumns(final BufferedDataTable in) {
         DataTableSpec spec = in.getDataTableSpec();
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
         HashSet<String> usedColNames = new HashSet<String>();
+
         usedColNames.addAll(Arrays.asList(spec.getColumnNames()));
         for (int p : m_multiColPos) {
             usedColNames.add(in.getDataTableSpec().getColumnSpec(p).getName());
@@ -226,10 +250,13 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         int offset = 0;
         for (XPathSettings x : m_settings.getXPathQueryList()) {
             if (x.getMultipleTagOption().equals(XPathMultiColOption.MultipleColumns)) {
+
                 String[] colNames = new String[x.getColumnNames().size()];
+
                 for (int i = 0; i < colNames.length; i++) {
-                    colNames[i] = XPathNodeSettings.uniqueName(x.getColumnNames().get(i), "", i, usedColNames);
-                    usedColNames.add(colNames[i]);
+                    String uName = XPathNodeSettings.uniqueName(x.getColumnNames().get(i), "", i, usedColNames);
+                    colNames[i] = uName;
+                    usedColNames.add(uName);
                 }
 
                 int pos = m_multiColPos.get(posIndex++);
@@ -238,6 +265,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
                 for (int i = 0; i < types.length; i++) {
                     types[i] = t;
                 }
+
                 DataColumnSpec[] dcs = DataTableSpec.createColumnSpecs(colNames, types);
 
                 HashMap<String, Integer> reverseColNames = new HashMap<String, Integer>();
@@ -248,11 +276,10 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
                 }
 
                 colRearranger.insertAt(offset + pos + 2,
-                    XMLSplitCollectionCellFactory.create(dcs, reverseColNames, pos));
+                    XMLSplitCollectionCellFactory.create(dcs, reverseColNames, pos, pos + 1));
                 colRearranger.remove(offset + pos + 1, offset + pos);
                 offset = dcs.length;
-                //                colRearranger.replace(XMLSplitCollectionCellFactory.create(dcs, reverseColNames, pos), pos, pos + 1);
-                //colRearranger.append(XMLSplitCollectionCellFactory.create(dcs, reverseColNames, pos));
+
                 offset -= 2;
             }
         }
@@ -287,9 +314,6 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         }
         if (!inputColSpec.getType().isCompatible(XMLValue.class)) {
             throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not of type XML");
-        }
-        if (m_settings.getInputColumn() == null) {
-            throw new InvalidSettingsException("No XML column available.");
         }
 
         // DataTableSpec could alter based on input table and user input

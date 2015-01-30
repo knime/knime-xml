@@ -44,49 +44,63 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   20.01.2015 (tibuch): created
+ *   15.01.2015 (tibuch): created
  */
-package org.knime.xml.node.xpath2;
+package org.knime.xml.node.xpath2.ui;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.w3c.dom.NodeList;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 
 /**
- * Abstract class which evaluates a XPhat node list.
- * @author tibuch
- * @param <T> type of input
+ *
+ * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland.
  */
-public abstract class NodeListReader<T> {
-
-    private ArrayList<T> m_values;
+public class XPathNamespaceContext implements NamespaceContext {
+    private final Map<String, String> m_namespaces;
 
     /**
-     * @param nodes node list
+     * @param prefixes the prefixes
+     * @param namespaces the namespaces
      */
-    public NodeListReader(final NodeList nodes) {
-        m_values = new ArrayList<T>();
-
-        if (!(nodes.getLength() == 0)) {
-            for (int i = 0; i < nodes.getLength(); i++) {
-                String str = nodes.item(i).getTextContent();
-                m_values.add(parse(str));
-
+    public XPathNamespaceContext(final String[] prefixes, final String[] namespaces) {
+        m_namespaces = new HashMap<String, String>();
+        for (int i = 0; i < prefixes.length; i++) {
+            if (prefixes[i].isEmpty()) {
+                throw new IllegalArgumentException("There are empty " + "namespace prefixes. Please provide a "
+                    + "prefix for every namespace.");
             }
+            m_namespaces.put(prefixes[i], namespaces[i]);
         }
     }
 
-    /**
-     * @param str text content of a xpath node
-     * @return parsed str of type T
-     */
-    public abstract T parse(String str);
+    @Override
+    public String getNamespaceURI(final String prefix) {
+        if (prefix == null) {
+            throw new NullPointerException("Null prefix");
+        }
+        if ("xml".equals(prefix)) {
+            return XMLConstants.XML_NS_URI;
+        } else if (m_namespaces.containsKey(prefix)) {
+            return m_namespaces.get(prefix);
+        } else {
+            return XMLConstants.NULL_NS_URI;
+        }
+    }
 
+    @Override
+    public String getPrefix(final String uri) {
+        // This method isn't necessary for XPath processing.
+        throw new UnsupportedOperationException();
+    }
 
-    /**
-     * @return list of all parsed values
-     */
-    public ArrayList<T> getValues() {
-        return m_values;
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Iterator getPrefixes(final String uri) {
+        // This method isn't necessary for XPath processing.
+        throw new UnsupportedOperationException();
     }
 }

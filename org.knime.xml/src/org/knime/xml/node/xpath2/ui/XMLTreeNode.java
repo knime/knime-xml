@@ -46,7 +46,7 @@
  * History
  *   19.12.2014 (tibuch): created
  */
-package org.knime.xml.node.xpath2;
+package org.knime.xml.node.xpath2.ui;
 
 import java.util.ArrayList;
 import java.util.List;
