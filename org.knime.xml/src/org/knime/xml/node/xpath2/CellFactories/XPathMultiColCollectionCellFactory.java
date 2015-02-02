@@ -125,7 +125,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
 
         String values = DataTableSpec.getUniqueColumnName(spec, "values" + Math.random());
 
-        DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(values, xpathSettings.getDataCellType());
+        DataColumnSpecCreator appendSpec =
+            new DataColumnSpecCreator(values, ListCell.getCollectionType(xpathSettings.getDataCellType()));
         String colName = DataTableSpec.getUniqueColumnName(spec, "value_names" + Math.random());
         String base = colName;
         int i = 0;
@@ -207,8 +208,9 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             colNames = nlrNames.getValues();
         } else {
             colNames = new ArrayList<StringCell>();
+            String name = m_xpathSettings.getNewColumn();
             for (int i = 0; i < values.size(); i++) {
-                colNames.add(new StringCell("column(#" + i + ")"));
+                colNames.add(new StringCell(name + "(#" + i + ")"));
             }
         }
         return colNames;

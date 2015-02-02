@@ -61,7 +61,6 @@ import java.util.Set;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.RowKey;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLValue;
@@ -97,8 +96,6 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
      * {@link XPathNodeSettings#getXPathQueryList()}.
      */
     private List<Integer> m_multiColPos = new ArrayList<Integer>();
-
-    private RowKey m_firstRowKey;
 
     /**
      * Number of columns in input table.
@@ -147,7 +144,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             } else if (multipleTagOption.equals(XPathMultiColOption.SingleCell)) {
                 colRearranger.append(XPathSingleCellFactory.create(spec, m_settings, xps));
             } else {
-                colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps, m_firstRowKey));
+                colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps));
             }
         }
 
@@ -244,9 +241,12 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
         HashSet<String> usedColNames = new HashSet<String>();
 
-        usedColNames.addAll(Arrays.asList(spec.getColumnNames()));
-        for (int p : m_multiColPos) {
-            usedColNames.add(in.getDataTableSpec().getColumnSpec(p).getName());
+        for (int i = 0; i < spec.getNumColumns(); i++) {
+            if (!(m_multiColPos.contains(i))) {
+                usedColNames.add(spec.getColumnSpec(i).getName());
+            } else {
+                i++;
+            }
         }
 
         int posIndex = 0;
@@ -281,7 +281,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
                 colRearranger.insertAt(offset + pos + 2,
                     XMLSplitCollectionCellFactory.create(dcs, reverseColNames, pos, pos + 1));
                 colRearranger.remove(offset + pos + 1, offset + pos);
-                offset = dcs.length;
+                offset += dcs.length;
 
                 offset -= 2;
             }

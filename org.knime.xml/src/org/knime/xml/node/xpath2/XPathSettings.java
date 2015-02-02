@@ -402,6 +402,8 @@ public class XPathSettings {
         if (null == m_multiTagOption) {
             throw new InvalidSettingsException("No multi tag option defined.");
         }
+
+        m_colNameMap =  new TreeMap<Integer, String>();
     }
 
     /**

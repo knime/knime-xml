@@ -218,13 +218,16 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
      */
     private DataCell evaluateBoolean(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException {
-        DataCell newCell;
         NodeList nodeList = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
         if (nodeList.getLength() == 0) {
             return DataType.getMissingCell();
         }
         String result = nodeList.item(0).getTextContent();
-        return Boolean.parseBoolean(result) ? BooleanCell.TRUE : BooleanCell.FALSE;
+        if (result.isEmpty()) {
+            return DataType.getMissingCell();
+        } else {
+            return Boolean.parseBoolean(result) ? BooleanCell.TRUE : BooleanCell.FALSE;
+        }
     }
 
     /**
