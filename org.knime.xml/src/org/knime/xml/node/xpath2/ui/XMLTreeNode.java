@@ -172,9 +172,7 @@ public class XMLTreeNode {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((m_children == null) ? 0 : m_children.hashCode());
         result = prime * result + m_linenumber;
-        result = prime * result + ((m_parent == null) ? 0 : m_parent.hashCode());
         result = prime * result + ((m_path == null) ? 0 : m_path.hashCode());
         result = prime * result + ((m_tag == null) ? 0 : m_tag.hashCode());
         return result;
