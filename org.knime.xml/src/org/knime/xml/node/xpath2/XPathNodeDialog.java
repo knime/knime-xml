@@ -205,11 +205,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     private HashSet<String> m_allColNames = null;
 
     /**
-     * Linenumber of first XML element.
-     */
-    private int m_offset = 0;
-
-    /**
      * Is input data available.
      */
     private boolean m_hasInputData = false;
@@ -461,7 +456,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
                 String xmlTag = m_textfield.getSelectedText();
 
-                XMLTreeNode node = m_allTags.get(linenumber + m_offset);
+                XMLTreeNode node = m_allTags.get(linenumber + 1);
                 String xmlPath = node.getPath();
 
                 // if selection != node tag it probably is an attribute
@@ -713,7 +708,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             }
 
             createAllTagsLookUp(m_root);
-            m_offset = m_root.getChildren().get(0).getLinenumber() - 1;
         } catch (Throwable err) {
             throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
         }
