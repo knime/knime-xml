@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -688,9 +689,24 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             SaxHandler handler = new SaxHandler(m_root, noNSSet);
             saxParser.parse(new InputSource(new StringReader(xml)), handler);
 
-            m_namesspaceHasChanged = handler.getNamespaceHasChanged();
             m_allTags = new HashMap<Integer, XMLTreeNode>();
+
+            String[] k = handler.getKeys();
+            String[] v = handler.getValues();
+            List<String> keys = Arrays.asList(m_nsPanel.getKeys());
+            List<String> vals = Arrays.asList(m_nsPanel.getValues());
+            if (k.length != keys.size()) {
+                m_namesspaceHasChanged = true;
+            }
+            for (int i = 0; i < k.length; i++) {
+                if (!(keys.contains(k[i])
+                        && (vals.get(keys.indexOf(k[i])).equals(v[i])))) {
+                    m_namesspaceHasChanged = true;
+
+                }
+            }
             if (noNSSet) {
+                m_namesspaceHasChanged = false;
                 m_nsPanel.setTableData(handler.getKeys(), handler.getValues());
                 m_useRootsNS.setSelected(false);
                 m_rootNSPrefix.setEnabled(false);

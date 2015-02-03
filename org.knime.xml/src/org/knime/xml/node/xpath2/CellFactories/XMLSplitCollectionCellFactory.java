@@ -104,21 +104,22 @@ public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
     public DataCell[] getCells(final DataRow row) {
         DataCell[] cells = new DataCell[m_specs.length];
 
-        CollectionDataValue valueCollection = (CollectionDataValue)row.getCell(m_valueColIndex);
-        CollectionDataValue nameCollection = (CollectionDataValue)row.getCell(m_nameColIndex);
+        if (!row.getCell(m_valueColIndex).isMissing()) {
+            CollectionDataValue valueCollection = (CollectionDataValue)row.getCell(m_valueColIndex);
+            CollectionDataValue nameCollection = (CollectionDataValue)row.getCell(m_nameColIndex);
 
-        Iterator<DataCell> valIt = valueCollection.iterator();
-        Iterator<DataCell> nameIt = nameCollection.iterator();
+            Iterator<DataCell> valIt = valueCollection.iterator();
+            Iterator<DataCell> nameIt = nameCollection.iterator();
 
-        while (valIt.hasNext()) {
-            DataCell value = valIt.next();
-            DataCell name = nameIt.next();
+            while (valIt.hasNext()) {
+                DataCell value = valIt.next();
+                DataCell name = nameIt.next();
 
-            m_reverseColNames.keySet();
-                Integer index = m_reverseColNames.get(name.toString());
-                cells[index] = value;
+                m_reverseColNames.keySet();
+                    Integer index = m_reverseColNames.get(name.toString());
+                    cells[index] = value;
+            }
         }
-
         for (int i = 0; i < cells.length; i++) {
             if (cells[i] == null) {
                 cells[i] = DataType.getMissingCell();

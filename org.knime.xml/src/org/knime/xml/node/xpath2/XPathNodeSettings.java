@@ -270,13 +270,6 @@ public class XPathNodeSettings {
     }
 
     /**
-     * @return the number of xpath queries
-     */
-    public int getNumberOfQueries() {
-        return m_numberOfQueries;
-    }
-
-    /**
      * @return the list of all xpath queries.
      */
     public ArrayList<XPathSettings> getXPathQueryList() {

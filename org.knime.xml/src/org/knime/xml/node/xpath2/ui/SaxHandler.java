@@ -64,11 +64,6 @@ import org.xml.sax.helpers.DefaultHandler;
 public class SaxHandler extends DefaultHandler {
 
     /**
-     * XML hierarchy root.
-     */
-    private XMLTreeNode m_root;
-
-    /**
      * Current node in the XML hierarchy.
      */
     private XMLTreeNode m_currentNode;
@@ -89,15 +84,9 @@ public class SaxHandler extends DefaultHandler {
     private ArrayList<String> m_values;
 
     /**
-     * Collect namespace information.
-     */
-    private boolean m_collectNS;
-
-    /**
      * Indicate if namespace has changed.
      */
     private boolean m_namespaceHasChanged = false;
-
 
     /**
      * @param root XML hierarchy tree root
@@ -106,11 +95,9 @@ public class SaxHandler extends DefaultHandler {
     public SaxHandler(final XMLTreeNode root, final boolean collectNS) {
         super();
 
-        m_root = root;
         m_currentNode = root;
         m_keys = new ArrayList<String>();
         m_values = new ArrayList<String>();
-        m_collectNS = collectNS;
         new HashMap<String, Integer>();
     }
 
@@ -134,22 +121,16 @@ public class SaxHandler extends DefaultHandler {
 
         String ns = m_currentNode.getPrefix();
 
-        if (m_collectNS) {
-            if (!uri.isEmpty()) {
-                if (localName.equals(localQNmae)) {
-                    ns = "dns";
-                    localQNmae = ns + ":" + localQNmae;
-                } else {
-                    ns = localQNmae.substring(0, localQNmae.indexOf(':'));
-                }
-                if (!m_keys.contains(ns)) {
-                    m_keys.add(ns);
-                    m_values.add(uri);
-                }
+        if (!uri.isEmpty()) {
+            if (localName.equals(localQNmae)) {
+                ns = "dns";
+                localQNmae = ns + ":" + localQNmae;
+            } else {
+                ns = localQNmae.substring(0, localQNmae.indexOf(':'));
             }
-        } else {
             if (!m_keys.contains(ns)) {
-                m_namespaceHasChanged  = true;
+                m_keys.add(ns);
+                m_values.add(uri);
             }
         }
 
@@ -171,13 +152,6 @@ public class SaxHandler extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         m_currentNode = m_currentNode.getParent();
-    }
-
-    /**
-     * @return the XML hierarchy tree root
-     */
-    public XMLTreeNode getRoot() {
-        return m_root;
     }
 
     /**

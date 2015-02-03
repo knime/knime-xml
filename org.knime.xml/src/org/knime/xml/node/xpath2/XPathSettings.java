@@ -76,8 +76,6 @@ public class XPathSettings {
 
     private static final String RETURN_TYPE = "returnType";
 
-    private static final String MISSING_CELL_ON_FALSE = "missingCellOnFalse";
-
     private static final String MISSING_CELL_ON_EMPTY_STRING = "missingCellOnEmptyString";
 
     private static final String MISSING_CELL_ON_INF_OR_NAN = "missingCellOnInfinityNaN";
@@ -148,6 +146,13 @@ public class XPathSettings {
     }
 
     /**
+     * Creates a new XPath settings object.
+     */
+    public XPathSettings() {
+
+    }
+
+    /**
      * Examples:
      * value query: /root/element
      * name query: /name
@@ -176,13 +181,6 @@ public class XPathSettings {
         }
         q += attributeForColName;
         return q;
-    }
-
-    /**
-     *
-     */
-    public XPathSettings() {
-        // TODO Auto-generated constructor stub
     }
 
     /**

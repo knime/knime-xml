@@ -128,11 +128,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         DataColumnSpecCreator appendSpec =
             new DataColumnSpecCreator(values, ListCell.getCollectionType(xpathSettings.getDataCellType()));
         String colName = DataTableSpec.getUniqueColumnName(spec, "value_names" + Math.random());
-        String base = colName;
-        int i = 0;
-        while (colName.equals(values)) {
-            colName = base + "(#" + i++ + ")";
-        }
+
         DataColumnSpecCreator nameSpec =
             new DataColumnSpecCreator(colName, ListCell.getCollectionType(StringCell.TYPE));
         DataColumnSpec[] colSpecs = new DataColumnSpec[]{appendSpec.createSpec(), nameSpec.createSpec()};
@@ -208,9 +204,15 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             colNames = nlrNames.getValues();
         } else {
             colNames = new ArrayList<StringCell>();
-            String name = m_xpathSettings.getNewColumn();
+            String base = m_xpathSettings.getNewColumn();
+            String name = base;
+            int j = 0;
             for (int i = 0; i < values.size(); i++) {
-                colNames.add(new StringCell(name + "(#" + i + ")"));
+
+                while (colNames.contains(new StringCell(name))) {
+                    name = base +  "(#" + j++ + ")";
+                }
+                colNames.add(new StringCell(name));
             }
         }
         return colNames;
@@ -234,6 +236,11 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
 
             @Override
             public DataCell parse(final String str) {
+
+                if (str.isEmpty()) {
+                    return null;
+                }
+
                 boolean value = Boolean.parseBoolean(str);
 
                 if (value) {
@@ -250,6 +257,12 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");
             throw new XPathExpressionException("Number of values differs from number of column names.");
+        }
+
+        while (values.contains(null)) {
+            int i = values.indexOf(null);
+            colNames.remove(i);
+            values.remove(i);
         }
 
         m_xpathSettings.addMultiColName(colNames);
