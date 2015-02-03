@@ -198,7 +198,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
 
                 @Override
                 public StringCell parse(final String value) {
-                    return new StringCell(value);
+                    return new StringCell(value.trim());
                 }
             };
             colNames = nlrNames.getValues();
@@ -208,9 +208,10 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             String name = base;
             int j = 0;
             for (int i = 0; i < values.size(); i++) {
-
+                name = name.trim();
                 while (colNames.contains(new StringCell(name))) {
                     name = base +  "(#" + j++ + ")";
+                    name = name.trim();
                 }
                 colNames.add(new StringCell(name));
             }

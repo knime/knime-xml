@@ -360,6 +360,7 @@ public class XPathNodeSettings {
      */
     public static String uniqueName(final String name, final String suffix, final int i, final HashSet<String> names) {
         String n = name + suffix;
+        n = n.trim();
         if (names.contains(n)) {
             return uniqueName(name, "(#" + i + ")", i + 1, names);
         }
