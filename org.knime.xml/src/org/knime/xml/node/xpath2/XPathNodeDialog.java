@@ -467,7 +467,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 String xmlPath = null;
 
                 // if selection != node tag it probably is an attribute
-                if (!node.getTag().equals(xmlTag)) {
+                if (!node.getTag().startsWith(xmlTag)) {
                     int i = 0;
                     String attr = node.getAttributeName(i++);
 
