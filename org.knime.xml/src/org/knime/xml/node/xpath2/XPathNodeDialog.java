@@ -94,6 +94,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit.SelectWordAction;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.knime.core.data.DataRow;
@@ -440,6 +441,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         panel.setBorder(BorderFactory.createTitledBorder("XML-Cell Preview"));
 
         m_textfield = new RSyntaxTextArea(m_text);
+        m_textfield.setDragEnabled(false);
         m_textfield.setEditable(false);
         m_textfield.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
         m_textfield.setCodeFoldingEnabled(true);
@@ -457,7 +459,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 String xmlTag = m_textfield.getSelectedText();
 
                 XMLTreeNode node = m_allTags.get(linenumber + 1);
-                String xmlPath = node.getPath();
+                if (node == null) {
+                    JOptionPane.showMessageDialog(getPanel(), "Could not identify selected tag. Please select only one"
+                        + "tag at once.");
+                    return;
+                }
+                String xmlPath = null;
 
                 // if selection != node tag it probably is an attribute
                 if (!node.getTag().equals(xmlTag)) {
@@ -472,6 +479,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                         }
                         attr = node.getAttributeName(i++);
                     }
+                } else {
+                    xmlPath = node.getPath();
                 }
 
                 // if selection is not a known XML element the user has selected something different.
@@ -508,11 +517,48 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         });
 
+        m_textfield.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                // TODO Auto-generated method stub
+                if (m_textfield.getSelectedText() == null) {
+                    SelectWordAction swa = new SelectWordAction();
+                    swa.actionPerformedImpl(null, m_textfield);
+                }
+            }
+
+            @Override
+            public void mouseExited(final MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mouseEntered(final MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+
         // enable "Add XPath" only if something is selected
         m_textfield.addCaretListener(new CaretListener() {
 
             @Override
             public void caretUpdate(final CaretEvent e) {
+
                 if (m_textfield.getSelectedText() != null) {
                     menuItem.setEnabled(true);
                 } else {
@@ -521,6 +567,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
             }
         });
+
+
         popup.add(menuItem);
 
         final RTextScrollPane sp = new RTextScrollPane(m_textfield);
@@ -710,6 +758,19 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             createAllTagsLookUp(m_root);
         } catch (Throwable err) {
             throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
+        }
+    }
+
+    /**
+     * @param root
+     */
+    private void printTree(final XMLTreeNode root) {
+        if (root == null) {
+            return;
+        }
+        System.out.println(root.getTag());
+        for (int i = 0; i < root.getChildren().size(); i++) {
+            printTree(root.getChildren().get(i));
         }
     }
 

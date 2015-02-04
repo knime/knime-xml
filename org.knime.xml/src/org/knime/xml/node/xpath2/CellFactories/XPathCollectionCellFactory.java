@@ -235,8 +235,6 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
             newCell = DataType.getMissingCell();
         } else {
             List<DoubleCell> cells = new ArrayList<DoubleCell>();
-            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-            domFactory.setNamespaceAware(true);
             for (int i = 0; i < nodes.getLength(); i++) {
                 String str = nodes.item(i).getTextContent();
                 double value = 0;

@@ -62,6 +62,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.ColumnRearranger;
+import org.knime.core.data.xml.PMMLCell;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.BufferedDataTable;
@@ -301,7 +302,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             Iterator<DataColumnSpec> it = specs.iterator();
             while (it.hasNext()) {
                 DataColumnSpec spec = it.next();
-                if (spec.getType().equals(XMLCell.TYPE)) {
+                if (spec.getType().equals(XMLCell.TYPE) || spec.getType().equals(PMMLCell.TYPE)) {
                     m_settings.setInputColumn(spec.getName());
                     break;
                 }
