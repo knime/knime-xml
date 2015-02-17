@@ -248,6 +248,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      */
     private JTextField m_rootNSPrefix = null;
 
+    private JLabel m_currentXPath;
+
     /**
      * Creates a new dialog.
      */
@@ -560,6 +562,39 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             public void caretUpdate(final CaretEvent e) {
 
                 if (m_textfield.getSelectedText() != null) {
+                    int linenumber = m_textfield.getCaretLineNumber();
+
+                    String xmlTag = m_textfield.getSelectedText();
+
+                    XMLTreeNode node = m_allTags.get(linenumber + 1);
+                    String xmlPath = "Selected XML element is not a tag nor an attribute.";
+                    if (node != null) {
+
+                    // if selection != node tag it probably is an attribute
+                    if (!node.getTag().startsWith(xmlTag)) {
+                        int i = 0;
+                        String attr = node.getAttributeName(i++);
+
+                        // check all attributes
+                        while (attr != null) {
+                            if (xmlTag.equals(attr)) {
+                                xmlPath = node.getPath() + "/@" + attr;
+                                break;
+                            }
+                            attr = node.getAttributeName(i++);
+                        }
+                    } else {
+                        xmlPath = node.getPath();
+                    }
+                    }
+                    if (!m_currentXPath.getText().equals(xmlPath)) {
+                        if (xmlPath.equals("Selected XML element is not a tag nor an attribute.")) {
+                            m_currentXPath.setForeground(Color.RED);
+                        } else {
+                            m_currentXPath.setForeground(new Color(0, 153, 0));
+                        }
+                        m_currentXPath.setText(xmlPath);
+                    }
                     menuItem.setEnabled(true);
                 } else {
                     menuItem.setEnabled(false);
@@ -597,8 +632,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         JScrollPane scrollPane = new JScrollPane(m_table);
         scrollPane.setPreferredSize(new Dimension(panel.getPreferredSize().width, 100));
 
+        m_currentXPath = new JLabel();
+
         GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(2, 0, 2, 0);
         c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = 2;
         c.weightx = 1;
         c.weighty = 1;
         c.gridx = 0;
@@ -606,6 +645,14 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         panel.add(scrollPane, c);
 
         c.weighty = 0;
+        c.gridwidth = 1;
+
+        c.gridy++;
+        panel.add(new JLabel("Selected XPath: "), c);
+        c.gridx++;
+        panel.add(m_currentXPath, c);
+        c.gridwidth = 2;
+
         c.gridy++;
         panel.add(createSummaryTableButtons(), c);
         return panel;
@@ -652,6 +699,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      */
     private void onAdd() {
         XPathSettings setting = new XPathSettings();
+        setting.setXpathQuery(m_currentXPath.getText());
         XPathSettings s = NewQueryDialog.openUserDialog(getFrame(), setting, false, m_allColNames);
 
         if (s != null) {
@@ -936,6 +984,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         }
         m_table.setModel(m_tableModel);
+        m_currentXPath.setForeground(new Color(0, 153, 0));
+        m_currentXPath.setText("/*");
         m_loadSettings = false;
         updateText(s.getInputColumn());
     }
