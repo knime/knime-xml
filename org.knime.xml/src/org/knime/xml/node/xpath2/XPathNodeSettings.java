@@ -142,7 +142,12 @@ public class XPathNodeSettings {
         /**
          * Create for each appearance of this tag a new SingleCell (a new column).
          */
-        MultipleColumns
+        MultipleColumns,
+
+        /**
+         * Create a collection from all query results and ungroup it. Add for each item a new row.
+         */
+        UngroupToRows
     }
 
     /**

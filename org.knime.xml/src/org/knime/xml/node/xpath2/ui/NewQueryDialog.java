@@ -124,26 +124,26 @@ public final class NewQueryDialog extends JDialog {
 
     private JComboBox<?> m_returnTypeSelection;
 
-        /*
-         * Returntype = String
-         */
+    /*
+     * Returntype = String
+     */
 
     private JCheckBox m_missingCellOnEmptyString;
 
     private JCheckBox m_missingCellOnEmptySet;
 
-        /*
-         * Returntype = Integer
-         */
+    /*
+     * Returntype = Integer
+     */
     private JRadioButton m_missingCellOnInfOrNaN;
 
     private JRadioButton m_valueOnInfOrNaN;
 
     private JTextField m_defaultNumber;
 
-        /*
-         * Returntype = XMLValue
-         */
+    /*
+     * Returntype = XMLValue
+     */
     private JTextField m_xmlFragmentName;
 
     /*
@@ -225,7 +225,8 @@ public final class NewQueryDialog extends JDialog {
         // XPath query panel
         m_xpathQuery = new JTextArea();
         JScrollPane xpathScrollPane = new JScrollPane(m_xpathQuery);
-        xpathScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        xpathScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        xpathScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         xpathScrollPane.setBorder(BorderFactory.createTitledBorder("XPath value query"));
         p.add(xpathScrollPane, c);
 
@@ -280,8 +281,7 @@ public final class NewQueryDialog extends JDialog {
     }
 
     /**
-     * A panel where the user can choose if a hardcoded column name or
-     * a XML value should be taken as column name.
+     * A panel where the user can choose if a hardcoded column name or a XML value should be taken as column name.
      *
      * @return panel with column name options
      */
@@ -292,11 +292,10 @@ public final class NewQueryDialog extends JDialog {
         m_xpathQueryColumnName = new JTextField(8);
         m_xpathQueryColumnName.setEnabled(false);
 
-
         m_hardcodedName = new JRadioButton("New column name: ");
         m_hardcodedName.setSelected(true);
-        m_useAttributeForColName = new JRadioButton("<html>XPath query for column name: <br>"
-            + "(relative to value query)</html>");
+        m_useAttributeForColName =
+            new JRadioButton("<html>XPath query for column name: <br>" + "(relative to value query)</html>");
         m_useAttributeForColName.addItemListener(new ItemListener() {
 
             @Override
@@ -309,8 +308,6 @@ public final class NewQueryDialog extends JDialog {
         ButtonGroup bg = new ButtonGroup();
         bg.add(m_hardcodedName);
         bg.add(m_useAttributeForColName);
-
-
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -486,11 +483,11 @@ public final class NewQueryDialog extends JDialog {
             return false;
         }
 
-                if (!name.equals(m_nodeSettings.getNewColumn()) && m_columnNames.contains(name)) {
-                    JOptionPane.showMessageDialog(this, "Column name allready taken. Enter valid name or press cancel.",
-                        "Column name taken", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+        if (!name.equals(m_nodeSettings.getNewColumn()) && m_columnNames.contains(name)) {
+            JOptionPane.showMessageDialog(this, "Column name allready taken. Enter valid name or press cancel.",
+                "Column name taken", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
 
         return true;
     }
@@ -602,23 +599,28 @@ public final class NewQueryDialog extends JDialog {
         final XPathMultiColOption singlecell = XPathMultiColOption.SingleCell;
         final XPathMultiColOption collectioncell = XPathMultiColOption.CollectionCell;
         final XPathMultiColOption multiplecolumns = XPathMultiColOption.MultipleColumns;
+        final XPathMultiColOption ungroupToRows = XPathMultiColOption.UngroupToRows;
         m_multiTagOptionMap.put(singlecell, "Single Cell");
         m_multiTagOptionMap.put(collectioncell, "Collection Cell");
         m_multiTagOptionMap.put(multiplecolumns, "Multiple Columns");
+        m_multiTagOptionMap.put(ungroupToRows, "Multiple Rows");
         m_multiTagOptionMapReverse = new HashMap<String, XPathNodeSettings.XPathMultiColOption>();
         m_multiTagOptionMapReverse.put("Single Cell", singlecell);
         m_multiTagOptionMapReverse.put("Collection Cell", collectioncell);
         m_multiTagOptionMapReverse.put("Multiple Columns", multiplecolumns);
+        m_multiTagOptionMapReverse.put("Multiple Rows", ungroupToRows);
 
         m_multiTagOption =
             new RadionButtonPanel<String>(null, m_multiTagOptionMap.get(singlecell),
-                m_multiTagOptionMap.get(collectioncell), m_multiTagOptionMap.get(multiplecolumns));
+                m_multiTagOptionMap.get(collectioncell), m_multiTagOptionMap.get(multiplecolumns),
+                m_multiTagOptionMap.get(ungroupToRows));
         m_multiTagOption.addPropertyChangeListener(new PropertyChangeListener() {
 
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(RadionButtonPanel.SELECTED_VALUE)) {
-                    if (evt.getNewValue().equals(m_multiTagOptionMap.get(collectioncell))) {
+                    if (evt.getNewValue().equals(m_multiTagOptionMap.get(collectioncell))
+                        || evt.getNewValue().equals(m_multiTagOptionMap.get(ungroupToRows))) {
                         m_useAttributeForColName.setEnabled(false);
                         m_hardcodedName.doClick();
                     } else {
@@ -628,7 +630,7 @@ public final class NewQueryDialog extends JDialog {
 
             }
         });
-        m_multiTagOption.setLayout(new GridLayout(1, 3));
+        m_multiTagOption.setLayout(new GridLayout(2, 2));
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
@@ -657,7 +659,7 @@ public final class NewQueryDialog extends JDialog {
     }
 
     /**
-     *  Blows away the dialog.
+     * Blows away the dialog.
      */
     private void shutDown() {
         setVisible(false);

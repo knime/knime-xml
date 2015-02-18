@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.knime.base.node.preproc.ungroup.UngroupOperation;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -104,6 +105,11 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     private int m_offset;
 
     /**
+     * Indices of {@link XPathSettings}, which will be ungrouped to rows.
+     */
+    private ArrayList<Integer> m_ungroupIndices = new ArrayList<Integer>();
+
+    /**
      * Creates a new model with no input port and one output port.
      */
     public XPathNodeModel() {
@@ -121,6 +127,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         ArrayList<XPathSettings> xpathQueries = m_settings.getXPathQueryList();
 
         m_multiColPos = new ArrayList<Integer>();
+        m_ungroupIndices = new ArrayList<Integer>();
 
         m_offset = spec.getNumColumns();
         if (m_settings.getRemoveInputColumn()) {
@@ -144,6 +151,9 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
                 m_multiColPos.add(xps.getCurrentColumnIndex());
             } else if (multipleTagOption.equals(XPathMultiColOption.SingleCell)) {
                 colRearranger.append(XPathSingleCellFactory.create(spec, m_settings, xps));
+            } else if (multipleTagOption.equals(XPathMultiColOption.UngroupToRows)) {
+                colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps));
+                m_ungroupIndices.add(xps.getCurrentColumnIndex());
             } else {
                 colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps));
             }
@@ -178,19 +188,36 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         BufferedDataTable dataTableWithSingleCellColNames =
             exec.createSpecReplacerTable(collectedXMLData, replacedNames);
 
+        BufferedDataTable ungrouped = dataTableWithSingleCellColNames;
+        if (!m_ungroupIndices.isEmpty()) {
+            int[] indices = new int[m_ungroupIndices.size()];
+            String[] colNames = new String[m_ungroupIndices.size()];
+            for (int i = 0; i < m_ungroupIndices.size(); i++) {
+                indices[i] = m_ungroupIndices.get(i);
+                colNames[i] =
+                    dataTableWithSingleCellColNames.getDataTableSpec().getColumnSpec(m_ungroupIndices.get(i)).getName();
+            }
+            UngroupOperation ugO = new UngroupOperation(false, false, true);
+            ugO.setColIndices(indices);
+            ugO.setTable(dataTableWithSingleCellColNames);
+            ugO.setNewSpec(UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true,
+                colNames));
+
+            ungrouped = ugO.compute(exec);
+        }
+
         if (m_multiColPos.isEmpty()) {
             // no multiple column options ---> return
-            return new BufferedDataTable[]{dataTableWithSingleCellColNames};
+            return new BufferedDataTable[]{ungrouped};
         } else {
             // expand all multiple column collections
-            ColumnRearranger expandColRearranger = insertMultiColumns(dataTableWithSingleCellColNames);
+            ColumnRearranger expandColRearranger = insertMultiColumns(ungrouped);
 
             // TableSpec
             // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
             // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
 
-            return new BufferedDataTable[]{exec.createColumnRearrangeTable(dataTableWithSingleCellColNames,
-                expandColRearranger, exec)};
+            return new BufferedDataTable[]{exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec)};
         }
     }
 
@@ -198,8 +225,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
      * @param intermediateResult DataTable with all SingleCell columns and Collection columns
      * @return table spec with new unique names.
      */
-    private DataTableSpec renameSingleCells(final BufferedDataTable intermediateResult)
-            throws InvalidSettingsException {
+    private DataTableSpec renameSingleCells(final BufferedDataTable intermediateResult) throws InvalidSettingsException {
         int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
         DataTableSpec spec = intermediateResult.getDataTableSpec();
         ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
@@ -232,8 +258,9 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     }
 
     /**
-     * Expands every collection column which is marked as multiple columns. For every found column name a new
-     * column is created. Every value will be matched to its corresponding column.
+     * Expands every collection column which is marked as multiple columns. For every found column name a new column is
+     * created. Every value will be matched to its corresponding column.
+     *
      * @param in data table with collection cells for values and names
      * @return data table with expanded collection cells
      */

@@ -262,6 +262,8 @@ public class XPathSettings {
             pre = "(SingleCell)";
         } else if (m_multiTagOption.equals(XPathMultiColOption.CollectionCell)) {
             pre = "(CollectionCell)";
+        } else if (m_multiTagOption.equals(XPathMultiColOption.UngroupToRows)) {
+            pre = "(Ungroup to Rows)";
         } else {
             pre = "(Multiple columns)";
         }
