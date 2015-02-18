@@ -119,8 +119,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         String newName = xpathSettings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
-            throw new InvalidSettingsException("Cannot create column " + newName
-                + " since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");
         }
 
         String values = DataTableSpec.getUniqueColumnName(spec, "values" + Math.random());
@@ -189,7 +188,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
     }
 
     private ArrayList<StringCell> getColumnNameCollection(final XMLValue xmlValue, final ArrayList<DataCell> values)
-            throws XPathExpressionException {
+        throws XPathExpressionException {
         ArrayList<StringCell> colNames = null;
         if (m_xpathSettings.getUseAttributeForColName()) {
             Object nameResult = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
@@ -210,7 +209,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             for (int i = 0; i < values.size(); i++) {
                 name = name.trim();
                 while (colNames.contains(new StringCell(name))) {
-                    name = base +  "(#" + j++ + ")";
+                    name = base + "(#" + j++ + ")";
                     name = name.trim();
                 }
                 colNames.add(new StringCell(name));
@@ -300,12 +299,15 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
                         value = Double.POSITIVE_INFINITY;
                     } else if ((str).toLowerCase().equals("-inf")) {
                         value = Double.NEGATIVE_INFINITY;
+                    } else if (str.trim().isEmpty()) {
+                        return DataType.getMissingCell();
+                    } else {
+                        logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + str + "\". " + str
+                            + " is not of type double.");
+                        throw e;
                     }
                 }
-                if (!str.trim().isEmpty()) {
-                    return new DoubleCell(value);
-                }
-                return DataType.getMissingCell();
+                return new DoubleCell(value);
             }
         };
 
@@ -349,10 +351,17 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
                     if (str.equals("NaN") || str.toLowerCase().equals("inf") || str.toLowerCase().equals("-inf")) {
                         if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
                             return new IntCell(m_xpathSettings.getDefaultNumber());
+                        } else {
+                            return DataType.getMissingCell();
                         }
+                    } else if (str.trim().isEmpty()) {
+                        return DataType.getMissingCell();
+                    } else {
+                        logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + str + "\". " + str
+                            + " is not of type integer.");
+                        throw e;
                     }
                 }
-                return DataType.getMissingCell();
             }
         };
 

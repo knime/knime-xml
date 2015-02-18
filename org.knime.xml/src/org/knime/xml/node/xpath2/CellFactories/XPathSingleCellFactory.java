@@ -115,8 +115,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
         String newName = xpathSettings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
-            throw new InvalidSettingsException("Cannot create column " + newName
-                + " since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");
         }
 
         DataColumnSpecCreator appendSpec = new DataColumnSpecCreator(newName, xpathSettings.getDataCellType());
@@ -137,7 +136,6 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
             m_settings.initXPathExpression(xpathQuery);
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -259,7 +257,9 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 }
             }
             if (newCell == null) {
-                throw new XPathExpressionException(e);
+                logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + result + "\". " + result
+                    + " is not of type integer.");
+                throw e;
             }
         }
 
@@ -288,8 +288,11 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 return new DoubleCell(Double.NEGATIVE_INFINITY);
             } else if (((String)result).trim().isEmpty()) {
                 return DataType.getMissingCell();
+            } else {
+                logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + result + "\". " + result
+                    + " is not of type double.");
+                throw e;
             }
-            throw new XPathExpressionException(e);
         }
     }
 

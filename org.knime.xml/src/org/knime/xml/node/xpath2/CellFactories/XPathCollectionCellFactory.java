@@ -75,6 +75,7 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.xml.node.xpath2.XPathNodeSettings;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.knime.xml.node.xpath2.XPathSettings;
@@ -88,6 +89,8 @@ import org.w3c.dom.NodeList;
  * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
  */
 public final class XPathCollectionCellFactory extends AbstractCellFactory {
+
+    private static NodeLogger logger = NodeLogger.getLogger(XPathCollectionCellFactory.class);
 
     private XPathNodeSettings m_settings;
 
@@ -113,8 +116,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         String newName = xpathSettings.getNewColumn();
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
-            throw new InvalidSettingsException("Cannot create column " + newName
-                + " since it is already in the input.");
+            throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");
         }
 
         DataColumnSpecCreator appendSpec =
@@ -247,6 +249,10 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                         value = Double.POSITIVE_INFINITY;
                     } else if ((str).toLowerCase().equals("-inf")) {
                         value = Double.NEGATIVE_INFINITY;
+                    } else if (!str.trim().isEmpty()) {
+                        logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + result + "\". " + result
+                            + " is not of type double.");
+                        throw e;
                     }
                 }
                 if (!str.trim().isEmpty()) {
@@ -292,6 +298,10 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                         if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
                             cells.add(new IntCell(m_xpathSettings.getDefaultNumber()));
                         }
+                    } else if (!str.trim().isEmpty()) {
+                        logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + result + "\". " + result
+                            + " is not of type double.");
+                        throw e;
                     }
                 }
             }
