@@ -54,6 +54,7 @@ import java.util.HashMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -62,6 +63,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Tim-Oliver Buchholz, KNIME AG Zurich
  */
 public class SaxHandler extends DefaultHandler {
+
+    private int count = 0;
 
     /**
      * Current node in the XML hierarchy.
@@ -144,6 +147,10 @@ public class SaxHandler extends DefaultHandler {
         XMLTreeNode newChild =
             new XMLTreeNode(p, attr, ns, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
         m_currentNode = m_currentNode.add(newChild);
+
+        //        if (m_locator.getLineNumber() > 17) {
+        //            throw new StopParsingException();
+        //        }
     }
 
     /**
@@ -152,6 +159,7 @@ public class SaxHandler extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         m_currentNode = m_currentNode.getParent();
+
     }
 
     /**
@@ -166,6 +174,19 @@ public class SaxHandler extends DefaultHandler {
      */
     public String[] getValues() {
         return m_values.toArray(new String[m_values.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void fatalError(final SAXParseException arg0) throws SAXException {
+        if (arg0.getMessage().equals("Premature end of file.")
+            || arg0.getMessage().equals("XML document structures must start and end within the same entity.")) {
+            // thrown if the preview string is not a complete xml file
+            throw new StopParsingException();
+        }
+        super.fatalError(arg0);
     }
 
     /**

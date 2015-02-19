@@ -149,7 +149,7 @@ public class XMLTreeNode {
             } else {
                 pt  = n.getTag();
             }
-            if (pt.matches(tag + "[[0-9]+]*")) {
+            if (pt.matches(tag + "(\\[[0-9]+\\])*")) {
                 count++;
             }
         }

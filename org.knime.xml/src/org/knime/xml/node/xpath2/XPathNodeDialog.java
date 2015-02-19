@@ -114,6 +114,7 @@ import org.knime.core.node.util.KeyValuePanel;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.knime.xml.node.xpath2.ui.NewQueryDialog;
 import org.knime.xml.node.xpath2.ui.SaxHandler;
+import org.knime.xml.node.xpath2.ui.StopParsingException;
 import org.knime.xml.node.xpath2.ui.XMLTreeNode;
 import org.xml.sax.InputSource;
 
@@ -460,7 +461,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
                 String xmlTag = m_textfield.getSelectedText();
 
-                XMLTreeNode node = m_allTags.get(linenumber + 1);
+                XMLTreeNode node = m_allTags.get(linenumber);
                 if (node == null) {
                     JOptionPane.showMessageDialog(getPanel(), "Could not identify selected tag. Please select only one"
                         + "tag at once.");
@@ -566,7 +567,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
                     String xmlTag = m_textfield.getSelectedText();
 
-                    XMLTreeNode node = m_allTags.get(linenumber + 1);
+                    XMLTreeNode node = m_allTags.get(linenumber);
                     String xmlPath = "Selected XML element is not a tag nor an attribute.";
                     if (node != null) {
 
@@ -778,8 +779,11 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
             boolean noNSSet = m_nsPanel.getKeys().length == 0;
             SaxHandler handler = new SaxHandler(m_root, noNSSet);
-            saxParser.parse(new InputSource(new StringReader(xml)), handler);
-
+            try {
+                saxParser.parse(new InputSource(new StringReader(xml)), handler);
+            } catch (StopParsingException spe) {
+                // easy
+            }
             m_allTags = new HashMap<Integer, XMLTreeNode>();
 
             String[] k = handler.getKeys();
@@ -803,7 +807,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 m_rootNSPrefix.setEnabled(false);
             }
 
-            createAllTagsLookUp(m_root);
+            createAllTagsLookUp(m_root, xml.split("\n"), 0);
         } catch (Throwable err) {
             throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
         }
@@ -825,14 +829,43 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     /**
      * Map of every tag and corresponding line number.
      * @param n node
+     * @param strings
+     * @param i
      */
-    private void createAllTagsLookUp(final XMLTreeNode n) {
+    private int createAllTagsLookUp(final XMLTreeNode n, final String[] strings, int i) {
+        if (n.getLinenumber() != -1) {
+            String t = n.getTag();
+            String s = strings[i].trim();
+            boolean next = true;
+            boolean isComment = false;
+            do  {
+               if (s.matches("\\s*<!--.*")) {
+                   isComment = true;
+               }
+               if (s.matches(".*-->.*")) {
+                   isComment = false;
+                   s = s.substring(s.indexOf("-->") + 3, s.length());
+               }
+               if (!isComment) {
+                   if (s.matches("\\s*<(?![?!/]).*")) {
+                       next = false;
+                   } else {
+                       i++;
+                       s = strings[i];
+                   }
+               } else {
+                   i++;
+                   s = strings[i];
+               }
+            } while (next);
+        m_allTags.put(i++, n);
+        }
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
-                createAllTagsLookUp(node);
+                i = createAllTagsLookUp(node, strings, i);
             }
         }
-        m_allTags.put(n.getLinenumber(), n);
+        return i;
     }
 
     /**
@@ -1005,9 +1038,27 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 try {
                     m_text.remove(0, m_text.getLength());
                     String xmlString = row.getCell(i).toString();
+                    String newlineChar = "\n";
+                    if (xmlString.contains("\r")) {
+                        newlineChar = "\r";
+                    }
+                    String[] strings = xmlString.split(newlineChar, 2000);
+                    int stop = strings.length;
+                    if (strings.length >= 2000) {
+                        strings[strings.length - 1] = "Only the first 2000 lines of the \n"
+                            + "input xml are set as preview.";
+                    }
+                    xmlString = "";
+                    for (int j = 0; j < stop; j++) {
+                        if (!strings[j].isEmpty()) {
+                            xmlString += strings[j] + "\n";
+                        }
+                    }
                     m_text.insertString(0, xmlString, null);
                     m_textfield.revalidate();
+                    xmlString = m_textfield.getText();
                     createHierarchyTree(xmlString);
+
                 } catch (BadLocationException e) {
                     // nothing to do
                 }
