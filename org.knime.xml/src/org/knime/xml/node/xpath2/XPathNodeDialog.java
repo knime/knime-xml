@@ -834,7 +834,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      */
     private int createAllTagsLookUp(final XMLTreeNode n, final String[] strings, int i) {
         if (n.getLinenumber() != -1) {
-            String t = n.getTag();
             String s = strings[i].trim();
             boolean next = true;
             boolean isComment = false;
@@ -851,10 +850,16 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                        next = false;
                    } else {
                        i++;
+                       if (i >= strings.length) {
+                           return i;
+                       }
                        s = strings[i];
                    }
                } else {
                    i++;
+                   if (i >= strings.length) {
+                       return i;
+                   }
                    s = strings[i];
                }
             } while (next);
@@ -863,6 +868,9 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
                 i = createAllTagsLookUp(node, strings, i);
+                if (i >= strings.length) {
+                    return i;
+                }
             }
         }
         return i;

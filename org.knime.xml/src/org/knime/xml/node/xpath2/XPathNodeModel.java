@@ -178,7 +178,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
         BufferedDataTable in = inData[0];
         ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
-        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec);
+        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec.createSubProgress(0.9));
 
         // TableSpec
         // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
@@ -203,7 +203,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             ugO.setNewSpec(UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true,
                 colNames));
 
-            ungrouped = ugO.compute(exec);
+            ungrouped = ugO.compute(exec.createSubExecutionContext(0.05));
         }
 
         if (m_multiColPos.isEmpty()) {
@@ -217,7 +217,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
             // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
 
-            return new BufferedDataTable[]{exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec)};
+            return new BufferedDataTable[]{exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec.createSubProgress(0.05))};
         }
     }
 
