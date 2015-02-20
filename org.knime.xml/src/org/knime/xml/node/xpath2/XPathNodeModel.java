@@ -184,7 +184,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
         // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
 
-        DataTableSpec replacedNames = renameSingleCells(collectedXMLData);
+        DataTableSpec replacedNames = renameSingleNameCells(collectedXMLData);
         BufferedDataTable dataTableWithSingleCellColNames =
             exec.createSpecReplacerTable(collectedXMLData, replacedNames);
 
@@ -222,10 +222,11 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     }
 
     /**
+     * Renames all Single-, Collection- and UngroupCollectionColumns which take their name from an xml element.
      * @param intermediateResult DataTable with all SingleCell columns and Collection columns
      * @return table spec with new unique names.
      */
-    private DataTableSpec renameSingleCells(final BufferedDataTable intermediateResult) throws InvalidSettingsException {
+    private DataTableSpec renameSingleNameCells(final BufferedDataTable intermediateResult) throws InvalidSettingsException {
         int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
         DataTableSpec spec = intermediateResult.getDataTableSpec();
         ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
@@ -246,7 +247,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         }
 
         for (XPathSettings x : xpsList) {
-            if (x.getMultipleTagOption().equals(XPathMultiColOption.SingleCell)) {
+            if (!x.getMultipleTagOption().equals(XPathMultiColOption.MultipleColumns)) {
                 if (x.getUseAttributeForColName()) {
                     String name = XPathNodeSettings.uniqueName(x.getColumnNames().get(0), "", 0, usedNames);
                     usedNames.add(name);

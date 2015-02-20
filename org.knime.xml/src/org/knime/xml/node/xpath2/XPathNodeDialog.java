@@ -344,6 +344,17 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
         // remove input column
         m_removeInputColumn = new JCheckBox("Remove source column.");
+        m_removeInputColumn.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(final ItemEvent e) {
+                if (m_removeInputColumn.isSelected()) {
+                    m_allColNames.remove(m_inputColumn.getSelectedColumn());
+                } else {
+                    m_allColNames.add(m_inputColumn.getSelectedColumn());
+                }
+            }
+        });
 
         // splitpane for summary and xml preview
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);

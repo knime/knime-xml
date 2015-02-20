@@ -55,9 +55,11 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -79,6 +81,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.xml.node.xpath2.XPathNodeSettings;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.knime.xml.node.xpath2.XPathSettings;
+import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -141,15 +144,49 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
      */
     @Override
     public DataCell[] getCells(final DataRow row) {
+        DataCell xmlCell = row.getCell(m_xmlIndex);
+        if (xmlCell.isMissing()) {
+            return new DataCell[]{DataType.getMissingCell()};
+        }
+
+        String name = m_xpathSettings.getNewColumn();
+        if (m_xpathSettings.getUseAttributeForColName()) {
+            XMLValue xmlValue = (XMLValue)xmlCell;
+
+            XPathExpression xpathExpr;
+            XPathFactory factory = XPathFactory.newInstance();
+            XPath xpath = factory.newXPath();
+            xpath
+                .setNamespaceContext(new XPathNamespaceContext(m_settings.getNsPrefixes(), m_settings.getNamespaces()));
+
+            String colNameQuery = "";
+            try {
+                colNameQuery = m_xpathSettings.buildXPathForColNames(m_xpathSettings.getXpathQuery());
+                xpathExpr = xpath.compile(colNameQuery);
+                Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
+                name = (String)result;
+
+            } catch (XPathExpressionException e) {
+                logger.warn("Could not compile XPath query for column name. XPath query: " + colNameQuery);
+            }
+
+        }
+        // if more than one column name was found throw exception
+        if (!m_xpathSettings.addSingleColname(name)) {
+            logger.warn("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
+                + " found more than one column name.");
+            throw new IllegalStateException("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
+                + " found more than one column name.");
+        }
         return new DataCell[]{getCell(row)};
     }
 
     private DataCell getCell(final DataRow row) {
-        DataCell xmlCell = row.getCell(m_xmlIndex);
-        if (xmlCell.isMissing()) {
-            return DataType.getMissingCell();
-        }
-        XMLValue xmlValue = (XMLValue)xmlCell;
+//        DataCell xmlCell = row.getCell(m_xmlIndex);
+//        if (xmlCell.isMissing()) {
+//            return DataType.getMissingCell();
+//        }
+        XMLValue xmlValue = (XMLValue)row.getCell(m_xmlIndex);
         DataCell newCell = null;
         try {
             final XPathOutput returnType = m_xpathSettings.getReturnType();

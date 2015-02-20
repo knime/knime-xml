@@ -619,13 +619,13 @@ public final class NewQueryDialog extends JDialog {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(RadionButtonPanel.SELECTED_VALUE)) {
-                    if (evt.getNewValue().equals(m_multiTagOptionMap.get(collectioncell))
-                        || evt.getNewValue().equals(m_multiTagOptionMap.get(ungroupToRows))) {
-                        m_useAttributeForColName.setEnabled(false);
-                        m_hardcodedName.doClick();
-                    } else {
-                        m_useAttributeForColName.setEnabled(true);
-                    }
+//                    if (evt.getNewValue().equals(m_multiTagOptionMap.get(collectioncell))
+//                        || evt.getNewValue().equals(m_multiTagOptionMap.get(ungroupToRows))) {
+//                        m_useAttributeForColName.setEnabled(false);
+//                        m_hardcodedName.doClick();
+//                    } else {
+//                        m_useAttributeForColName.setEnabled(true);
+//                    }
                 }
 
             }
