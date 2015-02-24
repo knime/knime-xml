@@ -280,11 +280,11 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
         try {
             return new DoubleCell(Double.parseDouble((String)result));
         } catch (NumberFormatException e) {
-            if (((String)result).equals("NaN")) {
+            if (((String)result).equalsIgnoreCase("NaN")) {
                 return new DoubleCell(Double.NaN);
-            } else if (((String)result).toLowerCase().equals("inf")) {
+            } else if (((String)result).equalsIgnoreCase("inf")) {
                 return new DoubleCell(Double.POSITIVE_INFINITY);
-            } else if (((String)result).toLowerCase().equals("-inf")) {
+            } else if (((String)result).equalsIgnoreCase("-inf")) {
                 return new DoubleCell(Double.NEGATIVE_INFINITY);
             } else if (((String)result).trim().isEmpty()) {
                 return DataType.getMissingCell();

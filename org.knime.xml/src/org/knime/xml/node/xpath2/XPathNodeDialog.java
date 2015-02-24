@@ -878,6 +878,9 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         }
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
+                if (node.getLinenumber() <= i ) {
+                    continue;
+                }
                 i = createAllTagsLookUp(node, strings, i);
                 if (i >= strings.length) {
                     return i;
@@ -1062,6 +1065,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                         newlineChar = "\r";
                     }
                     String[] strings = xmlString.split(newlineChar, 2000);
+
                     int stop = strings.length;
                     if (strings.length >= 2000) {
                         strings[strings.length - 1] = "Only the first 2000 lines of the \n"

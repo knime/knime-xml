@@ -280,11 +280,11 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                 try {
                     value = Double.parseDouble(str);
                 } catch (NumberFormatException e) {
-                    if ((str).equals("NaN")) {
+                    if ((str).equalsIgnoreCase("NaN")) {
                         value = Double.NaN;
-                    } else if ((str).toLowerCase().equals("inf")) {
+                    } else if ((str).equalsIgnoreCase("inf")) {
                         value = Double.POSITIVE_INFINITY;
-                    } else if ((str).toLowerCase().equals("-inf")) {
+                    } else if ((str).equalsIgnoreCase("-inf")) {
                         value = Double.NEGATIVE_INFINITY;
                     } else if (!str.trim().isEmpty()) {
                         logger.error(m_xpathSettings.getXpathQuery() + " returned: \"" + result + "\". " + result
