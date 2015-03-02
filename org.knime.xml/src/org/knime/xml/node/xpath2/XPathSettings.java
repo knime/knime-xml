@@ -473,8 +473,18 @@ public class XPathSettings {
      * @param colNames a column name
      */
     public synchronized void addMultiColName(final ArrayList<StringCell> colNames) {
+        boolean allContained = true;
         for (StringCell colName : colNames) {
             if (!m_colNameMap.containsValue(colName.getStringValue())) {
+                m_colNameMap.put(m_colNameMap.size(), colName.getStringValue());
+                allContained = false;
+            }
+        }
+        // if all column names are already in the map, we reinsert all names according to the input list
+        // the output columns will have the same order as the in the xml cell.
+        if (allContained && colNames.size() == m_colNameMap.size()) {
+            m_colNameMap.clear();
+            for (StringCell colName : colNames) {
                 m_colNameMap.put(m_colNameMap.size(), colName.getStringValue());
             }
         }
