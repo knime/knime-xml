@@ -55,8 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.knime.base.node.preproc.ungroup.UngroupOperation;
 import org.knime.core.data.DataColumnSpec;
@@ -283,10 +281,11 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         for (XPathSettings x : m_settings.getXPathQueryList()) {
             if (x.getMultipleTagOption().equals(XPathMultiColOption.MultipleColumns)) {
 
-                String[] colNames = new String[x.getColumnNames().size()];
+                ArrayList<String> columnNames = x.getColumnNames();
+                String[] colNames = new String[columnNames.size()];
 
                 for (int i = 0; i < colNames.length; i++) {
-                    String uName = XPathNodeSettings.uniqueName(x.getColumnNames().get(i), "", i, usedColNames);
+                    String uName = XPathNodeSettings.uniqueName(columnNames.get(i), "", i, usedColNames);
                     colNames[i] = uName;
                     usedColNames.add(uName);
                 }
@@ -302,9 +301,8 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
                 HashMap<String, Integer> reverseColNames = new HashMap<String, Integer>();
 
-                Set<Entry<Integer, String>> entrySet = x.getColumnNames().entrySet();
-                for (Entry<Integer, String> e : entrySet) {
-                    reverseColNames.put(e.getValue(), e.getKey());
+                for (int i = 0; i < columnNames.size(); i++) {
+                    reverseColNames.put(columnNames.get(i), i);
                 }
 
                 colRearranger.insertAt(offset + pos + 2,

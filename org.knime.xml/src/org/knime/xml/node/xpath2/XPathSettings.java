@@ -49,7 +49,7 @@
 package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.Collections;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -121,7 +121,7 @@ public class XPathSettings {
     private int m_currentColumnIndex = 0;
 
 
-    private TreeMap<Integer, String> m_colNameMap = new TreeMap<Integer, String>();
+    private ArrayList<String> m_colNameMap = new ArrayList<String>();
 
 
     /**
@@ -403,7 +403,7 @@ public class XPathSettings {
             throw new InvalidSettingsException("No multi tag option defined.");
         }
 
-        m_colNameMap =  new TreeMap<Integer, String>();
+        m_colNameMap =  new ArrayList<String>();
     }
 
     /**
@@ -475,17 +475,9 @@ public class XPathSettings {
     public synchronized void addMultiColName(final ArrayList<StringCell> colNames) {
         boolean allContained = true;
         for (StringCell colName : colNames) {
-            if (!m_colNameMap.containsValue(colName.getStringValue())) {
-                m_colNameMap.put(m_colNameMap.size(), colName.getStringValue());
+            if (!m_colNameMap.contains(colName.getStringValue())) {
+                m_colNameMap.add(colName.getStringValue());
                 allContained = false;
-            }
-        }
-        // if all column names are already in the map, we reinsert all names according to the input list
-        // the output columns will have the same order as the in the xml cell.
-        if (allContained && colNames.size() == m_colNameMap.size()) {
-            m_colNameMap.clear();
-            for (StringCell colName : colNames) {
-                m_colNameMap.put(m_colNameMap.size(), colName.getStringValue());
             }
         }
     }
@@ -496,17 +488,18 @@ public class XPathSettings {
      */
     public synchronized boolean addSingleColname(final String string) {
         if (m_colNameMap.isEmpty()) {
-            m_colNameMap.put(m_colNameMap.size(), string);
+            m_colNameMap.add(string);
             return true;
         } else {
-            return m_colNameMap.containsValue(string);
+            return m_colNameMap.contains(string);
         }
     }
 
     /**
-     * @return column names map
+     * @return column names list (sorted)
      */
-    public TreeMap<Integer, String> getColumnNames() {
+    public ArrayList<String> getColumnNames() {
+        Collections.sort(m_colNameMap);
         return m_colNameMap;
     }
 
