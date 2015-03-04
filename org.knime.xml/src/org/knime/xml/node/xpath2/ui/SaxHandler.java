@@ -64,8 +64,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SaxHandler extends DefaultHandler {
 
-    private int count = 0;
-
     /**
      * Current node in the XML hierarchy.
      */
@@ -122,11 +120,19 @@ public class SaxHandler extends DefaultHandler {
             attr.add(attributes.getQName(i));
         }
 
-        String ns = m_currentNode.getPrefix();
-
+        String ns = null;
+        if (m_values.contains(uri)) {
+            ns = m_keys.get(m_values.indexOf(uri));
+        }else {
+            int i = 0;
+            ns = "dns";
+            while (m_keys.contains(ns)) {
+                ns = "dns" + i++;
+            }
+        }
         if (!uri.isEmpty()) {
             if (localName.equals(localQNmae)) {
-                ns = "dns";
+                //ns = "dns";
                 localQNmae = ns + ":" + localQNmae;
             } else {
                 ns = localQNmae.substring(0, localQNmae.indexOf(':'));

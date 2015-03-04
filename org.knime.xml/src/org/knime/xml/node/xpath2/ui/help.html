@@ -1,0 +1,91 @@
+<html>
+<body>
+<h2>Dialog Options</h2>
+<div class="group">
+<div class="groupname">Column name</div>
+<dl>
+<dt>New column name</dt>
+	<dd>The new column name.</dd>
+
+<dt>XPath query for column name</dt>
+	<dd>
+    Enter a XPath query relative to the value query. The value of this query will be set as column name.
+	If this option is selected the node collects from each row of the input table the column name and processes this 
+	information based on the "Multiple Tag Options".
+	</dd>
+</dl>
+</div>
+
+<div class="group">
+<div class="groupname">Query</div>
+<dl>
+<dt>XPath value query</dt>
+	<dd>
+    Define the XPath query here.
+	</dd>
+</dl>
+</div>
+
+<div class="group">
+<div class="groupname">Return type</div>
+<dl>
+<dt>XPath data type</dt>
+	<dd>Choose the result type of your XPath query.
+            The result type will be match to a KNIME type denoted in braces.
+            There are return type specific <b>Options</b>. 
+            You can define if missing cells
+            should be written to the output for extreme values of this type.
+            If the returned node is an attribute you must embed this attribute
+            in an element, since XML cells must have an root element. For the
+            <b>Node</b> return type you can define the name of this element.
+    </dd>
+</dl>
+</div>
+
+<div class="group">
+<div class="groupname">Multiple tag options</div>
+<dl>
+<dt>Single Cell</dt>
+	<dd>
+	Creates a single cell of the selected type. 
+	<p>
+	<b>XPath query for column name:</b><br/>
+	If more than one column name is found the node will fail.
+	</p>
+    </dd>
+	
+<dt>Collection Cell</dt>
+	<dd>
+	Creates a collection cell of the selected type. 
+	<p>
+	<b>XPath query for column name:</b><br/>
+	The first extracted value is set as column name.
+	</p>
+    </dd>
+	
+<dt>Multiple Columns</dt>
+	<dd>
+	Creates as many columns of the selected type as column names were found. 
+	<p>
+	<b>XPath query for column name:</b><br/>
+	The values of each row are matched to the right column based on the column name of this row. If a column name is not
+	found in a row a missing cell will be inserted.	
+	</p>
+    </dd>
+	
+<dt>Multiple Rows</dt>
+	<dd>
+	This option creates a collection cell of the selected type followed by an ungroup.
+	<p>
+	<b>XPath query for column name:</b><br/>
+	The first extracted value is set as column name.
+	</p>
+    </dd>
+</dl>
+</div>
+<div id="origin-bundle">
+	This node is contained in <em>KNIME XML</em>
+	provided by <em>KNIME GmbH, Konstanz, Germany</em>.
+</div>
+</body>
+</html>

@@ -50,6 +50,8 @@ package org.knime.xml.node.xpath2.ui;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -60,8 +62,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -69,6 +69,7 @@ import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -83,6 +84,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.knime.core.node.util.RadionButtonPanel;
@@ -98,6 +100,7 @@ import org.knime.xml.node.xpath2.XPathSettings;
  */
 @SuppressWarnings("serial")
 public final class NewQueryDialog extends JDialog {
+    private JDialog m_helperDialog;
 
     private XPathSettings m_nodeSettings;
 
@@ -156,8 +159,6 @@ public final class NewQueryDialog extends JDialog {
      */
     private Frame m_parent;
 
-    private boolean m_edit;
-
     private HashSet<String> m_columnNames;
 
     private HashMap<String, XPathOutput> m_returnTypes;
@@ -188,8 +189,6 @@ public final class NewQueryDialog extends JDialog {
         m_parent = parent;
         m_nodeSettings = settings;
         m_columnNames = colNames;
-        m_edit = edit;
-
         getContentPane().add(createMainPanel());
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -264,9 +263,28 @@ public final class NewQueryDialog extends JDialog {
             }
         });
 
+        final JButton btnHelp = new JButton(new ImageIcon(getClass().getResource("help_icon.png")));
+        btnHelp.setOpaque(true);
+        btnHelp.setPreferredSize(new Dimension(m_cancel.getPreferredSize().height, m_cancel.getPreferredSize().height));
+
+        btnHelp.addActionListener(new ActionListener() {
+
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+
+                if(m_helperDialog == null) {
+                    m_helperDialog = QueryDialogHelp.openUserDialog(SwingUtilities.getWindowAncestor(getContentPane()));
+                } else {
+                    m_helperDialog.setVisible(true);
+                }
+            }
+        });
+
         JPanel buttonBox = new JPanel(new FlowLayout());
         buttonBox.add(m_ok);
         buttonBox.add(m_cancel);
+        buttonBox.add(btnHelp);
 
         c.gridx = 0;
         c.insets = new Insets(4, 6, 4, 6);
@@ -387,7 +405,7 @@ public final class NewQueryDialog extends JDialog {
         final String numberLabel = "Double cell";
         final String integerLabel = "Integer cell";
         final String stringLabel = "String cell";
-        final String nodeLabel = "XML cell";
+        final String nodeLabel = "Node cell";
         m_returnTypes = new LinkedHashMap<String, XPathOutput>();
         m_returnTypes.put(booleanLabel, XPathOutput.Boolean);
         m_returnTypes.put(numberLabel, XPathOutput.Double);
@@ -592,7 +610,7 @@ public final class NewQueryDialog extends JDialog {
     private JPanel createColumnTypePanel() {
         JPanel p = new JPanel(new GridBagLayout());
 
-        p.setBorder(BorderFactory.createTitledBorder("Multiple Tag Options"));
+        p.setBorder(BorderFactory.createTitledBorder("Multiple tag options"));
 
         m_multiTagOptionMap = new HashMap<XPathNodeSettings.XPathMultiColOption, String>();
 
@@ -614,22 +632,7 @@ public final class NewQueryDialog extends JDialog {
             new RadionButtonPanel<String>(null, m_multiTagOptionMap.get(singlecell),
                 m_multiTagOptionMap.get(collectioncell), m_multiTagOptionMap.get(multiplecolumns),
                 m_multiTagOptionMap.get(ungroupToRows));
-        m_multiTagOption.addPropertyChangeListener(new PropertyChangeListener() {
 
-            @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals(RadionButtonPanel.SELECTED_VALUE)) {
-//                    if (evt.getNewValue().equals(m_multiTagOptionMap.get(collectioncell))
-//                        || evt.getNewValue().equals(m_multiTagOptionMap.get(ungroupToRows))) {
-//                        m_useAttributeForColName.setEnabled(false);
-//                        m_hardcodedName.doClick();
-//                    } else {
-//                        m_useAttributeForColName.setEnabled(true);
-//                    }
-                }
-
-            }
-        });
         m_multiTagOption.setLayout(new GridLayout(2, 2));
 
         GridBagConstraints c = new GridBagConstraints();
@@ -682,5 +685,21 @@ public final class NewQueryDialog extends JDialog {
      */
     private void centerDialog() {
         setLocationRelativeTo(m_parent);
+    }
+
+    /**
+     * @return the parent frame
+     */
+    protected Frame getFrame() {
+        Frame f = null;
+        Container c = getParent();
+        while (c != null) {
+            if (c instanceof Frame) {
+                f = (Frame)c;
+                break;
+            }
+            c = c.getParent();
+        }
+        return f;
     }
 }

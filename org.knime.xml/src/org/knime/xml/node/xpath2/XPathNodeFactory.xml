@@ -2,33 +2,33 @@
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
 <knimeNode type="Manipulator" icon="./xpath.png">
     <name>XPath</name>
-    <shortDescription>Performs a XPath query on a XML column.</shortDescription>
+    <shortDescription>Performs XPath queries on a XML column.</shortDescription>
     <fullDescription>
         <intro>
             The node takes the XML Documents of the selected column and 
-            performs a XPath query on them. The node supports XPath 1.0.
+            performs XPath queries on them. The node supports XPath 1.0.
     <h3>XPath Examples</h3>
-<p>    
+	<p>    
     Consider the XML document:<br/> 
-&lt;inventory&gt;<br/>
-    &lt;book year="1999"&gt;<br/>
-        &lt;title&gt;Harry Potter and the Sorcerer's Stone&lt;/title&gt;<br/>
-        &lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
-    &lt;/book&gt;<br/>
-    &lt;book year="2000"&gt;<br/>
-        &lt;title&gt;Harry Potter and the Chamber of Secrets&lt;/title&gt;<br/>
-        &lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
-    &lt;/book&gt;<br/>
-&lt;/inventory&gt;
-</p>
-<p>
-With the  <b>Return type</b> "Node-Set" and the denoted XPath query you can get
-<ul>
-  <li>all books : //book</li>
-  <li>all author element within book : //book/author</li>
-  <li>the books from 1999 : //book[@year='1999']</li>
-</ul>
-</p>
+	&lt;inventory&gt;<br/>
+    	&lt;book year="1999"&gt;<br/>
+        	&lt;title&gt;Harry Potter and the Sorcerer's Stone&lt;/title&gt;<br/>
+        	&lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
+    	&lt;/book&gt;<br/>
+    	&lt;book year="2000"&gt;<br/>
+        	&lt;title&gt;Harry Potter and the Chamber of Secrets&lt;/title&gt;<br/>
+        	&lt;author&gt;J. K. Rowling&lt;/author&gt;<br/>
+    	&lt;/book&gt;<br/>
+	&lt;/inventory&gt;
+	</p>
+	<p>
+	With the <b>Return type</b> "Node-Set" and the denoted XPath query you can get
+	<ul>
+	  <li>all books : //book</li>
+	  <li>all author element within book : //book/author</li>
+	  <li>the books from 1999 : //book[@year='1999']</li>
+	</ul>
+	</p>
 
 <p>With the <b>Return type</b> "String" you can get the value of the first year 
 attribute with <i>//@year</i>. If you want all publishing dates you can use a flow of
@@ -40,23 +40,21 @@ an XPath with query <i>//@year</i> and return type "String".</p>
        
             
 		</intro>
+		<tab name="Settings">
         <option name="XML column">The column containing the XML cells.</option>
-        <option name="New column name">
-            Name of the new column in the output table.
-        </option>
         <option name="Remove source column">
             Check when the source column should not show up in the output table.
         </option>
-        <option name="XPath query">Define the XPath query here.</option>
-        <option name="Return type">Choose the result type of your XPath query.
-            The result type will be match to a KNIME type denoted in braces.
-            There are return type specific <b>Options</b>. 
-            You can define if missing cells
-            should be written to the output for extreme values of this type.
-            If the returned node is an attribute you must embed this attribute
-            in an element, since XML cells must have an root element. For the
-            <b>Node</b> return type you can define the name of this element.
+        <option name="XPath summary">A summary of all defined XPath queries.</option>
+        <option name="Add XPath">Opens a new dialog with the XPath query set XPath query of the selected XML element.
         </option>
+        <option name="Eidt XPath">Edit a selected XPath query of the summary table.</option>
+        <option name="Remove XPath">Remove a selected XPath query of the summary table.</option>
+        <option name="XML-Cell Preview">Preview of the first not missing XML-Cell of the selected XML column. If a XML 
+        element is selected a right click can be performed to add a new XPath query.<br/>
+        <b>Note:</b> Only the first 2000 lines of the input XML cell are displayed.</option>
+        </tab>
+        <tab name="Namespace">
         <option name="Namespaces">
             The prefixes and the namespaces used in the XPath query. For the
             example when querying XHTML documents with the XPath Query:<br/>
@@ -65,7 +63,9 @@ an XPath with query <i>//@year</i> and return type "String".</p>
             <br/>
             Prefix: <i>pre</i>
             <br/>
-            Namespace: <i>http://www.w3.org/1999/xhtml</i>         
+            Namespace: <i>http://www.w3.org/1999/xhtml</i>   
+            <br/>
+            <b>Note:</b> The namespaces are collected automatically.      
         </option>
         <option name="Incorporate namespace of the root element.">
             <p>This option is useful when you do not have the default
@@ -78,6 +78,7 @@ an XPath with query <i>//@year</i> and return type "String".</p>
         	root's prefix of <i>pre</i> you can leave
         	the <b>Namespaces</b> table empty.</p>     
         </option>          
+        </tab>
     </fullDescription>
 
     <ports>
@@ -85,7 +86,7 @@ an XPath with query <i>//@year</i> and return type "String".</p>
             Input table containing at least one XML column.
         </inPort>
         <outPort index="0" name="Output Table">
-            The input table with additional column containing the result of the XPath query.
+            The input table with additional columns containing the result of the XPath queries.
         </outPort>        
     </ports>
 </knimeNode>

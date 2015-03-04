@@ -508,7 +508,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                 // get a unique column name
                 String name = xmlTag;
                 name = XPathNodeSettings.uniqueName(name, "", 0, m_allColNames);
-                m_allColNames.add(name);
 
                 // create new XPathSettings and open dialog
                 XPathSettings x = new XPathSettings();
@@ -523,7 +522,9 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
                     m_xpathSettingsList.add(s);
 
-                    m_allColNames.add(s.getNewColumn());
+                    if (!s.getUseAttributeForColName()) {
+                        m_allColNames.add(s.getNewColumn());
+                    }
 
                     updateEnables();
                 }
@@ -583,7 +584,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                     if (node != null) {
 
                     // if selection != node tag it probably is an attribute
-                    if (!node.getTag().startsWith(xmlTag)) {
+                    if (!node.getTag().matches(xmlTag+"(\\[\\d+\\])?")) {
                         int i = 0;
                         String attr = node.getAttributeName(i++);
 
@@ -712,6 +713,10 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     private void onAdd() {
         XPathSettings setting = new XPathSettings();
         setting.setXpathQuery(m_currentXPath.getText());
+     // get a unique column name
+        String name = m_textfield.getSelectedText();
+        name = XPathNodeSettings.uniqueName(name, "", 0, m_allColNames);
+        setting.setNewColumn(name);
         XPathSettings s = NewQueryDialog.openUserDialog(getFrame(), setting, false, m_allColNames);
 
         if (s != null) {
@@ -821,19 +826,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             createAllTagsLookUp(m_root, xml.split("\n"), 0);
         } catch (Throwable err) {
             throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
-        }
-    }
-
-    /**
-     * @param root
-     */
-    private void printTree(final XMLTreeNode root) {
-        if (root == null) {
-            return;
-        }
-        System.out.println(root.getTag());
-        for (int i = 0; i < root.getChildren().size(); i++) {
-            printTree(root.getChildren().get(i));
         }
     }
 

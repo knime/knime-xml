@@ -52,8 +52,13 @@ import org.xml.sax.SAXException;
 
 /**
  * Dummy exception. SAXParser can only be stopped via exceptions.
- * @author tibuch
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class StopParsingException extends SAXException {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
 }
