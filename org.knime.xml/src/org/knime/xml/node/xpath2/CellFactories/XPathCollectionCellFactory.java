@@ -89,7 +89,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public final class XPathCollectionCellFactory extends AbstractCellFactory {
 
@@ -182,10 +182,6 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
     }
 
     private DataCell getCell(final DataRow row) {
-//        DataCell xmlCell = row.getCell(m_xmlIndex);
-//        if (xmlCell.isMissing()) {
-//            return DataType.getMissingCell();
-//        }
         XMLValue xmlValue = (XMLValue)row.getCell(m_xmlIndex);
         DataCell newCell = null;
         try {

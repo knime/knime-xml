@@ -83,7 +83,7 @@ import org.w3c.dom.NodeList;
 /**
  * CellFactory for the XPath node.
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public final class XPathSingleCellFactory extends AbstractCellFactory {
 

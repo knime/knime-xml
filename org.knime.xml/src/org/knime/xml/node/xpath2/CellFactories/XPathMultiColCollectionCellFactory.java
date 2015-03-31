@@ -84,7 +84,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public final class XPathMultiColCollectionCellFactory extends AbstractCellFactory {
 

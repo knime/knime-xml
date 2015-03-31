@@ -61,7 +61,7 @@ import org.knime.core.data.container.AbstractCellFactory;
 /**
  * This factory inserts the values of a collection accordingly to the column names stored in another collection cell.
  * Values and names have to be in same order and every name has to appear in the new table spec.
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
 
@@ -128,6 +128,4 @@ public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
 
         return cells;
     }
-
-
 }

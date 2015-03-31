@@ -54,7 +54,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Abstract class which evaluates a XPhat node list.
- * @author tibuch
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  * @param <T> type of input
  */
 public abstract class NodeListReader<T> {
@@ -62,6 +62,7 @@ public abstract class NodeListReader<T> {
     private ArrayList<T> m_values;
 
     /**
+     * Adds all xpath query results to the values list.
      * @param nodes node list
      */
     public NodeListReader(final NodeList nodes) {
@@ -77,10 +78,10 @@ public abstract class NodeListReader<T> {
     }
 
     /**
-     * @param str text content of a xpath node
-     * @return parsed str of type T
+     * @param string text content of a xpath node
+     * @return parsed string of type T
      */
-    public abstract T parse(String str);
+    public abstract T parse(String string);
 
     /**
      * @return list of all parsed values
