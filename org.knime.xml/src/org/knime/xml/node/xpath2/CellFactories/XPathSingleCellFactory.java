@@ -113,6 +113,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
             throw new InvalidSettingsException("No such column in input table: " + xmlColumn);
         }
         String newName = xpathSettings.getNewColumn();
+
         if ((spec.containsName(newName) && !newName.equals(xmlColumn))
             || (spec.containsName(newName) && newName.equals(xmlColumn) && !settings.getRemoveInputColumn())) {
             throw new InvalidSettingsException("Cannot create column " + newName + " since it is already in the input.");

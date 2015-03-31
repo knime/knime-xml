@@ -173,9 +173,9 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
         }
         // if more than one column name was found throw exception
         if (!m_xpathSettings.addSingleColname(name)) {
-            logger.warn("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
+            logger.warn("CollectionCell column " + m_xpathSettings.getCurrentColumnIndex()
                 + " found more than one column name.");
-            throw new IllegalStateException("SingleCell column " + m_xpathSettings.getCurrentColumnIndex()
+            throw new IllegalStateException("CollectionCell column " + m_xpathSettings.getCurrentColumnIndex()
                 + " found more than one column name.");
         }
         return new DataCell[]{getCell(row)};

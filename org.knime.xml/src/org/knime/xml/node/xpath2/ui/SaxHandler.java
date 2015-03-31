@@ -120,17 +120,17 @@ public class SaxHandler extends DefaultHandler {
             attr.add(attributes.getQName(i));
         }
 
-        String ns = null;
-        if (m_values.contains(uri)) {
-            ns = m_keys.get(m_values.indexOf(uri));
-        }else {
-            int i = 0;
-            ns = "dns";
-            while (m_keys.contains(ns)) {
-                ns = "dns" + i++;
-            }
-        }
+        String ns = "";
         if (!uri.isEmpty()) {
+            if (m_values.contains(uri)) {
+                ns = m_keys.get(m_values.indexOf(uri));
+            } else {
+                int i = 0;
+                ns = "dns";
+                while (m_keys.contains(ns)) {
+                    ns = "dns" + i++;
+                }
+            }
             if (localName.equals(localQNmae)) {
                 //ns = "dns";
                 localQNmae = ns + ":" + localQNmae;

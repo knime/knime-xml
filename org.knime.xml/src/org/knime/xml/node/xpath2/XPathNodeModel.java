@@ -133,9 +133,15 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         }
 
         int xpsIndex = 0;
+        HashSet<String> colNames = new HashSet<String>();
         for (XPathSettings xps : xpathQueries) {
             xps.setColIndexOfOutputTable(m_offset + xpsIndex);
             xpsIndex++;
+
+            String currentName = xps.getNewColumn();
+            String specName = XPathNodeSettings.uniqueName(currentName, "", 0, colNames);
+            colNames.add(specName);
+            xps.setNewColumn(specName);
 
             XPathMultiColOption multipleTagOption = xps.getMultipleTagOption();
             if (multipleTagOption.equals(XPathMultiColOption.MultipleColumns)) {
@@ -155,6 +161,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             } else {
                 colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps));
             }
+            xps.setNewColumn(currentName);
         }
 
         // remove input column

@@ -312,8 +312,9 @@ public final class NewQueryDialog extends JDialog {
 
         m_hardcodedName = new JRadioButton("New column name: ");
         m_hardcodedName.setSelected(true);
-        m_useAttributeForColName =
-            new JRadioButton("<html>XPath query for column name: <br>" + "(relative to value query)</html>");
+        JLabel label = new JLabel("<html>XPath query for column name: <br>" + "(relative to value query)</html>");
+        m_useAttributeForColName = new JRadioButton();
+        m_useAttributeForColName.setText(label.getText());
         m_useAttributeForColName.addItemListener(new ItemListener() {
 
             @Override

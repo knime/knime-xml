@@ -48,6 +48,7 @@
  */
 package org.knime.xml.node.xpath2.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
@@ -60,7 +61,7 @@ import javax.swing.text.html.HTMLEditorKit;
 
 /**
  *
- * @author tibuch
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class QueryDialogHelp extends JDialog {
     private Component m_parent;
@@ -71,33 +72,29 @@ public class QueryDialogHelp extends JDialog {
 
         m_parent = window;
 
-
         JEditorPane htmlLabel = new JEditorPane();
         htmlLabel.setEditable(false);
         htmlLabel.setContentType("text/html");
 
+        // set some css
         HTMLEditorKit kit = new HTMLEditorKit();
-        kit.getStyleSheet().addRule("body {    background-color: #ffffff;    font-family: Tahoma, Arial, Helvetica;     font-size: 12pt;    padding: 0.1em 0.1em 1.5em 0.1em;}");
-        kit.getStyleSheet().addRule("h2{    font-size: 140%;    /*padding-left: 5px;*/    border-bottom: thin dotted #ffd600;}");
-        kit.getStyleSheet().addRule("div#origin-bundle {    color: #cccccc;    font-size: 90%;    margin-top: 2em;    padding-top: 0.5em;    border-top: 1px solid #bbbbbb;}");
+        kit.getStyleSheet().addRule("body {font-family: Tahoma, Arial, Helvetica; font-size: 12pt; padding: 0.1em 0.1em 1.5em 0.1em;}");
+        kit.getStyleSheet().addRule("h2{font-size: 140%;border-bottom: thin dotted #ffd600;}");
+        kit.getStyleSheet().addRule("div#origin-bundle {color: #cccccc; font-size: 90%; margin-top: 2em; padding-top: 0.5em; border-top: 1px solid #bbbbbb;}");
         kit.getStyleSheet().addRule("dd { margin-left: 20px; } dt { display: block; float: left; margin-left:10pxm; margin-bottom: 2px; margin-top: 2px;font-weight: bold; ");
         kit.getStyleSheet().addRule("div.group {    border: 1px solid #ffd600;    padding: 5px;    margin-bottom: 2px;} div.groupname {    text-align: center;    font-weight: bold;    background-color: #EEEEEE;    padding: 0.3em;}");
 
         htmlLabel.setEditorKit(kit);
-       // htmlLabel.setFont(new Font(htmlLabel.getFont().getFontName(), htmlLabel.getFont().getStyle(), 50));
 
         try {
             htmlLabel.setPage(getClass().getResource("help.html"));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
         }
 
         JScrollPane p = new JScrollPane(htmlLabel);
+        p.setBackground(Color.white);
         setPreferredSize(new Dimension(300, m_parent.getHeight()));
-        //p.setPreferredSize(new Dimension(htmlLabel.getWidth(), window.getHeight()));
         add(p);
-
-
     }
 
     /**
