@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Dummy exception. SAXParser can only be stopped via exceptions.
+ * This exception is thrown in {@link SaxHandler#fatalError(org.xml.sax.SAXParseException)};
  * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class StopParsingException extends SAXException {

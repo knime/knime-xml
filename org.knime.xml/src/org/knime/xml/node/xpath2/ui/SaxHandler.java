@@ -60,7 +60,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * This class uses the SAXParser to create a XML hierarchy tree.
  *
- * @author Tim-Oliver Buchholz, KNIME AG Zurich
+ * @author Tim-Oliver Buchholz, KNIME.com AG Zurich
  */
 public class SaxHandler extends DefaultHandler {
 
@@ -153,10 +153,6 @@ public class SaxHandler extends DefaultHandler {
         XMLTreeNode newChild =
             new XMLTreeNode(p, attr, ns, m_currentNode.getPath(), m_locator.getLineNumber(), m_currentNode);
         m_currentNode = m_currentNode.add(newChild);
-
-        //        if (m_locator.getLineNumber() > 17) {
-        //            throw new StopParsingException();
-        //        }
     }
 
     /**
@@ -165,10 +161,10 @@ public class SaxHandler extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         m_currentNode = m_currentNode.getParent();
-
     }
 
     /**
+     * Get the namespace prefixes.
      * @return namespace prefixes
      */
     public String[] getKeys() {
@@ -176,6 +172,7 @@ public class SaxHandler extends DefaultHandler {
     }
 
     /**
+     * Get the namespace URIs.
      * @return namespace uris
      */
     public String[] getValues() {

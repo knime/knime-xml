@@ -121,7 +121,7 @@ import org.xml.sax.InputSource;
 /**
  * This is the dialog for the XPath node.
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
@@ -536,13 +536,11 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
             @Override
             public void mouseReleased(final MouseEvent e) {
-                // TODO Auto-generated method stub
-
+                // nothing
             }
 
             @Override
             public void mousePressed(final MouseEvent e) {
-                // TODO Auto-generated method stub
                 if (m_textfield.getSelectedText() == null) {
                     SelectWordAction swa = new SelectWordAction();
                     swa.actionPerformedImpl(null, m_textfield);
@@ -551,20 +549,17 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
             @Override
             public void mouseExited(final MouseEvent e) {
-                // TODO Auto-generated method stub
-
+                // nothing
             }
 
             @Override
             public void mouseEntered(final MouseEvent e) {
-                // TODO Auto-generated method stub
-
+                // nothing
             }
 
             @Override
             public void mouseClicked(final MouseEvent e) {
-                // TODO Auto-generated method stub
-
+                // nothing
             }
         });
 
@@ -713,7 +708,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     private void onAdd() {
         XPathSettings setting = new XPathSettings();
         setting.setXpathQuery(m_currentXPath.getText());
-     // get a unique column name
+        // get a unique column name
         String name = m_textfield.getSelectedText();
         name = XPathNodeSettings.uniqueName(name, "", 0, m_allColNames);
         setting.setNewColumn(name);

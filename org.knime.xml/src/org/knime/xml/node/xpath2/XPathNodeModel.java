@@ -82,7 +82,7 @@ import org.knime.xml.node.xpath2.CellFactories.XPathSingleCellFactory;
  * This is the model for the XPath node. It takes an XML column from the input table and performs a XPath query on every
  * cell.
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
@@ -138,6 +138,8 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             xps.setColIndexOfOutputTable(m_offset + xpsIndex);
             xpsIndex++;
 
+            // while we create the first column spec we have to ensure unique column names. therefore
+            // we reset the column names during the spec creation.
             String currentName = xps.getNewColumn();
             String specName = XPathNodeSettings.uniqueName(currentName, "", 0, colNames);
             colNames.add(specName);
@@ -161,6 +163,8 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             } else {
                 colRearranger.append(XPathCollectionCellFactory.create(spec, m_settings, xps));
             }
+            // after the spec is created we can reset the column name to the old one.
+            // So the disabled column names in the dialog wont change.
             xps.setNewColumn(currentName);
         }
 

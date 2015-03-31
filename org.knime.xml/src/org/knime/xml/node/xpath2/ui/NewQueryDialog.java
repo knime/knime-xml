@@ -96,7 +96,7 @@ import org.knime.xml.node.xpath2.XPathSettings;
 /**
  * Creates a new xpath query dialog.
  *
- * @author Tim-Oliver Buchholz, KNIME AG, Zurich
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich
  */
 @SuppressWarnings("serial")
 public final class NewQueryDialog extends JDialog {
@@ -299,7 +299,7 @@ public final class NewQueryDialog extends JDialog {
     }
 
     /**
-     * A panel where the user can choose if a hardcoded column name or a XML value should be taken as column name.
+     * A panel where the user can choose if a hard coded column name or a XML value should be taken as column name.
      *
      * @return panel with column name options
      */

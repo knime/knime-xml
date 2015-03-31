@@ -57,7 +57,7 @@ import javax.xml.namespace.NamespaceContext;
 
 /**
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland.
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland.
  */
 public class XPathNamespaceContext implements NamespaceContext {
     private final Map<String, String> m_namespaces;

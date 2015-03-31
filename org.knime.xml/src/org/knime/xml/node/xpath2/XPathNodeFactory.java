@@ -54,7 +54,7 @@ import org.knime.core.node.NodeView;
 /**
  * This is the factory for the XPath node.
  *
- * @author Heiko Hofer
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class XPathNodeFactory extends NodeFactory<XPathNodeModel> {
     /**

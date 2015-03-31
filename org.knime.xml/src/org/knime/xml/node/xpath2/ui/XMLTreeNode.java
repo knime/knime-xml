@@ -54,12 +54,12 @@ import java.util.List;
 /**
  * Node for the XML hierarchy tree.
  *
- * @author Tim-Oliver Buchholz, KNIME.com, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class XMLTreeNode {
 
     /**
-     * List of childes.
+     * List of children.
      */
     private List<XMLTreeNode> m_children;
 

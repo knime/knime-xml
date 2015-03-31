@@ -99,6 +99,7 @@ public class QueryDialogHelp extends JDialog {
 
     /**
      * @param window parent of this dialog
+     * @return the new helper dialog
      */
     public static JDialog openUserDialog(final Window window) {
         QueryDialogHelp queryDlg = new QueryDialogHelp(window);
@@ -107,14 +108,7 @@ public class QueryDialogHelp extends JDialog {
     }
 
     /**
-     * Blows away the dialog.
-     */
-    private void shutDown() {
-        setVisible(false);
-    }
-
-    /**
-     * @return XPath query dialog.
+     * Show the helper dialog.
      */
     private void showDialog() {
         setTitle("XPath Query Settings");

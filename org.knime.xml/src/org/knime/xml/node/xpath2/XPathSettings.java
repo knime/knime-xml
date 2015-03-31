@@ -66,7 +66,7 @@ import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 
 /**
  *
- * @author tibuch
+ * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
 public class XPathSettings {
 
@@ -473,11 +473,9 @@ public class XPathSettings {
      * @param colNames a column name
      */
     public synchronized void addMultiColName(final ArrayList<StringCell> colNames) {
-        boolean allContained = true;
         for (StringCell colName : colNames) {
             if (!m_colNameMap.contains(colName.getStringValue())) {
                 m_colNameMap.add(colName.getStringValue());
-                allContained = false;
             }
         }
     }
