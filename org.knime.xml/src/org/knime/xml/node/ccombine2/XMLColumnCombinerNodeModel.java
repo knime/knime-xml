@@ -439,7 +439,7 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
 
             @Override
             public boolean include(final DataColumnSpec name) {
-                return true;//name.getType().isCompatible(XMLValue.class);
+                return name.getType().isCompatible(XMLValue.class);
             }
         });
     }
