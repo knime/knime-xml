@@ -116,7 +116,7 @@ public class XMLColumnCombinerNodeDialog extends NodeDialogPane {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        c.fill = GridBagConstraints.BOTH;
+        c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(2, 4, 2, 4);
         c.gridx = 0;
@@ -133,25 +133,24 @@ public class XMLColumnCombinerNodeDialog extends NodeDialogPane {
         p.add(m_newColumn, c);
         c.weightx = 0;
 
-        c.insets = new Insets(2, 4, 6, 4);
-        c.gridx = 0;
-        c.gridwidth = 2;
-        c.gridy++;
-        c.weightx = 1;
-        p.add(m_filterPanel, c);
         c.weightx = 0;
-
         c.insets = new Insets(2, 4, 2, 4);
         c.gridx = 0;
-
+        c.fill = GridBagConstraints.HORIZONTAL;
         c.gridy++;
         c.weighty = 0;
         m_removeSourceColumns = new JCheckBox("Remove source columns.");
         p.add(m_removeSourceColumns, c);
 
+        c.insets = new Insets(2, 4, 6, 4);
+        c.gridx = 0;
+        c.gridwidth = 2;
         c.gridy++;
+        c.weightx = 1;
         c.weighty = 1;
-        p.add(new JPanel(), c);
+        c.fill = GridBagConstraints.BOTH;
+        p.add(m_filterPanel, c);
+
         return p;
     }
 
