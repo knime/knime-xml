@@ -48,8 +48,8 @@
  */
 package org.knime.xml.node.xpath2.CellFactories;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -66,7 +66,7 @@ import org.knime.core.data.container.AbstractCellFactory;
 public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
 
     private DataColumnSpec[] m_specs;
-    private HashMap<String, Integer> m_reverseColNames;
+    private Map<String, Integer> m_reverseColNames;
     private int m_valueColIndex;
     private int m_nameColIndex;
 
@@ -76,7 +76,7 @@ public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
      * @param valueColIndex index of the value column
      * @param nameColIndex index of the name column
      */
-    public XMLSplitCollectionCellFactory(final DataColumnSpec[] specs, final HashMap<String, Integer> reverseColNames,
+    public XMLSplitCollectionCellFactory(final DataColumnSpec[] specs, final Map<String, Integer> reverseColNames,
         final int valueColIndex, final int nameColIndex) {
         super(true, specs);
         m_specs = specs;
@@ -93,7 +93,7 @@ public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
      * @return split collection cell factory
      */
     public static XMLSplitCollectionCellFactory create(final DataColumnSpec[] specs,
-        final HashMap<String, Integer> reverseColNames, final int valueColIndex, final int nameColIndex) {
+        final Map<String, Integer> reverseColNames, final int valueColIndex, final int nameColIndex) {
         return new XMLSplitCollectionCellFactory(specs, reverseColNames, valueColIndex, nameColIndex);
     }
 
@@ -115,9 +115,8 @@ public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
                 DataCell value = valIt.next();
                 DataCell name = nameIt.next();
 
-                m_reverseColNames.keySet();
-                    Integer index = m_reverseColNames.get(name.toString());
-                    cells[index] = value;
+                Integer index = m_reverseColNames.get(name.toString());
+                cells[index] = value;
             }
         }
         for (int i = 0; i < cells.length; i++) {

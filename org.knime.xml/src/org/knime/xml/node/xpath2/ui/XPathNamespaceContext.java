@@ -80,7 +80,7 @@ public class XPathNamespaceContext implements NamespaceContext {
     @Override
     public String getNamespaceURI(final String prefix) {
         if (prefix == null) {
-            throw new NullPointerException("Null prefix");
+            throw new IllegalArgumentException("Null prefix");
         }
         if ("xml".equals(prefix)) {
             return XMLConstants.XML_NS_URI;

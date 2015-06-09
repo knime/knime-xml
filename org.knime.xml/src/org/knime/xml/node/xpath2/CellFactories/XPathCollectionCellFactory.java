@@ -165,9 +165,9 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                 xpathExpr = xpath.compile(colNameQuery);
                 Object result = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
                 name = (String)result;
-
             } catch (XPathExpressionException e) {
-                logger.warn("Could not compile XPath query for column name. XPath query: " + colNameQuery);
+                logger.warn("Could not compile XPath query '" + colNameQuery + "' for column name: " + e.getMessage(),
+                    e);
             }
 
         }
@@ -327,7 +327,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                     value = Integer.parseInt(str);
                     cells.add(new IntCell(value));
                 } catch (NumberFormatException e) {
-                    if (str.equals("NaN") || str.toLowerCase().equals("inf") || str.toLowerCase().equals("-inf")) {
+                    if (str.equals("NaN") || str.equalsIgnoreCase("inf") || str.equalsIgnoreCase("-inf")) {
                         if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
                             cells.add(new IntCell(m_xpathSettings.getDefaultNumber()));
                         }
@@ -379,7 +379,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
             }
         };
 
-        ArrayList<DataCell> values = nlr.getValues();
+        List<DataCell> values = nlr.getValues();
 
         values.removeAll(Collections.singleton(null));
 

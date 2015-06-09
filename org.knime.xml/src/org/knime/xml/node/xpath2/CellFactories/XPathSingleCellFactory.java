@@ -167,9 +167,8 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 name = (String)result;
 
             } catch (XPathExpressionException e) {
-                logger.warn("Could not compile XPath query for column name. XPath query: " + colNameQuery);
+                logger.warn("Could not compile XPath query '" + colNameQuery + "' for column name: " + colNameQuery, e);
             }
-
         }
         // if more than one column name was found throw exception
         if (!m_xpathSettings.addSingleColname(name)) {
@@ -245,13 +244,13 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
             return new IntCell(Integer.parseInt(result));
         } catch (NumberFormatException e) {
             if (m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
-                if (result.equals("NaN") || result.toLowerCase().equals("inf") || result.toLowerCase().equals("-inf")) {
+                if (result.equals("NaN") || result.equalsIgnoreCase("inf") || result.equalsIgnoreCase("-inf")) {
                     newCell = DataType.getMissingCell();
                 } else if (result.trim().isEmpty()) {
                     return DataType.getMissingCell();
                 }
             } else {
-                if (result.equals("NaN") || result.toLowerCase().equals("inf") || result.toLowerCase().equals("-inf")) {
+                if (result.equals("NaN") || result.equalsIgnoreCase("inf") || result.equalsIgnoreCase("-inf")) {
                     newCell = new IntCell(m_xpathSettings.getDefaultNumber());
                 } else if (result.trim().isEmpty()) {
                     return DataType.getMissingCell();

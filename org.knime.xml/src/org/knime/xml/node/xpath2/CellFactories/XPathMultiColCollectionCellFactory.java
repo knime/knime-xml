@@ -49,6 +49,7 @@
 package org.knime.xml.node.xpath2.CellFactories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -187,9 +188,9 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         return newCell;
     }
 
-    private ArrayList<StringCell> getColumnNameCollection(final XMLValue xmlValue, final ArrayList<DataCell> values)
+    private List<StringCell> getColumnNameCollection(final XMLValue xmlValue, final List<DataCell> values)
         throws XPathExpressionException {
-        ArrayList<StringCell> colNames = null;
+        List<StringCell> colNames = null;
         if (m_xpathSettings.getUseAttributeForColName()) {
             Object nameResult = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
             NodeList nameNodes = (NodeList)nameResult;
@@ -209,7 +210,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             for (int i = 0; i < values.size(); i++) {
                 name = name.trim();
                 while (colNames.contains(new StringCell(name))) {
-                    name = base + "(#" + j++ + ")";
+                    name = base + "(#" + j + ")";
+                    j++;
                     name = name.trim();
                 }
                 colNames.add(new StringCell(name));
@@ -250,9 +252,9 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
                 }
             }
         };
-        ArrayList<DataCell> values = nlr.getValues();
+        List<DataCell> values = nlr.getValues();
 
-        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+        List<StringCell> colNames = getColumnNameCollection(xmlValue, values);
 
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");
@@ -311,8 +313,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             }
         };
 
-        ArrayList<DataCell> values = nlr.getValues();
-        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+        List<DataCell> values = nlr.getValues();
+        List<StringCell> colNames = getColumnNameCollection(xmlValue, values);
 
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");
@@ -348,7 +350,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
                     value = Integer.parseInt(str);
                     return new IntCell(value);
                 } catch (NumberFormatException e) {
-                    if (str.equals("NaN") || str.toLowerCase().equals("inf") || str.toLowerCase().equals("-inf")) {
+                    if (str.equals("NaN") || str.equalsIgnoreCase("inf") || str.equalsIgnoreCase("-inf")) {
                         if (!m_xpathSettings.getMissingCellOnInfinityOrNaN()) {
                             return new IntCell(m_xpathSettings.getDefaultNumber());
                         } else {
@@ -365,8 +367,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             }
         };
 
-        ArrayList<DataCell> values = nlr.getValues();
-        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+        List<DataCell> values = nlr.getValues();
+        List<StringCell> colNames = getColumnNameCollection(xmlValue, values);
 
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");
@@ -409,8 +411,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             }
         };
 
-        ArrayList<DataCell> values = nlr.getValues();
-        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+        List<DataCell> values = nlr.getValues();
+        List<StringCell> colNames = getColumnNameCollection(xmlValue, values);
 
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");
@@ -455,7 +457,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
             values.add(XMLCellFactory.create(doc));
         }
 
-        ArrayList<StringCell> colNames = getColumnNameCollection(xmlValue, values);
+        List<StringCell> colNames = getColumnNameCollection(xmlValue, values);
 
         if (values.size() != colNames.size()) {
             logger.warn("Number of values differs from number of column names.");

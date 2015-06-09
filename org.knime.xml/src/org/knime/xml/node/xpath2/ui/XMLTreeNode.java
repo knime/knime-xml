@@ -91,7 +91,7 @@ public class XMLTreeNode {
     /**
      * Attribute list.
      */
-    private ArrayList<String> m_attributes;
+    private List<String> m_attributes;
 
     /**
      * Use this constructor for the root element.
@@ -120,7 +120,7 @@ public class XMLTreeNode {
      * @param linenumber of this tag in the preview
      * @param parent parent of this tag
      */
-    public XMLTreeNode(final String tag, final ArrayList<String> attributes, final String prefix, final String path,
+    public XMLTreeNode(final String tag, final List<String> attributes, final String prefix, final String path,
         final int linenumber, final XMLTreeNode parent) {
         m_tag = tag;
         m_attributes = attributes;

@@ -50,7 +50,6 @@ package org.knime.xml.node.xpath2.ui;
 
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -63,9 +62,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -102,7 +102,7 @@ import org.knime.xml.node.xpath2.XPathSettings;
 public final class NewQueryDialog extends JDialog {
     private JDialog m_helperDialog;
 
-    private XPathSettings m_nodeSettings;
+    private transient XPathSettings m_nodeSettings;
 
     /*
      * Namepanel
@@ -159,15 +159,15 @@ public final class NewQueryDialog extends JDialog {
      */
     private Frame m_parent;
 
-    private HashSet<String> m_columnNames;
+    private Set<String> m_columnNames;
 
-    private HashMap<String, XPathOutput> m_returnTypes;
+    private Map<String, XPathOutput> m_returnTypes;
 
-    private HashMap<XPathOutput, String> m_returnTypesReverse;
+    private Map<XPathOutput, String> m_returnTypesReverse;
 
-    private HashMap<XPathMultiColOption, String> m_multiTagOptionMap;
+    private Map<XPathMultiColOption, String> m_multiTagOptionMap;
 
-    private HashMap<String, XPathMultiColOption> m_multiTagOptionMapReverse;
+    private Map<String, XPathMultiColOption> m_multiTagOptionMapReverse;
 
     /*
      * Buttons
@@ -179,10 +179,10 @@ public final class NewQueryDialog extends JDialog {
     /*
      * Result
      */
-    private XPathSettings m_resultNodeSettings;
+    private transient XPathSettings m_resultNodeSettings;
 
     private NewQueryDialog(final Frame parent, final XPathSettings settings, final boolean edit,
-        final HashSet<String> colNames) {
+        final Set<String> colNames) {
 
         super(parent, true);
 
@@ -656,7 +656,7 @@ public final class NewQueryDialog extends JDialog {
      * @return new column properties or null (on cancel)
      */
     public static XPathSettings openUserDialog(final Frame parent, final XPathSettings settings, final boolean edit,
-        final HashSet<String> colNames) {
+        final Set<String> colNames) {
         NewQueryDialog queryDlg = new NewQueryDialog(parent, settings, edit, colNames);
         return queryDlg.showDialog();
 
@@ -686,21 +686,5 @@ public final class NewQueryDialog extends JDialog {
      */
     private void centerDialog() {
         setLocationRelativeTo(m_parent);
-    }
-
-    /**
-     * @return the parent frame
-     */
-    protected Frame getFrame() {
-        Frame f = null;
-        Container c = getParent();
-        while (c != null) {
-            if (c instanceof Frame) {
-                f = (Frame)c;
-                break;
-            }
-            c = c.getParent();
-        }
-        return f;
     }
 }

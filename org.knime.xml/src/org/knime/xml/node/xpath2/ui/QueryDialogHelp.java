@@ -59,6 +59,8 @@ import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.knime.core.node.NodeLogger;
+
 /**
  *
  * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
@@ -89,6 +91,7 @@ public class QueryDialogHelp extends JDialog {
         try {
             htmlLabel.setPage(getClass().getResource("help.html"));
         } catch (IOException e) {
+            NodeLogger.getLogger(getClass()).coding("help.html is invalid: " + e.getMessage(), e);
         }
 
         JScrollPane p = new JScrollPane(htmlLabel);

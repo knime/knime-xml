@@ -49,8 +49,8 @@ package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -183,7 +183,7 @@ public class XPathNodeSettings {
     /**
      * List of {@XPathSettings} holds all xpath queries with the corresponding configuration.
      */
-    private ArrayList<XPathSettings> m_xpathQueryList = new ArrayList<XPathSettings>();
+    private List<XPathSettings> m_xpathQueryList = new ArrayList<XPathSettings>();
 
     /**
      * Number of different xpath queries.
@@ -277,14 +277,14 @@ public class XPathNodeSettings {
     /**
      * @return the list of all xpath queries.
      */
-    public ArrayList<XPathSettings> getXPathQueryList() {
+    public List<XPathSettings> getXPathQueryList() {
         return m_xpathQueryList;
     }
 
     /**
      * @param list the list of xpath queries.
      */
-    public void setXPathQueryList(final ArrayList<XPathSettings> list) {
+    public void setXPathQueryList(final List<XPathSettings> list) {
         m_xpathQueryList = list;
         m_numberOfQueries = list.size();
     }
@@ -363,7 +363,7 @@ public class XPathNodeSettings {
      * @param names all current used names
      * @return unique column name
      */
-    public static String uniqueName(final String name, final String suffix, final int i, final HashSet<String> names) {
+    public static String uniqueName(final String name, final String suffix, final int i, final Set<String> names) {
         String n = name + suffix;
         n = n.trim();
         if (names.contains(n)) {

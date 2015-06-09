@@ -50,6 +50,7 @@ package org.knime.xml.node.xpath2;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -121,7 +122,7 @@ public class XPathSettings {
     private int m_currentColumnIndex = 0;
 
 
-    private ArrayList<String> m_colNameMap = new ArrayList<String>();
+    private List<String> m_colNameMap = new ArrayList<String>();
 
 
     /**
@@ -472,7 +473,7 @@ public class XPathSettings {
     /**
      * @param colNames a column name
      */
-    public synchronized void addMultiColName(final ArrayList<StringCell> colNames) {
+    public synchronized void addMultiColName(final List<StringCell> colNames) {
         for (StringCell colName : colNames) {
             if (!m_colNameMap.contains(colName.getStringValue())) {
                 m_colNameMap.add(colName.getStringValue());
@@ -496,7 +497,7 @@ public class XPathSettings {
     /**
      * @return column names list (sorted)
      */
-    public ArrayList<String> getColumnNames() {
+    public synchronized List<String> getColumnNames() {
         Collections.sort(m_colNameMap);
         return m_colNameMap;
     }

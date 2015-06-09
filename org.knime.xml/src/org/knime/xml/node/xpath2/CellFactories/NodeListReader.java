@@ -49,6 +49,7 @@
 package org.knime.xml.node.xpath2.CellFactories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.w3c.dom.NodeList;
 
@@ -58,8 +59,7 @@ import org.w3c.dom.NodeList;
  * @param <T> type of input
  */
 public abstract class NodeListReader<T> {
-
-    private ArrayList<T> m_values;
+    private List<T> m_values;
 
     /**
      * Adds all xpath query results to the values list.
@@ -86,7 +86,7 @@ public abstract class NodeListReader<T> {
     /**
      * @return list of all parsed values
      */
-    public ArrayList<T> getValues() {
+    public List<T> getValues() {
         return m_values;
     }
 }

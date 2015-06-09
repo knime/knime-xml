@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.knime.base.node.preproc.ungroup.UngroupOperation;
 import org.knime.core.data.DataColumnSpec;
@@ -105,7 +107,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     /**
      * Indices of {@link XPathSettings}, which will be ungrouped to rows.
      */
-    private ArrayList<Integer> m_ungroupIndices = new ArrayList<Integer>();
+    private List<Integer> m_ungroupIndices = new ArrayList<Integer>();
 
     /**
      * Creates a new model with no input port and one output port.
@@ -122,7 +124,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     protected ColumnRearranger createColumnRearranger(final DataTableSpec spec) throws InvalidSettingsException {
 
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
-        ArrayList<XPathSettings> xpathQueries = m_settings.getXPathQueryList();
+        List<XPathSettings> xpathQueries = m_settings.getXPathQueryList();
 
         m_multiColPos = new ArrayList<Integer>();
         m_ungroupIndices = new ArrayList<Integer>();
@@ -133,7 +135,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         }
 
         int xpsIndex = 0;
-        HashSet<String> colNames = new HashSet<String>();
+        Set<String> colNames = new HashSet<String>();
         for (XPathSettings xps : xpathQueries) {
             xps.setColIndexOfOutputTable(m_offset + xpsIndex);
             xpsIndex++;
@@ -238,9 +240,9 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     private DataTableSpec renameSingleNameCells(final BufferedDataTable intermediateResult) throws InvalidSettingsException {
         int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
         DataTableSpec spec = intermediateResult.getDataTableSpec();
-        ArrayList<XPathSettings> xpsList = m_settings.getXPathQueryList();
+        List<XPathSettings> xpsList = m_settings.getXPathQueryList();
 
-        HashSet<String> usedNames = new HashSet<String>();
+        Set<String> usedNames = new HashSet<String>();
         usedNames.addAll(Arrays.asList(spec.getColumnNames()));
         for (XPathSettings x : xpsList) {
             usedNames.remove(spec.getColumnSpec(x.getCurrentColumnIndex()).getName());
@@ -277,7 +279,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     private ColumnRearranger insertMultiColumns(final BufferedDataTable in) {
         DataTableSpec spec = in.getDataTableSpec();
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
-        HashSet<String> usedColNames = new HashSet<String>();
+        Set<String> usedColNames = new HashSet<String>();
 
         for (int i = 0; i < spec.getNumColumns(); i++) {
             if (!(m_multiColPos.contains(i))) {
@@ -291,8 +293,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         int offset = 0;
         for (XPathSettings x : m_settings.getXPathQueryList()) {
             if (x.getMultipleTagOption().equals(XPathMultiColOption.MultipleColumns)) {
-
-                ArrayList<String> columnNames = x.getColumnNames();
+                List<String> columnNames = x.getColumnNames();
                 String[] colNames = new String[columnNames.size()];
 
                 for (int i = 0; i < colNames.length; i++) {
@@ -310,7 +311,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
 
                 DataColumnSpec[] dcs = DataTableSpec.createColumnSpecs(colNames, types);
 
-                HashMap<String, Integer> reverseColNames = new HashMap<String, Integer>();
+                Map<String, Integer> reverseColNames = new HashMap<String, Integer>();
 
                 for (int i = 0; i < columnNames.size(); i++) {
                     reverseColNames.put(columnNames.get(i), i);
@@ -357,7 +358,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not of type XML");
         }
 
-        // DataTableSpec could alter based on input table and user input
+        // DataTableSpec could change based on input table and user input
         return null;
     }
 

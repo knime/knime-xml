@@ -49,7 +49,7 @@
 package org.knime.xml.node.xpath2.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -77,12 +77,12 @@ public class SaxHandler extends DefaultHandler {
     /**
      * Namespace keys.
      */
-    private ArrayList<String> m_keys;
+    private List<String> m_keys;
 
     /**
      * Namespace URIs.
      */
-    private ArrayList<String> m_values;
+    private List<String> m_values;
 
     /**
      * Indicate if namespace has changed.
@@ -94,12 +94,9 @@ public class SaxHandler extends DefaultHandler {
      * @param collectNS collect namespace information
      */
     public SaxHandler(final XMLTreeNode root, final boolean collectNS) {
-        super();
-
         m_currentNode = root;
         m_keys = new ArrayList<String>();
         m_values = new ArrayList<String>();
-        new HashMap<String, Integer>();
     }
 
     @Override
@@ -114,7 +111,7 @@ public class SaxHandler extends DefaultHandler {
     public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
         throws SAXException {
         String localQNmae = qName;
-        ArrayList<String> attr = new ArrayList<String>();
+        List<String> attr = new ArrayList<String>();
 
         for (int i = 0; i < attributes.getLength(); i++) {
             attr.add(attributes.getQName(i));
@@ -128,11 +125,12 @@ public class SaxHandler extends DefaultHandler {
                 int i = 0;
                 ns = "dns";
                 while (m_keys.contains(ns)) {
-                    ns = "dns" + i++;
+                    ns = "dns" + i;
+                    i++;
                 }
             }
             if (localName.equals(localQNmae)) {
-                //ns = "dns";
+                //ns = "dns"
                 localQNmae = ns + ":" + localQNmae;
             } else {
                 ns = localQNmae.substring(0, localQNmae.indexOf(':'));

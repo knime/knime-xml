@@ -68,6 +68,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -189,7 +191,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     /**
      * List of all created XPath queries.
      */
-    private ArrayList<XPathSettings> m_xpathSettingsList = null;
+    private List<XPathSettings> m_xpathSettingsList = null;
 
     /**
      * Root of XML input value hierarchy tree.
@@ -199,12 +201,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     /**
      * Map which maps {@link XPathNodeDialog#m_textfield.getCaretLineNumber()} to an XML element.
      */
-    private HashMap<Integer, XMLTreeNode> m_allTags = null;
+    private Map<Integer, XMLTreeNode> m_allTags = null;
 
     /**
      * Set of all entered column names.
      */
-    private HashSet<String> m_allColNames = null;
+    private Set<String> m_allColNames = null;
 
     /**
      * Is input data available.
@@ -255,8 +257,6 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
      * Creates a new dialog.
      */
     public XPathNodeDialog() {
-        super();
-
         m_xpathSettingsList = new ArrayList<XPathSettings>();
         m_allColNames = new HashSet<String>();
 
@@ -579,7 +579,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                     if (node != null) {
 
                     // if selection != node tag it probably is an attribute
-                    if (!node.getTag().matches(xmlTag+"(\\[\\d+\\])?")) {
+                    if (!node.getTag().matches(xmlTag + "(\\[\\d+\\])?")) {
                         int i = 0;
                         String attr = node.getAttributeName(i++);
 
@@ -703,7 +703,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     }
 
     /**
-     * Opens new XPath query dialog and adds a new row to summary if needed
+     * Opens new XPath query dialog and adds a new row to summary if needed.
      */
     private void onAdd() {
         XPathSettings setting = new XPathSettings();
@@ -819,8 +819,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             }
 
             createAllTagsLookUp(m_root, xml.split("\n"), 0);
-        } catch (Throwable err) {
-            throw new NotConfigurableException("Could not create XML hierarchy tree.", err);
+        } catch (Exception ex) {
+            throw new NotConfigurableException("Could not create XML hierarchy tree: " + ex.getMessage(), ex);
         }
     }
 
@@ -865,7 +865,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         }
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
-                if (node.getLinenumber() <= i ) {
+                if (node.getLinenumber() <= i) {
                     continue;
                 }
                 i = createAllTagsLookUp(node, strings, i);
@@ -880,7 +880,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
     /**
      * @return the parent frame
      */
-    protected Frame getFrame() {
+    private Frame getFrame() {
         Frame f = null;
         Container c = getPanel().getParent();
         while (c != null) {
@@ -1058,13 +1058,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                         strings[strings.length - 1] = "Only the first 2000 lines of the \n"
                             + "input xml are set as preview.";
                     }
-                    xmlString = "";
+                    StringBuilder buf = new StringBuilder();
                     for (int j = 0; j < stop; j++) {
                         if (!strings[j].isEmpty()) {
-                            xmlString += strings[j] + "\n";
+                            buf.append(strings[j]).append('\n');
                         }
                     }
-                    m_text.insertString(0, xmlString, null);
+                    m_text.insertString(0, buf.toString(), null);
                     m_textfield.revalidate();
                     xmlString = m_textfield.getText();
                     createHierarchyTree(xmlString);
