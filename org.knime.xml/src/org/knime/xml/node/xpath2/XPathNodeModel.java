@@ -60,6 +60,7 @@ import java.util.Set;
 
 import org.knime.base.node.preproc.ungroup.UngroupOperation;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.ColumnRearranger;
@@ -248,13 +249,9 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
             usedNames.remove(spec.getColumnSpec(x.getCurrentColumnIndex()).getName());
         }
 
-        String[] names = new String[numColumns];
-        DataType[] types = new DataType[numColumns];
-
+        DataColumnSpec[] updatedColSpecs = new DataColumnSpec[numColumns];
         for (int i = 0; i < numColumns; i++) {
-            DataColumnSpec columnSpec = spec.getColumnSpec(i);
-            names[i] = columnSpec.getName();
-            types[i] = columnSpec.getType();
+            updatedColSpecs[i] = spec.getColumnSpec(i);
         }
 
         for (XPathSettings x : xpsList) {
@@ -262,11 +259,14 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
                 if (x.getUseAttributeForColName()) {
                     String name = XPathNodeSettings.uniqueName(x.getColumnNames().get(0), "", 0, usedNames);
                     usedNames.add(name);
-                    names[x.getCurrentColumnIndex()] = name;
+
+                    DataColumnSpecCreator crea = new DataColumnSpecCreator(updatedColSpecs[x.getCurrentColumnIndex()]);
+                    crea.setName(name);
+                    updatedColSpecs[x.getCurrentColumnIndex()] = crea.createSpec();
                 }
             }
         }
-        return new DataTableSpec(names, types);
+        return new DataTableSpec(updatedColSpecs);
     }
 
     /**
