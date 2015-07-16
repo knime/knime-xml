@@ -503,7 +503,7 @@ public final class NewQueryDialog extends JDialog {
         }
 
         if (!name.equals(m_nodeSettings.getNewColumn()) && m_columnNames.contains(name)) {
-            JOptionPane.showMessageDialog(this, "Column name allready taken. Enter valid name or press cancel.",
+            JOptionPane.showMessageDialog(this, "Column name already in use. Enter valid name or press cancel.",
                 "Column name taken", JOptionPane.ERROR_MESSAGE);
             return false;
         }
