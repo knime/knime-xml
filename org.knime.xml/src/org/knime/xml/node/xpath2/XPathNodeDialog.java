@@ -844,7 +844,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                    s = s.substring(s.indexOf("-->") + 3, s.length());
                }
                if (!isComment) {
-                   if (s.matches("\\s*<(?![?!/]).*")) {
+                   if (s.matches("[\\|*\\s*]*<(?![?!/]).*")) {
                        next = false;
                    } else {
                        i++;
