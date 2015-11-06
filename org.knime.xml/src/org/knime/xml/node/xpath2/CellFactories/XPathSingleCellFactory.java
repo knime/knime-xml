@@ -216,11 +216,19 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
      */
     private DataCell evaluateBoolean(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException {
-        NodeList nodeList = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
-        if (nodeList.getLength() == 0) {
-            return DataType.getMissingCell();
+        final Object res = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
+        if (res instanceof String) {
+            final String value = (String)res;
+            return asBooleanCell(value);
         }
-        String result = nodeList.item(0).getTextContent();
+        return DataType.getMissingCell();
+    }
+
+    /**
+     * @param result A {@link String}.
+     * @return The result parsed as {@link BooleanCell}.
+     */
+    private DataCell asBooleanCell(final String result) {
         if (result.isEmpty()) {
             return DataType.getMissingCell();
         } else {
@@ -307,18 +315,40 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
      */
     private DataCell evaluateString(final XPathExpression xpathExpr, final XMLValue xmlValue)
         throws XPathExpressionException, InvalidSettingsException {
-        DataCell newCell;
-        NodeList result = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        final Object res = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.STRING);
 
-        if (result.getLength() == 0) {
+        if (res instanceof String) {
+            final String value = (String)res;
+
+            if (value.isEmpty()) {
+                // Check if the XPath even exists, because non-existing paths also return an empty string.
+                try {
+                    NodeList nl = (NodeList)xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+                    if (nl.getLength() == 0) {
+                        // the path doesn't even exist => return missing cell
+                        return DataType.getMissingCell();
+                    }
+                } catch (XPathExpressionException ex) {
+                    // happens if the XPath does not return a node set but really a string
+                    // ignore it and return the empty string
+                }
+            }
+            return asStringCell(value);
+        } else {
+            return DataType.getMissingCell();
+        }
+    }
+
+    /**
+     * @param value A {@link String} result.
+     * @return The {@code value} as {@link StringCell}.
+     */
+    private DataCell asStringCell(final String value) {
+        DataCell newCell;
+        if (value.isEmpty() && m_xpathSettings.getMissingCellOnEmptyString()) {
             newCell = DataType.getMissingCell();
         } else {
-            String value = result.item(0).getTextContent();
-            if (value.isEmpty() && m_xpathSettings.getMissingCellOnEmptyString()) {
-                newCell = DataType.getMissingCell();
-            } else {
-                newCell = new StringCell(value);
-            }
+            newCell = new StringCell(value);
         }
         return newCell;
     }
