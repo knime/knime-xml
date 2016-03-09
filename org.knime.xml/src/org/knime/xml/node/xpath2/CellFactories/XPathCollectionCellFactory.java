@@ -423,6 +423,7 @@ public final class XPathCollectionCellFactory extends AbstractCellFactory {
                     doc.appendChild(elem);
                 } else {
                     Node node = doc.importNode(value, true);
+                    XPathSingleCellFactory.addMissingNamespaces(node, value);
                     doc.appendChild(node);
                 }
                 cells.add(XMLCellFactory.create(doc));
