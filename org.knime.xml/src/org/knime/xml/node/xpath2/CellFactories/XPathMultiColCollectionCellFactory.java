@@ -452,6 +452,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
                 doc.appendChild(elem);
             } else {
                 Node node = doc.importNode(value, true);
+                XPathSingleCellFactory.addMissingNamespaces(node, value);
                 doc.appendChild(node);
             }
             values.add(XMLCellFactory.create(doc));

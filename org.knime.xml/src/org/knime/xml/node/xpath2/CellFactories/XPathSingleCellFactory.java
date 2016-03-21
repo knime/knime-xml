@@ -47,6 +47,7 @@
  */
 package org.knime.xml.node.xpath2.CellFactories;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,6 +78,7 @@ import org.knime.xml.node.xpath2.XPathSettings;
 import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -380,10 +382,40 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 doc.appendChild(elem);
             } else {
                 Node node = doc.importNode(value, true);
+                addMissingNamespaces(node, value);
                 doc.appendChild(node);
             }
             newCell = XMLCellFactory.create(doc);
         }
         return newCell;
+    }
+
+    /**
+     * This methods assume that <i>newNode</i> is a copy of <i>originalNode</i> whereas the <i>originalNode</i> has been
+     * extracted via XPath. In such cases the new node may contain elements or attributes with namespace prefixes that
+     * are not declared in the new root element. Serializing such a node will result in invalid XML. This methods
+     * adds missing namespace declarations that are present in the original document but not yet in the new node.
+     *
+     * @param newNode the new node to be inserted into a new document; doesn't have a parent
+     * @param originalNode the node from original document
+     */
+    static void addMissingNamespaces(final Node newNode, final Node originalNode) {
+        if (!(newNode instanceof Element)) {
+            return;
+        }
+
+        Element e = (Element)newNode;
+        Node p = originalNode;
+        while (p != null) {
+            NamedNodeMap atts = p.getAttributes();
+            for (int i = 0; (atts != null) && i < atts.getLength(); i++) {
+                Node attributeNode = atts.item(i);
+                if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(attributeNode.getNamespaceURI())) {
+                    e.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, attributeNode.getNodeName(),
+                        attributeNode.getNodeValue());
+                }
+            }
+            p = p.getParentNode();
+        }
     }
 }
