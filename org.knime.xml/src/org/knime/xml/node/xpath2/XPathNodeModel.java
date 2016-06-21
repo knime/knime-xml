@@ -72,9 +72,22 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.streamable.InputPortRole;
+import org.knime.core.node.streamable.MergeOperator;
+import org.knime.core.node.streamable.OutputPortRole;
+import org.knime.core.node.streamable.PartitionInfo;
+import org.knime.core.node.streamable.PortInput;
+import org.knime.core.node.streamable.PortObjectInput;
+import org.knime.core.node.streamable.PortOutput;
+import org.knime.core.node.streamable.RowOutput;
+import org.knime.core.node.streamable.StreamableOperator;
+import org.knime.core.node.streamable.StreamableOperatorInternals;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
 import org.knime.xml.node.xpath2.CellFactories.XMLSplitCollectionCellFactory;
 import org.knime.xml.node.xpath2.CellFactories.XPathCollectionCellFactory;
@@ -87,12 +100,23 @@ import org.knime.xml.node.xpath2.CellFactories.XPathSingleCellFactory;
  *
  * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
  */
-final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
+final class XPathNodeModel extends NodeModel {
 
     /**
      * Settings object with all settings.
      */
     private final XPathNodeSettings m_settings;
+
+    /**
+     * Whether the node is streamable.
+     * Field is assigned in {@link #loadValidatedSettingsFrom(NodeSettingsRO)}.
+     */
+    private boolean m_isStreamable;
+
+    /**
+     * Intermediate table created when the node is run in streamed fashion but is not streamable.
+     */
+    private BufferedDataTable m_table;
 
     /**
      * Indices of {@link XPathSettings}, which will be expanded to multiple columns, in
@@ -114,15 +138,224 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
      * Creates a new model with no input port and one output port.
      */
     public XPathNodeModel() {
+        super(1,1);
         m_settings = new XPathNodeSettings();
     }
 
+
+
     /**
-     * Queries with the multiple column option will be read in as collection columns. In a second run we will expand all
-     * multiple column collections. {@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
-    protected ColumnRearranger createColumnRearranger(final DataTableSpec spec) throws InvalidSettingsException {
+    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+        DataTableSpec specs = inSpecs[0];
+
+        // Find first XML column
+        if (m_settings.getInputColumn() == null) {
+            Iterator<DataColumnSpec> it = specs.iterator();
+            while (it.hasNext()) {
+                DataColumnSpec spec = it.next();
+                if (spec.getType().equals(XMLCell.TYPE) || spec.getType().equals(PMMLCell.TYPE)) {
+                    m_settings.setInputColumn(spec.getName());
+                    break;
+                }
+            }
+        }
+        String inputColumn = m_settings.getInputColumn();
+        if (inputColumn == null) {
+            throw new InvalidSettingsException("No settings available");
+        }
+        DataColumnSpec inputColSpec = specs.getColumnSpec(inputColumn);
+        if (inputColSpec == null) {
+            throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not present in the input table");
+        }
+        if (!inputColSpec.getType().isCompatible(XMLValue.class)) {
+            throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not of type XML");
+        }
+
+        return new DataTableSpec[]{createFinalOutSpec(inSpecs[0])};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
+        throws Exception {
+        return new BufferedDataTable[]{executeInternal(inData[0], exec)};
+    }
+
+    /**
+     * Performs the actual execution, to be shared between the {@link #execute(BufferedDataTable[], ExecutionContext)} and
+     * {@link StreamableOperator#runIntermediate(PortInput[], ExecutionContext)}-methods.
+     *
+     * @param inData input table
+     * @param exec execution context to create new tables and log the progress
+     * @return the result table
+     * @throws Exception
+     */
+    private BufferedDataTable executeInternal(final BufferedDataTable in, final ExecutionContext exec) throws Exception {
+        ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
+        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec.createSubProgress(0.9));
+
+        // TableSpec
+        // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
+        // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
+
+        DataTableSpec replacedNames = renameSingleNameCells(collectedXMLData.getDataTableSpec());
+        BufferedDataTable dataTableWithSingleCellColNames =
+            exec.createSpecReplacerTable(collectedXMLData, replacedNames);
+
+        BufferedDataTable ungrouped = dataTableWithSingleCellColNames;
+        if (!m_ungroupIndices.isEmpty()) {
+            int[] indices = new int[m_ungroupIndices.size()];
+            String[] colNames = new String[m_ungroupIndices.size()];
+            for (int i = 0; i < m_ungroupIndices.size(); i++) {
+                indices[i] = m_ungroupIndices.get(i);
+                colNames[i] =
+                    dataTableWithSingleCellColNames.getDataTableSpec().getColumnSpec(m_ungroupIndices.get(i)).getName();
+            }
+            UngroupOperation ugO = new UngroupOperation(false, false, true);
+            ugO.setColIndices(indices);
+            ugO.setTable(dataTableWithSingleCellColNames);
+            ugO.setNewSpec(UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true,
+                colNames));
+
+            ungrouped = ugO.compute(exec.createSubExecutionContext(0.05));
+        }
+
+        if (m_multiColPos.isEmpty()) {
+            // no multiple column options ---> return
+            return ungrouped;
+        } else {
+            // expand all multiple column collections
+            ColumnRearranger expandColRearranger = insertMultiColumns(ungrouped);
+
+            // TableSpec
+            // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
+            // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
+
+            return exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec.createSubProgress(0.05));
+        }
+    }
+
+    /*---------------------------- Streaming API methods --------------------------------- */
+
+    /**
+     * {@inheritDoc}7
+     */
+    @Override
+    public InputPortRole[] getInputPortRoles() {
+        return new InputPortRole[]{
+            m_isStreamable ? InputPortRole.NONDISTRIBUTED_STREAMABLE : InputPortRole.NONDISTRIBUTED_NONSTREAMABLE};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OutputPortRole[] getOutputPortRoles() {
+        return new OutputPortRole[]{m_isStreamable ? OutputPortRole.DISTRIBUTED : OutputPortRole.NONDISTRIBUTED};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean iterate(final StreamableOperatorInternals internals) {
+        return !m_isStreamable && m_table == null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PortObjectSpec[] computeFinalOutputSpecs(final StreamableOperatorInternals internals,
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (m_isStreamable) {
+            return configure(inSpecs);
+        } else {
+            return new PortObjectSpec[]{m_table.getDataTableSpec()};
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (m_isStreamable) {
+            return createColumnRearranger((DataTableSpec)inSpecs[0]).createStreamableFunction();
+        } else {
+            NodeLogger.getLogger(this.getClass())
+                .warn("Is NOT executed in streamed fashion. Please check the node's configuration.");
+            return new StreamableOperator() {
+
+                @Override
+                public void runIntermediate(final PortInput[] inputs, final ExecutionContext exec) throws Exception {
+                    //workaround, otherwise it will result in an IllegalThreadStateException
+                    KNIMEConstants.GLOBAL_THREAD_POOL
+                        .submit(() -> m_table =
+                            executeInternal((BufferedDataTable)((PortObjectInput)inputs[0]).getPortObject(), exec))
+                        .get();
+                }
+
+                @Override
+                public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
+                    throws Exception {
+                    //transfer the already created result table
+                    ((RowOutput)outputs[0]).setFully(m_table);
+                    m_table = null;
+                }
+            };
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MergeOperator createMergeOperator() {
+        //overwriting the #finishStreamableExecution-method requires this method to be overridden, too
+        return new MergeOperator() {
+
+            @Override
+            public StreamableOperatorInternals mergeIntermediate(final StreamableOperatorInternals[] operators) {
+                return null;
+            }
+
+            @Override
+            public StreamableOperatorInternals mergeFinal(final StreamableOperatorInternals[] operators) {
+                return operators[0];
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void finishStreamableExecution(final StreamableOperatorInternals internals, final ExecutionContext exec,
+        final PortOutput[] output) throws Exception {
+        if (!m_isStreamable) {
+            setWarningMessage("Node wasn't executed in streamed fashion due to its configuration.");
+        }
+    }
+
+
+    /* ----------------------- Helper Methods -------------------------- */
+
+
+    /**
+     * Queries with the multiple column option will be read in as collection columns. In a second run we will expand all
+     * multiple column collections.
+     * @param spec data table spec of the input table
+     * @return the column rearranger used to do most of the work
+     * @throws InvalidSettingsException
+     */
+    private ColumnRearranger createColumnRearranger(final DataTableSpec spec) throws InvalidSettingsException {
 
         ColumnRearranger colRearranger = new ColumnRearranger(spec);
         List<XPathSettings> xpathQueries = m_settings.getXPathQueryList();
@@ -182,65 +415,42 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     }
 
     /**
-     * {@inheritDoc}
+     * Creates the final out spec
+     *
+     * @return the out spec, potentially <code>null</code> if cannot be predetermined (e.g. when column names are taken
+     *         from the incoming xml data)
+     * @throws InvalidSettingsException
      */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
-        throws Exception {
-
-        BufferedDataTable in = inData[0];
-        ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
-        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec.createSubProgress(0.9));
-
-        // TableSpec
-        // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
-        // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
-
-        DataTableSpec replacedNames = renameSingleNameCells(collectedXMLData);
-        BufferedDataTable dataTableWithSingleCellColNames =
-            exec.createSpecReplacerTable(collectedXMLData, replacedNames);
-
-        BufferedDataTable ungrouped = dataTableWithSingleCellColNames;
-        if (!m_ungroupIndices.isEmpty()) {
-            int[] indices = new int[m_ungroupIndices.size()];
-            String[] colNames = new String[m_ungroupIndices.size()];
-            for (int i = 0; i < m_ungroupIndices.size(); i++) {
-                indices[i] = m_ungroupIndices.get(i);
-                colNames[i] =
-                    dataTableWithSingleCellColNames.getDataTableSpec().getColumnSpec(m_ungroupIndices.get(i)).getName();
-            }
-            UngroupOperation ugO = new UngroupOperation(false, false, true);
-            ugO.setColIndices(indices);
-            ugO.setTable(dataTableWithSingleCellColNames);
-            ugO.setNewSpec(UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true,
-                colNames));
-
-            ungrouped = ugO.compute(exec.createSubExecutionContext(0.05));
-        }
-
-        if (m_multiColPos.isEmpty()) {
-            // no multiple column options ---> return
-            return new BufferedDataTable[]{ungrouped};
+    private DataTableSpec createFinalOutSpec(final DataTableSpec inSpec) throws InvalidSettingsException {
+        if (m_isStreamable) {
+            return createColumnRearranger(inSpec).createSpec();
         } else {
-            // expand all multiple column collections
-            ColumnRearranger expandColRearranger = insertMultiColumns(ungrouped);
-
-            // TableSpec
-            // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
-            // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
-
-            return new BufferedDataTable[]{exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec.createSubProgress(0.05))};
+            return null;
         }
     }
 
     /**
+     * Checks whether the out spec can be predetermined based on the current settings.
+     * The out spec can only be predetermined if there no xpath-query whose result needs to be ungrouped or whose attribute values specify the column names
+     *
+     * @return <code>true</code> if the out spec can be predetermined
+     */
+    private boolean isOutSpecKnown() {
+        return m_settings.getXPathQueryList().stream().anyMatch(xps -> {
+            return !xps.getUseAttributeForColName()
+                && (xps.getMultipleTagOption().equals(XPathMultiColOption.SingleCell)
+                    || xps.getMultipleTagOption().equals(XPathMultiColOption.CollectionCell));
+        });
+    }
+
+    /**
      * Renames all Single-, Collection- and UngroupCollectionColumns which take their name from an xml element.
-     * @param intermediateResult DataTable with all SingleCell columns and Collection columns
+     * @param intermediateResultSpec datatable-specs with all SingleCell columns and Collection columns
      * @return table spec with new unique names.
      */
-    private DataTableSpec renameSingleNameCells(final BufferedDataTable intermediateResult) throws InvalidSettingsException {
-        int numColumns = intermediateResult.getDataTableSpec().getNumColumns();
-        DataTableSpec spec = intermediateResult.getDataTableSpec();
+    private DataTableSpec renameSingleNameCells(final DataTableSpec intermediateResultSpec) throws InvalidSettingsException {
+        int numColumns = intermediateResultSpec.getNumColumns();
+        DataTableSpec spec = intermediateResultSpec;
         List<XPathSettings> xpsList = m_settings.getXPathQueryList();
 
         Set<String> usedNames = new HashSet<String>();
@@ -328,39 +538,8 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
         return colRearranger;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-        DataTableSpec specs = inSpecs[0];
 
-        // Find first XML column
-        if (m_settings.getInputColumn() == null) {
-            Iterator<DataColumnSpec> it = specs.iterator();
-            while (it.hasNext()) {
-                DataColumnSpec spec = it.next();
-                if (spec.getType().equals(XMLCell.TYPE) || spec.getType().equals(PMMLCell.TYPE)) {
-                    m_settings.setInputColumn(spec.getName());
-                    break;
-                }
-            }
-        }
-        String inputColumn = m_settings.getInputColumn();
-        if (inputColumn == null) {
-            throw new InvalidSettingsException("No settings available");
-        }
-        DataColumnSpec inputColSpec = specs.getColumnSpec(inputColumn);
-        if (inputColSpec == null) {
-            throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not present in the input table");
-        }
-        if (!inputColSpec.getType().isCompatible(XMLValue.class)) {
-            throw new InvalidSettingsException("XML column \"" + inputColumn + "\" is not of type XML");
-        }
-
-        // DataTableSpec could change based on input table and user input
-        return null;
-    }
+    /* ------------------ load/save --------------------*/
 
     /**
      * {@inheritDoc}
@@ -402,6 +581,7 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsModel(settings);
+        m_isStreamable = isOutSpecKnown();
     }
 
     /**
@@ -409,7 +589,6 @@ final class XPathNodeModel extends SimpleStreamableFunctionNodeModel {
      */
     @Override
     protected void reset() {
-        // no internals
+        m_table = null;
     }
-
 }

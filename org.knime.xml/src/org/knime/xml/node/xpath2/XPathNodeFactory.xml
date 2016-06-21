@@ -7,6 +7,10 @@
         <intro>
             The node takes the XML Documents of the selected column and 
             performs XPath queries on them. The node supports XPath 1.0.
+            
+            <p><b>Hint for streaming:</b> Node can only be executed in real streamed fashion if every single XPath query is configured as follow (see XPath Query Settings):<br></br>
+            The column names are fixed (i.e. select 'new column name') and either 'Single Cell' or 'Collection Cell' are selected as 'Multiple tag option'.</p>
+            
 		    <h3>XPath Syntax</h3>
 		    <h4>Selection Nodes</h4>
 		    <table>
