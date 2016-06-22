@@ -61,6 +61,7 @@ import java.util.Set;
 import org.knime.base.node.preproc.ungroup.UngroupOperation;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.ColumnRearranger;
@@ -78,6 +79,8 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.streamable.BufferedDataTableRowOutput;
+import org.knime.core.node.streamable.DataTableRowInput;
 import org.knime.core.node.streamable.InputPortRole;
 import org.knime.core.node.streamable.MergeOperator;
 import org.knime.core.node.streamable.OutputPortRole;
@@ -85,7 +88,9 @@ import org.knime.core.node.streamable.PartitionInfo;
 import org.knime.core.node.streamable.PortInput;
 import org.knime.core.node.streamable.PortObjectInput;
 import org.knime.core.node.streamable.PortOutput;
+import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.RowOutput;
+import org.knime.core.node.streamable.StreamableFunction;
 import org.knime.core.node.streamable.StreamableOperator;
 import org.knime.core.node.streamable.StreamableOperatorInternals;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
@@ -108,13 +113,9 @@ final class XPathNodeModel extends NodeModel {
     private final XPathNodeSettings m_settings;
 
     /**
-     * Whether the node is streamable.
-     * Field is assigned in {@link #loadValidatedSettingsFrom(NodeSettingsRO)}.
-     */
-    private boolean m_isStreamable;
-
-    /**
-     * Intermediate table created when the node is run in streamed fashion but is not streamable.
+     * Intermediate table created when the node is run in streamed fashion but is not streamable. Table needs to be kept
+     * in order to transfer it between the {@link StreamableOperator#runIntermediate(PortInput[], ExecutionContext)} and
+     * {@link StreamableOperator#runFinal(PortInput[], PortOutput[], ExecutionContext)}-method calls.
      */
     private BufferedDataTable m_table;
 
@@ -187,17 +188,99 @@ final class XPathNodeModel extends NodeModel {
     }
 
     /**
-     * Performs the actual execution, to be shared between the {@link #execute(BufferedDataTable[], ExecutionContext)} and
-     * {@link StreamableOperator#runIntermediate(PortInput[], ExecutionContext)}-methods.
+     * Internal execution shared by {@link #execute(BufferedDataTable[], ExecutionContext)} and
+     * {@link StreamableOperator#runIntermediate(PortInput[], ExecutionContext)}.
      *
      * @param inData input table
+     * @param exec
+     * @return final output table
+     * @throws Exception
+     */
+    private BufferedDataTable executeInternal(final BufferedDataTable inData, final ExecutionContext exec)
+        throws Exception {
+        BufferedDataTable intermediate = null;
+        if (isOutSpecKnown()) {
+            //if the outspec is known, the query execution and the (optional) ungroup to rows (if desired) can be done on the fly
+            RowInput in = new DataTableRowInput(inData);
+            BufferedDataTableRowOutput out =
+                new BufferedDataTableRowOutput(exec.createDataContainer(createKnownOutSpec(in.getDataTableSpec())));
+            executeQueriesAndUngroupToRowsOnTheFly(in, out, exec.createSubExecutionContext(.95), inData.size());
+            intermediate = out.getDataTable();
+        } else {
+            //otherwise the xml-queries have to be executed first before (optional) the ungroup to rows can be done
+            intermediate = executeQueriesAndUngroupToRows(inData, exec.createSubExecutionContext(.95));
+        }
+        //return the table and (optionally) ungroup the result to columns
+        return executeUngroupToColumns(intermediate, exec.createSubExecutionContext(0.05));
+    }
+
+    /**
+     * Performs the actual execution, i.e. executing the queries and (optionally) ungrouping them to rows.
+     * It does it on the fly, i.e. directly ungrouping collections-cells after their creation. This is only
+     * possible, if column names are not determined by xml attributes (i.e. not depending on the input data).
+     *
+     * @param in in data
+     * @param out out data
      * @param exec execution context to create new tables and log the progress
+     * @param rowCount number of rows in table to log the progress, if <code>-1</code> no progress will be logged
+     * @throws Exception
+     */
+    private void executeQueriesAndUngroupToRowsOnTheFly(final RowInput in, final RowOutput out, final ExecutionContext exec,
+        final long rowCount) throws Exception {
+
+        // TableSpec
+        // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
+        // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
+
+        DataTableSpec inSpec = in.getDataTableSpec();
+        UngroupOperation ungroup = null;
+        if (!m_ungroupIndices.isEmpty()) {
+            int[] indices = new int[m_ungroupIndices.size()];
+            for (int i = 0; i < m_ungroupIndices.size(); i++) {
+                indices[i] = m_ungroupIndices.get(i);
+            }
+            ungroup = new UngroupOperation(false, false, true);
+            ungroup.setColIndices(indices);
+        }
+
+        StreamableFunction fct = createColumnRearranger(inSpec).createStreamableFunction();
+        fct.init(exec);
+        try {
+            DataRow inputRow;
+            long index = 0;
+            while ((inputRow = in.poll()) != null) {
+                DataRow newRow = fct.compute(inputRow);
+                if (ungroup != null) {
+                    ungroup.compute(new SingleRowInput(newRow), out, exec, rowCount);
+                } else {
+                    out.push(newRow);
+                }
+                final long i = ++index;
+                final DataRow r = inputRow;
+                exec.setMessage(() -> String.format("Row %d (\"%s\"))", i, r.getKey()));
+            }
+        } finally {
+            fct.finish();
+            in.close();
+            out.close();
+        }
+
+    }
+
+    /**
+     * This method is used when the on the fly execution (queries execution and ungrouping to rows) is not possible
+     * (i.e. {@link #executeQueriesAndUngroupToRowsOnTheFly(RowInput, RowOutput, ExecutionContext, long, boolean)}. The
+     * entire xml-query table is created first. In a second run the table is ungrouped into rows (if necessary and
+     * configured so).
+     *
+     * @param inData
      * @return the result table
      * @throws Exception
      */
-    private BufferedDataTable executeInternal(final BufferedDataTable in, final ExecutionContext exec) throws Exception {
+    private BufferedDataTable executeQueriesAndUngroupToRows(final BufferedDataTable in, final ExecutionContext exec)
+        throws Exception {
         ColumnRearranger r = createColumnRearranger(in.getDataTableSpec());
-        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec.createSubProgress(0.9));
+        BufferedDataTable collectedXMLData = exec.createColumnRearrangeTable(in, r, exec);
 
         // TableSpec
         // SingleCol | (1) MultiColValues | (1) MultiColNames | CollectionCol | (2) MultiColValues | (2) MultiColNames
@@ -219,36 +302,50 @@ final class XPathNodeModel extends NodeModel {
             UngroupOperation ugO = new UngroupOperation(false, false, true);
             ugO.setColIndices(indices);
             ugO.setTable(dataTableWithSingleCellColNames);
-            ugO.setNewSpec(UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true,
-                colNames));
+            ugO.setNewSpec(
+                UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true, colNames));
 
             ungrouped = ugO.compute(exec.createSubExecutionContext(0.05));
         }
+        return ungrouped;
+    }
 
+    /**
+     * Performs the ungroup to column operation, if configured so.
+     *
+     * @param intermediate the result table of the intermediate execution, i.e. TODO
+     * @param exec to log the progress
+     * @return the result table
+     * @throws CanceledExecutionException
+     */
+    private BufferedDataTable executeUngroupToColumns(final BufferedDataTable intermediate,
+        final ExecutionContext exec) throws CanceledExecutionException {
         if (m_multiColPos.isEmpty()) {
             // no multiple column options ---> return
-            return ungrouped;
+            return intermediate;
         } else {
             // expand all multiple column collections
-            ColumnRearranger expandColRearranger = insertMultiColumns(ungrouped);
+            ColumnRearranger expandColRearranger = insertMultiColumns(intermediate);
 
             // TableSpec
             // SingleCol | (1) MC_col1 | (1) MC_col2 | CollectionCol | (2) MC_col1 | (2) MC_col2 | (2) MC_col3
             // SingleCell| SingleCell  | SingleCell  | CollectionCell| SingleCell  | SingleCell  | SingleCell
 
-            return exec.createColumnRearrangeTable(ungrouped, expandColRearranger, exec.createSubProgress(0.05));
+            return exec.createColumnRearrangeTable(intermediate, expandColRearranger, exec);
         }
     }
+
+
 
     /*---------------------------- Streaming API methods --------------------------------- */
 
     /**
-     * {@inheritDoc}7
+     * {@inheritDoc}
      */
     @Override
     public InputPortRole[] getInputPortRoles() {
         return new InputPortRole[]{
-            m_isStreamable ? InputPortRole.NONDISTRIBUTED_STREAMABLE : InputPortRole.NONDISTRIBUTED_NONSTREAMABLE};
+            isOutSpecKnown() ? InputPortRole.NONDISTRIBUTED_STREAMABLE : InputPortRole.NONDISTRIBUTED_NONSTREAMABLE};
     }
 
     /**
@@ -256,7 +353,7 @@ final class XPathNodeModel extends NodeModel {
      */
     @Override
     public OutputPortRole[] getOutputPortRoles() {
-        return new OutputPortRole[]{m_isStreamable ? OutputPortRole.DISTRIBUTED : OutputPortRole.NONDISTRIBUTED};
+        return new OutputPortRole[]{isOutSpecKnown() ? OutputPortRole.DISTRIBUTED : OutputPortRole.NONDISTRIBUTED};
     }
 
     /**
@@ -264,7 +361,7 @@ final class XPathNodeModel extends NodeModel {
      */
     @Override
     public boolean iterate(final StreamableOperatorInternals internals) {
-        return !m_isStreamable && m_table == null;
+        return !isOutSpecKnown() && m_table == null;
     }
 
     /**
@@ -273,7 +370,7 @@ final class XPathNodeModel extends NodeModel {
     @Override
     public PortObjectSpec[] computeFinalOutputSpecs(final StreamableOperatorInternals internals,
         final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (m_isStreamable) {
+        if (isOutSpecKnown()) {
             return configure(inSpecs);
         } else {
             return new PortObjectSpec[]{m_table.getDataTableSpec()};
@@ -286,8 +383,16 @@ final class XPathNodeModel extends NodeModel {
     @Override
     public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
         final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (m_isStreamable) {
-            return createColumnRearranger((DataTableSpec)inSpecs[0]).createStreamableFunction();
+        if (isOutSpecKnown()) {
+            return new StreamableOperator() {
+
+                @Override
+                public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec) throws Exception {
+                    RowInput in = (RowInput) inputs[0];
+                    RowOutput out = (RowOutput) outputs[0];
+                    executeQueriesAndUngroupToRowsOnTheFly(in, out, exec, -1);
+                }
+            };
         } else {
             NodeLogger.getLogger(this.getClass())
                 .warn("Is NOT executed in streamed fashion. Please check the node's configuration.");
@@ -339,7 +444,7 @@ final class XPathNodeModel extends NodeModel {
     @Override
     public void finishStreamableExecution(final StreamableOperatorInternals internals, final ExecutionContext exec,
         final PortOutput[] output) throws Exception {
-        if (!m_isStreamable) {
+        if (!isOutSpecKnown()) {
             setWarningMessage("Node wasn't executed in streamed fashion due to its configuration.");
         }
     }
@@ -415,31 +520,59 @@ final class XPathNodeModel extends NodeModel {
     }
 
     /**
-     * Creates the final out spec
+     * Create the out spec to the point where its know, also including the ungroup row operation.
+     *
+     * @param inSpec
+     * @return the output spec
+     * @throws InvalidSettingsException
+     */
+    private DataTableSpec createKnownOutSpec(final DataTableSpec inSpec) throws InvalidSettingsException {
+        DataTableSpec initialOutSpec = renameSingleNameCells(createColumnRearranger(inSpec).createSpec());
+
+        if (!m_ungroupIndices.isEmpty()) {
+            int[] indices = new int[m_ungroupIndices.size()];
+            String[] colNames = new String[m_ungroupIndices.size()];
+            for (int i = 0; i < m_ungroupIndices.size(); i++) {
+                indices[i] = m_ungroupIndices.get(i);
+                colNames[i] = initialOutSpec.getColumnSpec(m_ungroupIndices.get(i)).getName();
+            }
+            return UngroupOperation.createTableSpec(initialOutSpec, true, colNames);
+        } else {
+            return initialOutSpec;
+        }
+    }
+
+
+    /**
+     * Creates the final out spec.
      *
      * @return the out spec, potentially <code>null</code> if cannot be predetermined (e.g. when column names are taken
      *         from the incoming xml data)
      * @throws InvalidSettingsException
      */
     private DataTableSpec createFinalOutSpec(final DataTableSpec inSpec) throws InvalidSettingsException {
-        if (m_isStreamable) {
-            return createColumnRearranger(inSpec).createSpec();
+        if (isOutSpecKnown()) {
+            return createKnownOutSpec(inSpec);
         } else {
             return null;
         }
     }
 
     /**
-     * Checks whether the out spec can be predetermined based on the current settings.
-     * The out spec can only be predetermined if there no xpath-query whose result needs to be ungrouped or whose attribute values specify the column names
+     * Checks whether the out spec can be predetermined based on the current settings. The out spec can only be
+     * predetermined if there no xpath-query whose result needs to be column-ungrouped or whose attribute values specify the
+     * column names.
+     *
+     * If the output spec is know the node can be executed in real streamed fashion.
      *
      * @return <code>true</code> if the out spec can be predetermined
      */
     private boolean isOutSpecKnown() {
-        return m_settings.getXPathQueryList().stream().anyMatch(xps -> {
+        return m_settings.getXPathQueryList().stream().allMatch(xps -> {
             return !xps.getUseAttributeForColName()
                 && (xps.getMultipleTagOption().equals(XPathMultiColOption.SingleCell)
-                    || xps.getMultipleTagOption().equals(XPathMultiColOption.CollectionCell));
+                    || xps.getMultipleTagOption().equals(XPathMultiColOption.CollectionCell)
+                    || xps.getMultipleTagOption().equals(XPathMultiColOption.UngroupToRows));
         });
     }
 
@@ -581,7 +714,6 @@ final class XPathNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsModel(settings);
-        m_isStreamable = isOutSpecKnown();
     }
 
     /**
@@ -590,5 +722,48 @@ final class XPathNodeModel extends NodeModel {
     @Override
     protected void reset() {
         m_table = null;
+    }
+
+    /**
+     * {@link RowInput} wrapping just one single row.
+     *
+     */
+    private class SingleRowInput extends RowInput {
+
+        private DataRow m_row;
+
+        /**
+         *
+         */
+        public SingleRowInput(final DataRow row) {
+            m_row = row;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DataTableSpec getDataTableSpec() {
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DataRow poll() throws InterruptedException {
+            DataRow r = m_row;
+            m_row = null;
+            return r;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void close() {
+            //
+        }
+
     }
 }
