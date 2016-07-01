@@ -93,6 +93,7 @@ import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableFunction;
 import org.knime.core.node.streamable.StreamableOperator;
 import org.knime.core.node.streamable.StreamableOperatorInternals;
+import org.knime.core.util.ThreadPool;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathMultiColOption;
 import org.knime.xml.node.xpath2.CellFactories.XMLSplitCollectionCellFactory;
 import org.knime.xml.node.xpath2.CellFactories.XPathCollectionCellFactory;
@@ -401,10 +402,12 @@ final class XPathNodeModel extends NodeModel {
                 @Override
                 public void runIntermediate(final PortInput[] inputs, final ExecutionContext exec) throws Exception {
                     //workaround, otherwise it will result in an IllegalThreadStateException
-                    KNIMEConstants.GLOBAL_THREAD_POOL
-                        .submit(() -> m_table =
-                            executeInternal((BufferedDataTable)((PortObjectInput)inputs[0]).getPortObject(), exec))
-                        .get();
+                    ThreadPool tp = ThreadPool.currentPool();
+                    if (tp == null) {
+                        tp = KNIMEConstants.GLOBAL_THREAD_POOL;
+                    }
+                    tp.submit(() -> m_table = executeInternal(
+                        (BufferedDataTable)((PortObjectInput)inputs[0]).getPortObject(), exec)).get();
                 }
 
                 @Override
