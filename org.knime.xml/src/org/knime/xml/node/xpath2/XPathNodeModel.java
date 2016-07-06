@@ -406,7 +406,7 @@ final class XPathNodeModel extends NodeModel {
                     if (tp == null) {
                         tp = KNIMEConstants.GLOBAL_THREAD_POOL;
                     }
-                    tp.submit(() -> m_table = executeInternal(
+                    tp.enqueue(() -> m_table = executeInternal(
                         (BufferedDataTable)((PortObjectInput)inputs[0]).getPortObject(), exec)).get();
                 }
 
