@@ -70,6 +70,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -824,6 +825,12 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         }
     }
 
+    private static final Pattern COMMENT_START_PATTERN = Pattern.compile("\\s*<!--.*");
+
+    private static final Pattern COMMENT_END_PATTERN = Pattern.compile(".*-->.*");
+
+    private static final Pattern TAG_START_PATTERN = Pattern.compile(".*<(?![?!/]).*");
+
     /**
      * Map of every tag and corresponding line number.
      * @param n node
@@ -836,15 +843,15 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             boolean next = true;
             boolean isComment = false;
             do  {
-               if (s.matches("\\s*<!--.*")) {
+               if (COMMENT_START_PATTERN.matcher(s).matches()) {
                    isComment = true;
                }
-               if (s.matches(".*-->.*")) {
+               if (COMMENT_END_PATTERN.matcher(s).matches()) {
                    isComment = false;
                    s = s.substring(s.indexOf("-->") + 3, s.length());
                }
                if (!isComment) {
-                   if (s.matches("[\\|*\\s*]*<(?![?!/]).*")) {
+                   if (TAG_START_PATTERN.matcher(s).matches()) {
                        next = false;
                    } else {
                        i++;
@@ -861,7 +868,7 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
                    s = strings[i];
                }
             } while (next);
-        m_allTags.put(i++, n);
+            m_allTags.put(i++, n);
         }
         if (!n.getChildren().isEmpty()) {
             for (XMLTreeNode node : n.getChildren()) {
