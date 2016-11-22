@@ -89,6 +89,7 @@ import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -123,43 +124,9 @@ public class XMLReaderNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-        if (m_settings.getFileURL() == null) {
-            throw new InvalidSettingsException("No input file selected");
-        }
-        String loc = m_settings.getFileURL();
-        if (loc == null || loc.length() == 0) {
-            throw new InvalidSettingsException("No location provided");
-        }
-
-        if (loc.startsWith("file:/") || !loc.matches("^[a-zA-Z]+:/.*")) {
-            File file = null;
-            if (loc.startsWith("file:/")) {
-                URL url;
-                try {
-                    url = new URL(loc);
-                } catch (MalformedURLException ex) {
-                    throw new InvalidSettingsException("Invalid URL: " + loc,
-                            ex);
-                }
-                try {
-                    // can handle file:///c:/Documents%20and%20Settings/...
-                    file = new File(url.toURI());
-                } catch (Exception e) {
-                    // can handle file:///c:/Documents and Settings/...
-                    file = new File(url.getPath());
-                }
-            } else {
-                file = new File(loc);
-            }
-
-            if (!file.exists()) {
-                throw new InvalidSettingsException("File '"
-                        + file.getAbsolutePath() + "' does not exist");
-            }
-            if (!file.isFile()) {
-                throw new InvalidSettingsException("'" + file.getAbsolutePath()
-                        + "' is a directory");
-            }
+        String warning = CheckUtils.checkSourceFile(m_settings.getFileURL());
+        if (warning != null) {
+            setWarningMessage(warning);
         }
 
         if (m_settings.getUseXPathFilter()) {

@@ -67,7 +67,9 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.FilesHistoryPanel;
+import org.knime.core.node.util.FilesHistoryPanel.LocationValidation;
 import org.knime.core.node.util.KeyValuePanel;
+import org.knime.core.node.workflow.FlowVariable.Type;
 
 /**
  * This is the dialog for the XML reader.
@@ -75,23 +77,52 @@ import org.knime.core.node.util.KeyValuePanel;
  * @author Heiko Hofer
  */
 public class XMLReaderNodeDialog extends NodeDialogPane {
-    private FilesHistoryPanel m_url;
-    private JCheckBox m_useXPathFilter;
-    private JTextField m_xpath;
-    private KeyValuePanel m_nsPanel;
-    private JCheckBox m_useRootsNS;
-    private JTextField m_rootNSPrefix;
+    private final FilesHistoryPanel m_url;
+    private final JCheckBox m_useXPathFilter;
+    private final JTextField m_xpath;
+    private final KeyValuePanel m_nsPanel;
+    private final JCheckBox m_useRootsNS;
+    private final JTextField m_rootNSPrefix;
 
     /**
      * Creates a new dialog.
      */
     public XMLReaderNodeDialog() {
-        super();
+        m_url = new FilesHistoryPanel(createFlowVariableModel("fileUrl", Type.STRING), "org.knime.xml.node.reader",
+            LocationValidation.FileInput, ".xml");
+        m_url.setBorder(BorderFactory.createTitledBorder("Input location:"));
 
-        addTab("Settings", createFilePanel());
+        m_useXPathFilter = new JCheckBox("Use XPath Filter");
+        m_useXPathFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                enableXPathComponents(m_useXPathFilter.isSelected());
+            }
+        });
+
+        m_xpath = new JTextField();
+
+        m_nsPanel = new KeyValuePanel();
+        m_nsPanel.getTable().setPreferredScrollableViewportSize(null);
+        m_nsPanel.setKeyColumnLabel("Prefix");
+        m_nsPanel.setValueColumnLabel("Namespace");
+
+        m_useRootsNS =
+            new JCheckBox("Incorporate namespace of the root element.");
+        m_useRootsNS.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_rootNSPrefix.setEnabled(
+                        m_useRootsNS.isSelected());
+            }
+        });
+
+        m_rootNSPrefix = new JTextField();
+
+        addTab("Settings", initLayout());
     }
 
-    private JPanel createFilePanel() {
+    private JPanel initLayout() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -104,18 +135,9 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c.weightx = 1;
         c.weighty = 0;
 
-        m_url = new FilesHistoryPanel("org.knime.xml.node.reader", false);
-        m_url.setBorder(BorderFactory.createTitledBorder("Selected File"));
         p.add(m_url, c);
 
         c.gridy++;
-        m_useXPathFilter = new JCheckBox("Use XPath Filter");
-        m_useXPathFilter.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                enableXPathComponents(m_useXPathFilter.isSelected());
-            }
-        });
         p.add(m_useXPathFilter, c);
 
         JPanel pXPath = new JPanel(new GridBagLayout());
@@ -128,7 +150,6 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c1.gridwidth = 1;
         c1.weightx = 1;
 
-        m_xpath = new JTextField();
         pXPath.add(m_xpath, c1);
         c1.gridy++;
         c1.insets = new Insets(0, 0, 0, 0);
@@ -142,12 +163,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c.weighty = 1;
         JPanel nsp = new JPanel(new BorderLayout());
         nsp.setBorder(BorderFactory.createTitledBorder("Namespaces"));
-
         nsp.add(infereRootDefaulNSPanel(), BorderLayout.SOUTH);
-        m_nsPanel = new KeyValuePanel();
-        m_nsPanel.getTable().setPreferredScrollableViewportSize(null);
-        m_nsPanel.setKeyColumnLabel("Prefix");
-        m_nsPanel.setValueColumnLabel("Namespace");
         nsp.add(m_nsPanel);
         p.add(nsp, c);
 
@@ -168,15 +184,6 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         c.gridwidth = 2;
         c.weightx = 0;
         c.weighty = 1;
-        m_useRootsNS =
-            new JCheckBox("Incorporate namespace of the root element.");
-        m_useRootsNS.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                m_rootNSPrefix.setEnabled(
-                        m_useRootsNS.isSelected());
-            }
-        });
         p.add(m_useRootsNS, c);
 
         c.gridy++;
@@ -185,7 +192,6 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
         p.add(new JLabel("Prefix of root's namespace:"), c);
         c.gridx++;
         c.weightx = 1;
-        m_rootNSPrefix = new JTextField();
         p.add(m_rootNSPrefix, c);
         return p;
     }
