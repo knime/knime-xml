@@ -85,6 +85,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
@@ -208,9 +209,10 @@ public class XMLReaderNodeModel extends NodeModel {
             // read the roots namespace from the input
             XMLInputFactory factory = XMLInputFactory.newInstance();
             factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.TRUE);
-            factory.setProperty(
-                    XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
-                    Boolean.TRUE);
+            if (!Boolean.getBoolean(KNIMEConstants.PROPERTY_XML_DISABLE_EXT_ENTITIES)) { // see AP-6752
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            }
+
             try {
                 XMLStreamReader parser = factory.createXMLStreamReader(in);
                 while (parser.hasNext()) {
