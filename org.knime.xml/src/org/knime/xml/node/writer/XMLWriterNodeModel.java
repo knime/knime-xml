@@ -177,7 +177,7 @@ public class XMLWriterNodeModel extends NodeModel {
                             + "' exists and must not be overwritten due to user settings");
                     }
                 } else {
-                    xmlUrl = new URL(remoteBaseUrl.toString() + name);
+                    xmlUrl = new URL(remoteBaseUrl.toString() + "/" + name);
                 }
 
                 try (XMLCellWriter xmlCellWriter = XMLCellWriterFactory.createXMLCellWriter(
