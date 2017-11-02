@@ -1,6 +1,6 @@
 /*
  * ------------------------------------------------------------------------
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -104,7 +104,7 @@ import org.knime.xml.node.xpath2.CellFactories.XPathSingleCellFactory;
  * This is the model for the XPath node. It takes an XML column from the input table and performs a XPath query on every
  * cell.
  *
- * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland
  */
 final class XPathNodeModel extends NodeModel {
 

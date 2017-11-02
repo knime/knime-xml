@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME XML
 Bundle-SymbolicName: org.knime.xml;singleton:=true
 Bundle-Version: 3.5.0.qualifier
-Bundle-Vendor: KNIME GmbH, Konstanz, Germany
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.xml.node.ccombine,
  org.knime.xml.node.columntoxml,
  org.knime.xml.node.combinewriter,

@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@ import org.xml.sax.SAXException;
 /**
  * Dummy exception. SAXParser can only be stopped via exceptions.
  * This exception is thrown in {@link SaxHandler#fatalError(org.xml.sax.SAXParseException)};
- * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland
  */
 public class StopParsingException extends SAXException {
 

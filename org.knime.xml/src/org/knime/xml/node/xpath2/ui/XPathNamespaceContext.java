@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@ import javax.xml.namespace.NamespaceContext;
 
 /**
  *
- * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland.
+ * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland.
  */
 public class XPathNamespaceContext implements NamespaceContext {
     private final Map<String, String> m_namespaces;

@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ import org.knime.core.data.container.AbstractCellFactory;
 /**
  * This factory inserts the values of a collection accordingly to the column names stored in another collection cell.
  * Values and names have to be in same order and every name has to appear in the new table spec.
- * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland
  */
 public class XMLSplitCollectionCellFactory extends AbstractCellFactory {
 

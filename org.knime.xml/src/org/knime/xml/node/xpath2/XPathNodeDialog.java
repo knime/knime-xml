@@ -1,6 +1,6 @@
 /*
  * ------------------------------------------------------------------------
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -124,7 +124,7 @@ import org.xml.sax.InputSource;
 /**
  * This is the dialog for the XPath node.
  *
- * @author Tim-Oliver Buchholz, KNIME.com AG, Zurich, Switzerland
+ * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland
  */
 final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
