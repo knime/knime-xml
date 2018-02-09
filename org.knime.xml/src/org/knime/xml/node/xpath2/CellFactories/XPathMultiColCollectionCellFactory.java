@@ -71,6 +71,7 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -162,7 +163,8 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         if (xmlCell.isMissing()) {
             return new DataCell[]{DataType.getMissingCell(), DataType.getMissingCell()};
         }
-        XMLValue xmlValue = (XMLValue)xmlCell;
+        @SuppressWarnings("unchecked")
+        XMLValue<Document> xmlValue = (XMLValue<Document>)xmlCell;
         DataCell[] newCell = null;
         try {
             final XPathOutput returnType = m_xpathSettings.getReturnType();
@@ -188,11 +190,14 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         return newCell;
     }
 
-    private List<StringCell> getColumnNameCollection(final XMLValue xmlValue, final List<DataCell> values)
+    private List<StringCell> getColumnNameCollection(final XMLValue<Document> xmlValue, final List<DataCell> values)
         throws XPathExpressionException {
         List<StringCell> colNames = null;
         if (m_xpathSettings.getUseAttributeForColName()) {
-            Object nameResult = m_colNameXPathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+            Object nameResult;
+            try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+                nameResult = m_colNameXPathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+            }
             NodeList nameNodes = (NodeList)nameResult;
             NodeListReader<StringCell> nlrNames = new NodeListReader<StringCell>(nameNodes) {
 
@@ -229,9 +234,14 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell[] evaluateBooleanSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateBooleanSet(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
-        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        Object valResult;
+
+        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+        }
+
         NodeList valNodes = (NodeList)valResult;
 
         NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
@@ -282,9 +292,14 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell[] evaluateDoubleSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateDoubleSet(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
-        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        Object valResult;
+
+        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+        }
+
         NodeList valNodes = (NodeList)valResult;
 
         NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
@@ -336,9 +351,14 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell[] evaluateIntegerSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateIntegerSet(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
-        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        Object valResult;
+
+        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+        }
+
         NodeList valNodes = (NodeList)valResult;
 
         NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
@@ -390,9 +410,14 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell[] evaluateStringSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateStringSet(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
-        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+        Object valResult;
+
+        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+        }
+
         NodeList valNodes = (NodeList)valResult;
 
         NodeListReader<DataCell> nlr = new NodeListReader<DataCell>(valNodes) {
@@ -434,9 +459,15 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
      * @throws XPathExpressionException If the expression cannot be evaluated.
      * @throws ParserConfigurationException
      */
-    private DataCell[] evaluateNodeSet(final XPathExpression xpathExpr, final XMLValue xmlValue)
+    private DataCell[] evaluateNodeSet(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException, ParserConfigurationException {
-        Object valResult = xpathExpr.evaluate(xmlValue.getDocument(), XPathConstants.NODESET);
+
+        Object valResult;
+
+        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
+        }
+
         NodeList valNodes = (NodeList)valResult;
 
         ArrayList<DataCell> values = new ArrayList<DataCell>();

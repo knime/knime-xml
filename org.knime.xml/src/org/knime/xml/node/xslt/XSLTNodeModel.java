@@ -71,6 +71,7 @@ import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
@@ -82,6 +83,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.w3c.dom.Document;
 
 /**
  * This is the model for the XSLT node.
@@ -226,39 +228,39 @@ public class XSLTNodeModel extends NodeModel {
                 if (xmlCell.isMissing()) {
                     return DataType.getMissingCell();
                 }
-                XMLValue xmlValue = (XMLValue) xmlCell;
+                @SuppressWarnings("unchecked")
+                XMLValue<Document> xmlValue = (XMLValue<Document>) xmlCell;
                 DataCell newCell = null;
-                try {
+                try (AutocloseableSupplier<Document> xmlSupplier = xmlValue.getDocumentSupplier()) {
                     if (m_settings.getUseFirstStylesheeOnly()) {
                         DataCell xsltCell = xsltData.iterator().next()
                             .getCell(xsltIndex);
                         if (xsltCell.isMissing()) {
                             return DataType.getMissingCell();
                         }
-                        XMLValue xsltValue = (XMLValue) xsltCell;
-                        DOMSource source = new DOMSource(
-                                xmlValue.getDocument());
-                        DOMSource stylesheet = new DOMSource(
-                                xsltValue.getDocument());
-                        TransformerFactory transFact =
-                            TransformerFactory.newInstance();
-                        Transformer trans;
+                        try (@SuppressWarnings("unchecked")
+                        AutocloseableSupplier<Document> xsltSupplier = ((XMLValue<Document>)xsltCell).getDocumentSupplier()) {
+                            DOMSource source = new DOMSource(xmlSupplier.get());
+                            DOMSource stylesheet = new DOMSource(xsltSupplier.get());
+                            TransformerFactory transFact = TransformerFactory.newInstance();
+                            Transformer trans;
                             trans = transFact.newTransformer(stylesheet);
-                        // this will take precedence over any encoding specified
-                        // in the stylesheet
-                        trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                        ByteArrayOutputStream os = new ByteArrayOutputStream();
-                        trans.transform(source, new StreamResult(os));
-                        String result = os.toString("UTF-8");
-                        if (m_settings.getOutputIsXML()) {
-                            newCell = XMLCellFactory.create(result);
-                        } else {
-                            newCell = new StringCell(result);
+                            // this will take precedence over any encoding specified
+                            // in the stylesheet
+                            trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                            ByteArrayOutputStream os = new ByteArrayOutputStream();
+                            trans.transform(source, new StreamResult(os));
+                            String result = os.toString("UTF-8");
+                            if (m_settings.getOutputIsXML()) {
+                                newCell = XMLCellFactory.create(result);
+                            } else {
+                                newCell = new StringCell(result);
+                            }
                         }
                     } else {
                         List<DataCell> cells = new ArrayList<DataCell>();
                         DOMSource source = new DOMSource(
-                                xmlValue.getDocument());
+                                xmlSupplier.get());
                         TransformerFactory transFact =
                             TransformerFactory.newInstance();
                         for (CloseableRowIterator iter = xsltData.iterator();
@@ -267,23 +269,22 @@ public class XSLTNodeModel extends NodeModel {
                             if (xsltCell.isMissing()) {
                                 cells.add(DataType.getMissingCell());
                             }
-                            XMLValue xsltValue = (XMLValue) xsltCell;
-                            DOMSource stylesheet = new DOMSource(
-                                    xsltValue.getDocument());
-                            Transformer trans = transFact.newTransformer(
-                                    stylesheet);
-                            // this will take precedence over any encoding
-                            // specified in the stylesheet
-                            trans.setOutputProperty(OutputKeys.ENCODING,
-                                    "UTF-8");
-                            ByteArrayOutputStream os =
-                                new ByteArrayOutputStream();
-                            trans.transform(source, new StreamResult(os));
-                            String result = os.toString("UTF-8");
-                            if (m_settings.getOutputIsXML()) {
-                                cells.add(XMLCellFactory.create(result));
-                            } else {
-                                cells.add(new StringCell(result));
+                            try (@SuppressWarnings("unchecked")
+                            AutocloseableSupplier<Document> xsltSupplier =
+                                ((XMLValue<Document>)xsltCell).getDocumentSupplier()) {
+                                DOMSource stylesheet = new DOMSource(xsltSupplier.get());
+                                Transformer trans = transFact.newTransformer(stylesheet);
+                                // this will take precedence over any encoding
+                                // specified in the stylesheet
+                                trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                                trans.transform(source, new StreamResult(os));
+                                String result = os.toString("UTF-8");
+                                if (m_settings.getOutputIsXML()) {
+                                    cells.add(XMLCellFactory.create(result));
+                                } else {
+                                    cells.add(new StringCell(result));
+                                }
                             }
                         }
                         newCell = CollectionCellFactory.createListCell(cells);

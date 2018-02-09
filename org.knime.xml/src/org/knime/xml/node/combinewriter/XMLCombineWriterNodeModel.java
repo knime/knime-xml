@@ -75,6 +75,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.w3c.dom.Document;
 
 /**
  * This is the model for the XML combine Writer node.
@@ -155,6 +156,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
@@ -190,7 +192,7 @@ public class XMLCombineWriterNodeModel extends NodeModel {
                     + max + ")");
             DataCell cell = row.getCell(colIndex);
             if (!cell.isMissing()) {
-                xmlCellWriter.write((XMLValue)cell);
+                xmlCellWriter.write((XMLValue<Document>)cell);
             } else {
                 missingCellCount++;
                 LOGGER.debug("Skip row " + row.getKey().getString()

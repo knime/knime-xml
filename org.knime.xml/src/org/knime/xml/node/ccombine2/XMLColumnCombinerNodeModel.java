@@ -66,6 +66,7 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
@@ -396,17 +397,21 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
             try {
                 InputStream is = new ByteArrayInputStream(
                         content.toString().getBytes("UTF-8"));
-                Document doc = XMLCellReaderFactory.createXMLCellReader(is)
-                    .readXML().getDocument();
-                for (int i = 0; i < m_includeColumns.length; i++) {
-                    DataCell cell = row.getCell(m_includeColumns[i]);
-                    if (!cell.isMissing()) {
-                        Node child = getRootNode((XMLValue)cell);
-                        child = doc.importNode(child, true);
-                        doc.getFirstChild().appendChild(child);
+
+                try (AutocloseableSupplier<Document> supplier =
+                    XMLCellReaderFactory.createXMLCellReader(is).readXML().getDocumentSupplier()) {
+                    Document doc = supplier.get();
+                    for (int i = 0; i < m_includeColumns.length; i++) {
+                        DataCell cell = row.getCell(m_includeColumns[i]);
+                        if (!cell.isMissing()) {
+                            @SuppressWarnings("unchecked")
+                            Node child = getRootNode((XMLValue<Document>)cell);
+                            child = doc.importNode(child, true);
+                            doc.getFirstChild().appendChild(child);
+                        }
                     }
+                    newCell = XMLCellFactory.create(doc);
                 }
-                newCell = XMLCellFactory.create(doc);
             } catch (final Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -418,14 +423,15 @@ public class XMLColumnCombinerNodeModel extends NodeModel {
          * @param cell
          * @return
          */
-        private Node getRootNode(final XMLValue cell) {
-            Document doc = cell.getDocument();
-            Node node = doc.getFirstChild();
-            while (node.getNodeType() != Node.ELEMENT_NODE
-                    && null != node) {
-                node = node.getNextSibling();
+        private Node getRootNode(final XMLValue<Document> cell) {
+            try (AutocloseableSupplier<Document> supplier = cell.getDocumentSupplier()) {
+                Document doc = supplier.get();
+                Node node = doc.getFirstChild();
+                while (node.getNodeType() != Node.ELEMENT_NODE && null != node) {
+                    node = node.getNextSibling();
+                }
+                return node;
             }
-            return node;
         }
     }
 

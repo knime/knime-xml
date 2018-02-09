@@ -58,11 +58,13 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -378,7 +380,7 @@ public class XPathNodeSettings {
      * @return xpath expression
      * @throws InvalidSettingsException thrown if xpath expression is invalid
      */
-    public XPathExpression createXPathExpr(final XMLValue xmlValue, final String query)
+    public XPathExpression createXPathExpr(final XMLValue<Document> xmlValue, final String query)
             throws InvalidSettingsException {
         List<String> nsPrefixes = new ArrayList<String>();
         nsPrefixes.addAll(Arrays.asList(getNsPrefixes()));
@@ -399,15 +401,17 @@ public class XPathNodeSettings {
             }
             namespaces.add(ns);
         } else {
-            Node root = xmlValue.getDocument().getFirstChild();
-            while (root.getNodeType() != Node.ELEMENT_NODE) {
-                root = root.getNextSibling();
-            }
-            String rootNSUri = root.getNamespaceURI();
-            if (rootNSUri != null) {
-                namespaces.add(rootNSUri);
-            } else {
-                throw new InvalidSettingsException("The root node does not have a namesapce URI.");
+            try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+                Node root = supplier.get().getFirstChild();
+                while (root.getNodeType() != Node.ELEMENT_NODE) {
+                    root = root.getNextSibling();
+                }
+                String rootNSUri = root.getNamespaceURI();
+                if (rootNSUri != null) {
+                    namespaces.add(rootNSUri);
+                } else {
+                    throw new InvalidSettingsException("The root node does not have a namesapce URI.");
+                }
             }
         }
 
