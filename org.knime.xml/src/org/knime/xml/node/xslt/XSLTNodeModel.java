@@ -71,7 +71,7 @@ import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
@@ -231,7 +231,7 @@ public class XSLTNodeModel extends NodeModel {
                 @SuppressWarnings("unchecked")
                 XMLValue<Document> xmlValue = (XMLValue<Document>) xmlCell;
                 DataCell newCell = null;
-                try (AutocloseableSupplier<Document> xmlSupplier = xmlValue.getDocumentSupplier()) {
+                try (LockedSupplier<Document> xmlSupplier = xmlValue.getDocumentSupplier()) {
                     if (m_settings.getUseFirstStylesheeOnly()) {
                         DataCell xsltCell = xsltData.iterator().next()
                             .getCell(xsltIndex);
@@ -239,7 +239,7 @@ public class XSLTNodeModel extends NodeModel {
                             return DataType.getMissingCell();
                         }
                         try (@SuppressWarnings("unchecked")
-                        AutocloseableSupplier<Document> xsltSupplier = ((XMLValue<Document>)xsltCell).getDocumentSupplier()) {
+                        LockedSupplier<Document> xsltSupplier = ((XMLValue<Document>)xsltCell).getDocumentSupplier()) {
                             DOMSource source = new DOMSource(xmlSupplier.get());
                             DOMSource stylesheet = new DOMSource(xsltSupplier.get());
                             TransformerFactory transFact = TransformerFactory.newInstance();
@@ -270,7 +270,7 @@ public class XSLTNodeModel extends NodeModel {
                                 cells.add(DataType.getMissingCell());
                             }
                             try (@SuppressWarnings("unchecked")
-                            AutocloseableSupplier<Document> xsltSupplier =
+                            LockedSupplier<Document> xsltSupplier =
                                 ((XMLValue<Document>)xsltCell).getDocumentSupplier()) {
                                 DOMSource stylesheet = new DOMSource(xsltSupplier.get());
                                 Transformer trans = transFact.newTransformer(stylesheet);

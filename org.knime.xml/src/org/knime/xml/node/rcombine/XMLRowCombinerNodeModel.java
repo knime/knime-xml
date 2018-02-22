@@ -69,7 +69,7 @@ import org.knime.core.data.RowKey;
 import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.DataContainer;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
@@ -206,7 +206,7 @@ public class XMLRowCombinerNodeModel extends NodeModel {
             InputStream is = new ByteArrayInputStream(
                     content.toString().getBytes("UTF-8"));
 
-            try (AutocloseableSupplier<Document> supplier =
+            try (LockedSupplier<Document> supplier =
                 XMLCellReaderFactory.createXMLCellReader(is).readXML().getDocumentSupplier()) {
                 Document doc = supplier.get();
 
@@ -245,7 +245,7 @@ public class XMLRowCombinerNodeModel extends NodeModel {
      * @return
      */
     private Node getRootNode(final XMLValue<Document> cell) {
-        try (AutocloseableSupplier<Document> supplier = cell.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = cell.getDocumentSupplier()) {
             Document doc = supplier.get();
             Node node = doc.getFirstChild();
             while (node.getNodeType() != Node.ELEMENT_NODE && null != node) {

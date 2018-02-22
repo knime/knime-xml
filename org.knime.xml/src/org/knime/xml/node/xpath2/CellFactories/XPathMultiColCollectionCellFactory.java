@@ -71,7 +71,7 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -195,7 +195,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         List<StringCell> colNames = null;
         if (m_xpathSettings.getUseAttributeForColName()) {
             Object nameResult;
-            try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
                 nameResult = m_colNameXPathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
             }
             NodeList nameNodes = (NodeList)nameResult;
@@ -238,7 +238,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         throws XPathExpressionException, ParserConfigurationException {
         Object valResult;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
         }
 
@@ -296,7 +296,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         throws XPathExpressionException, ParserConfigurationException {
         Object valResult;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
         }
 
@@ -355,7 +355,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         throws XPathExpressionException, ParserConfigurationException {
         Object valResult;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
         }
 
@@ -414,7 +414,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
         throws XPathExpressionException, ParserConfigurationException {
         Object valResult;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
         }
 
@@ -464,7 +464,7 @@ public final class XPathMultiColCollectionCellFactory extends AbstractCellFactor
 
         Object valResult;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             valResult = xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
         }
 

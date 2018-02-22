@@ -68,7 +68,7 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -164,7 +164,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
                 .setNamespaceContext(new XPathNamespaceContext(m_settings.getNsPrefixes(), m_settings.getNamespaces()));
 
             String colNameQuery = "";
-            try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
                 colNameQuery = m_xpathSettings.buildXPathForColNames(m_xpathSettings.getXpathQuery());
                 xpathExpr = xpath.compile(colNameQuery);
                 Object result = xpathExpr.evaluate(supplier.get(), XPathConstants.STRING);
@@ -221,7 +221,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
      */
     private DataCell evaluateBoolean(final XPathExpression xpathExpr, final XMLValue<Document> xmlValue)
         throws XPathExpressionException {
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             final Object res = xpathExpr.evaluate(supplier.get(), XPathConstants.STRING);
             if (res instanceof String) {
                 final String value = (String)res;
@@ -256,7 +256,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
         DataCell newCell = null;
         String result;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             result = (String)xpathExpr.evaluate(supplier.get(), XPathConstants.STRING);
         }
 
@@ -298,7 +298,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
         throws XPathExpressionException {
         Object result;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             result = xpathExpr.evaluate(supplier.get(), XPathConstants.STRING);
         }
 
@@ -335,7 +335,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
 
         final Object res;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             res = xpathExpr.evaluate(supplier.get(), XPathConstants.STRING);
         }
 
@@ -344,7 +344,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
 
             if (value.isEmpty()) {
                 // Check if the XPath even exists, because non-existing paths also return an empty string.
-                try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()){
+                try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()){
                     NodeList nl = (NodeList)xpathExpr.evaluate(supplier.get(), XPathConstants.NODESET);
                     if (nl.getLength() == 0) {
                         // the path doesn't even exist => return missing cell
@@ -389,7 +389,7 @@ public final class XPathSingleCellFactory extends AbstractCellFactory {
         DataCell newCell;
         Object result;
 
-        try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
             result = xpathExpr.evaluate(supplier.get(), XPathConstants.NODE);}
 
         Node value = (Node)result;

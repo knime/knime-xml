@@ -58,7 +58,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -401,7 +401,7 @@ public class XPathNodeSettings {
             }
             namespaces.add(ns);
         } else {
-            try (AutocloseableSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
+            try (LockedSupplier<Document> supplier = xmlValue.getDocumentSupplier()) {
                 Node root = supplier.get().getFirstChild();
                 while (root.getNodeType() != Node.ELEMENT_NODE) {
                     root = root.getNextSibling();
