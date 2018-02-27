@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.knime.base.node.preproc.ungroup.UngroupOperation;
+import org.knime.base.node.preproc.ungroup.UngroupOperation2;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
@@ -234,14 +234,13 @@ final class XPathNodeModel extends NodeModel {
         // SingleCell| CollectionCell     | CollectionCell    | CollectionCell| CollectionCell     | CollectionCell
 
         DataTableSpec inSpec = in.getDataTableSpec();
-        UngroupOperation ungroup = null;
+        UngroupOperation2 ungroup = null;
         if (!m_ungroupIndices.isEmpty()) {
             int[] indices = new int[m_ungroupIndices.size()];
             for (int i = 0; i < m_ungroupIndices.size(); i++) {
                 indices[i] = m_ungroupIndices.get(i);
             }
-            ungroup = new UngroupOperation(false, false, true);
-            ungroup.setColIndices(indices);
+            ungroup = new UngroupOperation2(false, false, true, indices);
         }
 
         StreamableFunction fct = createColumnRearranger(inSpec).createStreamableFunction();
@@ -252,7 +251,7 @@ final class XPathNodeModel extends NodeModel {
             while ((inputRow = in.poll()) != null) {
                 DataRow newRow = fct.compute(inputRow);
                 if (ungroup != null) {
-                    ungroup.compute(new SingleRowInput(newRow), out, exec, rowCount);
+                    ungroup.compute(new SingleRowInput(newRow), out, exec, rowCount, null);
                 } else {
                     out.push(newRow);
                 }
@@ -300,13 +299,9 @@ final class XPathNodeModel extends NodeModel {
                 colNames[i] =
                     dataTableWithSingleCellColNames.getDataTableSpec().getColumnSpec(m_ungroupIndices.get(i)).getName();
             }
-            UngroupOperation ugO = new UngroupOperation(false, false, true);
-            ugO.setColIndices(indices);
-            ugO.setTable(dataTableWithSingleCellColNames);
-            ugO.setNewSpec(
-                UngroupOperation.createTableSpec(dataTableWithSingleCellColNames.getDataTableSpec(), true, colNames));
-
-            ungrouped = ugO.compute(exec.createSubExecutionContext(0.05));
+            UngroupOperation2 ugO =
+                new UngroupOperation2(false, false, true, indices);
+            ungrouped = ugO.compute(exec.createSubExecutionContext(0.05), dataTableWithSingleCellColNames, null);
         }
         return ungrouped;
     }
@@ -539,7 +534,7 @@ final class XPathNodeModel extends NodeModel {
                 indices[i] = m_ungroupIndices.get(i);
                 colNames[i] = initialOutSpec.getColumnSpec(m_ungroupIndices.get(i)).getName();
             }
-            return UngroupOperation.createTableSpec(initialOutSpec, true, colNames);
+            return UngroupOperation2.createTableSpec(initialOutSpec, true, indices);
         } else {
             return initialOutSpec;
         }
