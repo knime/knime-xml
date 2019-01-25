@@ -89,7 +89,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
      */
     public XMLReaderNodeDialog() {
         m_url = new FilesHistoryPanel(createFlowVariableModel("fileUrl", Type.STRING), "org.knime.xml.node.reader",
-            LocationValidation.FileInput, ".xml");
+            LocationValidation.FileInput, ".xml|.xml.gz");
         m_url.setBorder(BorderFactory.createTitledBorder("Input location:"));
 
         m_useXPathFilter = new JCheckBox("Use XPath Filter");
