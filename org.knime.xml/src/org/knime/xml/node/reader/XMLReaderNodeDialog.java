@@ -56,6 +56,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -90,6 +91,7 @@ public class XMLReaderNodeDialog extends NodeDialogPane {
     public XMLReaderNodeDialog() {
         m_url = new FilesHistoryPanel(createFlowVariableModel("fileUrl", Type.STRING), "org.knime.xml.node.reader",
             LocationValidation.FileInput, ".xml|.xml.gz");
+        m_url.setSelectMode(JFileChooser.FILES_ONLY);
         m_url.setBorder(BorderFactory.createTitledBorder("Input location:"));
 
         m_useXPathFilter = new JCheckBox("Use XPath Filter");
