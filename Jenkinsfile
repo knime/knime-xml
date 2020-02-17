@@ -14,16 +14,16 @@ properties([
 try {
 	knimetools.defaultTychoBuild('org.knime.update.xml')
 
-	/* workflowTests.runTests( */
-	/* 	"org.knime.features.xml.testing.feature.group", */
-	/* 	false, */
-	/* 	["knime-xml", "knime-base", "knime-core", "knime-shared", "knime-tp"] */
-	/* ) */
+	workflowTests.runTests(
+		"org.knime.features.xml.testing.feature.group",
+		false,
+		["knime-xml", "knime-base", "knime-core", "knime-shared", "knime-tp"]
+	)
 
-	/* stage('Sonarqube analysis') { */
-	/* 	env.lastStage = env.STAGE_NAME */
-	/* 	workflowTests.runSonar() */
-	/* } */
+	stage('Sonarqube analysis') {
+		env.lastStage = env.STAGE_NAME
+		workflowTests.runSonar()
+	}
  } catch (ex) {
 	 currentBuild.result = 'FAILED'
 	 throw ex
