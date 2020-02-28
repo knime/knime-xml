@@ -16,7 +16,7 @@ try {
 
     workflowTests.runTests(
         dependencies: [
-            repositories: [ "knime-xml", "knime-base", "knime-core", "knime-shared", "knime-tp" ]
+            repositories: [ "knime-xml", "knime-streaming" ]
         ]
     )
 
