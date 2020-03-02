@@ -26,7 +26,6 @@
 	<modules>
 		<module>org.knime.xml</module>
 		<module>org.knime.features.xml</module>
-		<module>org.knime.features.xml.testing</module>
 		<module>org.knime.update.xml</module>
 	</modules>
 
