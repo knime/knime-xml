@@ -21,6 +21,12 @@
             >
       </node> 
       <node
+            category-path="/struct-data/xml"
+            factory-class="org.knime.xml.node.xpath.XPathNodeFactory"
+            deprecated="true"
+            >
+      </node>
+      <node
             after="org.knime.xml.node.stringtoxml.StringToXMLNodeFactory"
             category-path="/struct-data/xml"
             factory-class="org.knime.xml.node.xpath2.XPathNodeFactory"
