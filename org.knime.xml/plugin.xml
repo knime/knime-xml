@@ -61,7 +61,13 @@
             category-path="/struct-data/xml"
             factory-class="org.knime.xml.node.combinewriter.XMLCombineWriterNodeFactory"
             >
-      </node>      
+      </node>
+      <node
+            category-path="/struct-data/xml"
+            deprecated="true"
+            factory-class="org.knime.xml.node.ccombine.XMLColumnCombinerNodeFactory"
+            hidden="false">
+      </node>
    </extension>
    <extension
          point="org.knime.workbench.repository.categories">
