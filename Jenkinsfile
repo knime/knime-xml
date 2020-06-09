@@ -11,12 +11,17 @@ properties([
     disableConcurrentBuilds()
 ])
 
+SSHD_IMAGE = "${dockerTools.ECR}/knime/sshd:alpine3.10"                                                                                 
+
 try {
     knimetools.defaultTychoBuild('org.knime.update.xml')
 
     workflowTests.runTests(
         dependencies: [
-            repositories: [ "knime-xml", "knime-streaming" ]
+            repositories: [ "knime-xml", "knime-streaming", "knime-filehandling", "knime-exttool", "knime-chemistry", "knime-distance" ]
+        ],
+         sidecarContainers: [
+            [ image: SSHD_IMAGE, namePrefix: "SSHD", port: 22 ]
         ]
     )
 
