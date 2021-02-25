@@ -12,7 +12,7 @@ properties([
     disableConcurrentBuilds()
 ])
 
-SSHD_IMAGE = "${dockerTools.ECR}/knime/sshd:alpine3.10"                                                                                 
+SSHD_IMAGE = "${dockerTools.ECR}/knime/sshd:alpine3.11"
 
 try {
     knimetools.defaultTychoBuild('org.knime.update.xml')
