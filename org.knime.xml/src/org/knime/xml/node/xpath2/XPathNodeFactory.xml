@@ -33,7 +33,7 @@
 			<tr><td>/bookstore/book[price&gt;35.00]/title</td><td>Selects all the title elements of the book elements of the bookstore element that have a price element with a value greater than 35.00</td></tr>
 			</table>
 		
-			<p>Syntax description from  <a href="http://www.w3schools.com/XPath/xpath_syntax.asp">w3cschools.com</a>.</p>    
+			<p>Syntax description from  <a href="https://www.w3schools.com/xml/xpath_syntax.asp">w3cschools.com</a>.</p>    
             
             <p><b>Hint for streaming:</b> Node can only be executed in real streamed fashion if every single XPath query is configured as follow (see XPath Query Settings):<br></br>
             The column names are fixed (i.e. select 'new column name') and either 'Single Cell', 'Collection Cell', or 'Multiple Rows' are selected as 'Multiple tag option'.</p>
