@@ -19,7 +19,7 @@ try {
 
     workflowTests.runTests(
         dependencies: [
-            repositories: [ "knime-xml", "knime-streaming", "knime-filehandling", "knime-exttool", "knime-chemistry", "knime-distance" ]
+            repositories: [ "knime-xml", "knime-streaming", "knime-filehandling", "knime-exttool", "knime-chemistry", "knime-distance", 'knime-kerberos' ]
         ],
          sidecarContainers: [
             [ image: SSHD_IMAGE, namePrefix: "SSHD", port: 22 ]
