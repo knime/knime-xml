@@ -96,7 +96,9 @@ import org.knime.core.util.FileUtil;
  * This is the model for the XML Reader node.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLReaderNodeModel extends NodeModel {
     private final XMLReaderNodeSettings m_settings;
     private LimitedXPathMatcher m_xpathExpr;

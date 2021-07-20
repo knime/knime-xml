@@ -56,7 +56,9 @@ import org.knime.core.node.NodeView;
  * This is the factory for the XML Reader node.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLReaderNodeFactory extends
     ContextAwareNodeFactory<XMLReaderNodeModel> {
     /**
