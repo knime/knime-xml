@@ -2,7 +2,7 @@
 <knimeNode icon="./xmlread.png" type="Source" xmlns="http://knime.org/node/v4.1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v4.1 http://knime.org/node/v4.1.xsd">
-    <name>XML Reader NEW</name>
+    <name>XML Reader</name>
     <shortDescription>Reads a XML File.</shortDescription>
     <fullDescription>
         <intro>

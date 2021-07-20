@@ -6,10 +6,11 @@
       <node
             category-path="/struct-data/xml"
             factory-class="org.knime.xml.node.reader.XMLReaderNodeFactory"
+            deprecated="true"
             >
       </node>
       <node
-            after="org.knime.xml.node.reader.XMLReaderNodeFactory"
+            after="org.knime.xml.node.reader.XMLReaderNodeFactory2"
             category-path="/struct-data/xml"
             factory-class="org.knime.xml.node.writer.XMLWriterNodeFactory"
             >

@@ -76,7 +76,9 @@ import org.knime.core.node.workflow.FlowVariable.Type;
  * This is the dialog for the XML reader.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLReaderNodeDialog extends NodeDialogPane {
     private final FilesHistoryPanel m_url;
     private final JCheckBox m_useXPathFilter;

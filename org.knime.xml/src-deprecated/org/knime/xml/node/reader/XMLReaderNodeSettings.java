@@ -56,7 +56,9 @@ import org.knime.core.node.NodeSettingsWO;
  * The settings of the XML Reader node.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLReaderNodeSettings {
     private static final String FILE_URL = "fileUrl";
     private static final String USE_XPATH_FILTER = "useXPathFilter";
