@@ -144,38 +144,6 @@
             <option name="Limit data rows">
                 If enabled, only the specified number of data rows are read.
             </option>
-            <option name="Namespaces">
-            The prefixes and the namespaces used in the XPath query. For the
-            example in <b>XPath Query</b> following namespace must be defined:
-            <br/>
-            Prefix: <i>dns</i>
-            <br/>
-            Namespace: <i>http://www.w3.org/1999/xhtml</i>         
-        </option>
-        <option name="Incorporate namespace of the root element.">
-            <p>This option is useful when you do not have the default
-            namespace of your document at hand.</p>
-            <p>If checked, the namespace of the root element is added to the 
-            <b>Namespaces</b> table during runtime. Please define a prefix for this 
-            namespace in <b>Prefix of root's namespace</b>.</p>
-            <p>For the example of XHTML documents the namespace of the root 
-            element is <i>http://www.w3.org/1999/xhtml</i> so that with the
-            root's prefix of <i>dns</i> you can leave
-            the <b>Namespaces</b> table empty.</p>     
-        </option>
-        <option name="Path column">
-                If checked, the node will append a path column with the provided name to the output table.
-                This column contains for each row which file it was read from.
-                The node will fail if adding the column with the provided name causes a name collision with any of the columns in the read table.
-        </option>
-        </tab>
-        <tab name="Limit Rows">
-            <option name="Skip first data rows">
-                If enabled, the specified number of valid data rows are skipped.
-            </option>
-            <option name="Limit data rows">
-                If enabled, only the specified number of data rows are read.
-            </option>
         </tab>
     </fullDescription>
     
