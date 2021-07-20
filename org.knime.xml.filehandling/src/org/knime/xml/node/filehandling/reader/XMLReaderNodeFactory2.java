@@ -48,10 +48,15 @@
  */
 package org.knime.xml.node.filehandling.reader;
 
+import java.util.Optional;
+
 import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.node.context.NodeCreationConfiguration;
+import org.knime.core.node.context.url.URLConfiguration;
+import org.knime.filehandling.core.connections.FSCategory;
+import org.knime.filehandling.core.connections.FSLocation;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
@@ -94,9 +99,15 @@ public class XMLReaderNodeFactory2 extends AbstractTableReaderNodeFactory<XMLRea
 
     @Override
     protected SettingsModelReaderFileChooser createPathSettings(final NodeCreationConfiguration nodeCreationConfig) {
-        return new SettingsModelReaderFileChooser("file_selection",
+        final SettingsModelReaderFileChooser settingsModel = new SettingsModelReaderFileChooser("file_selection",
                 nodeCreationConfig.getPortConfig().orElseThrow(IllegalStateException::new), FS_CONNECT_GRP_ID,
                 EnumConfig.create(FilterMode.FILE, FilterMode.FILES_IN_FOLDERS), FILE_SUFFIXES);
+        final Optional<? extends URLConfiguration> urlConfig = nodeCreationConfig.getURLConfig();
+        if (urlConfig.isPresent()) {
+            settingsModel
+                    .setLocation(new FSLocation(FSCategory.CUSTOM_URL, "1000", urlConfig.get().getUrl().toString()));
+        }
+        return settingsModel;
     }
 
     @Override
