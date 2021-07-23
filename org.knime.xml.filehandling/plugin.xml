@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+<extension point="org.knime.workbench.repository.nodes">
+      <node category-path="/struct-data/xml" factory-class="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2"/>
+   </extension>
+   <extension point="org.knime.workbench.repository.registeredFileExtensions">
+      <FileExtensionMapping NodeFactory="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2">
+         <FileExtension extension=".xml"/>
+         <FileExtension extension=".xml.gz"/>
+      </FileExtensionMapping>
+   </extension>
+   
+</plugin>
