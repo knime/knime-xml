@@ -86,7 +86,8 @@ import org.knime.filehandling.core.node.table.reader.ReadAdapter.ReadAdapterPara
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ProductionPathSerializer;
 
 /**
- * ProducerRegistry implementation. Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
+ * ProducerRegistry implementation. Reusing for XML from
+ * org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
  *
  * @author Moditha Hewasinghage, KNIME GmbH, Konstanz, Germany
  */
@@ -101,43 +102,43 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
     /** {@link ProductionPathSerializer} to use for the table manipulator. */
     static final ProductionPathSerializer PATH_SERIALIZER = new TableManipulatorProductionPathSerializer();
 
-    private static final class TableManipulatorProductionPathSerializer implements ProductionPathSerializer {
+    private static final class TableManipulatorProductionPathSerializer implements ProductionPathSerializer {//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
 
         @Override
         public ProductionPath loadProductionPath(final NodeSettingsRO config, final String key)
-                throws InvalidSettingsException {
-            final CellValueProducerFactory<?, DataType, ?, ?> producerFactory = loadCellValueProducerFactory(config,
-                    key);
-            final JavaToDataCellConverterFactory<?> converterFactory = loadConverterFactory(config, key,
-                    producerFactory.getSourceType());
+            throws InvalidSettingsException {
+            final CellValueProducerFactory<?, DataType, ?, ?> producerFactory =
+                loadCellValueProducerFactory(config, key);
+            final JavaToDataCellConverterFactory<?> converterFactory =
+                loadConverterFactory(config, key, producerFactory.getSourceType());
             return new ProductionPath(producerFactory, converterFactory);
         }
 
         private static CellValueProducerFactory<?, DataType, ?, ?> loadCellValueProducerFactory(
-                final NodeSettingsRO config, final String key) throws InvalidSettingsException {
+            final NodeSettingsRO config, final String key) throws InvalidSettingsException {
             String producerKey = key + "_producer";
             return SerializeUtil.loadConverterFactory(config, INSTANCE, producerKey)//
-                    .orElseThrow(() -> new InvalidSettingsException(
-                            String.format("Can't load CellValueProducer with key '%s'.", producerKey)));
+                .orElseThrow(() -> new InvalidSettingsException(
+                    String.format("Can't load CellValueProducer with key '%s'.", producerKey)));
         }
 
         private static JavaToDataCellConverterFactory<?> loadConverterFactory(final NodeSettingsRO settings,
-                final String key, final DataType sourceType) throws InvalidSettingsException {
+            final String key, final DataType sourceType) throws InvalidSettingsException {
             final String id = settings.getString(key + "_converter");
             if (CELL_CONVERTER_IDENTITY_FACTORY.equals(id)) {
                 return new IdentityCellConverterFactory(sourceType);
             } else {
                 JavaToDataCellConverterFactory<?> converterFactory = JavaToDataCellConverterRegistry.getInstance()
-                        .getFactory(id).orElseThrow(() -> new InvalidSettingsException(
-                                String.format("Can't load JavaToDataCellConverter with key '%s'.", key)));
-                converterFactory.loadAdditionalConfig(settings.getConfig(key + "_converter_config"));
+                    .getFactory(id).orElseThrow(() -> new InvalidSettingsException(
+                        String.format("Can't load JavaToDataCellConverter with key '%s'.", key)));
+                converterFactory.loadAdditionalConfig(settings.getConfig(key + "_converter_config"));//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
                 return converterFactory;
             }
         }
 
         @Override
         public void saveProductionPath(final ProductionPath productionPath, final NodeSettingsWO settings,
-                final String key) {
+            final String key) {
             SerializeUtil.storeProductionPath(productionPath, settings, key);
         }
 
@@ -173,12 +174,12 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
 
         @Override
         public void loadAdditionalConfig(final ConfigBaseRO config) throws InvalidSettingsException {
-            m_type = DataType.load((ConfigRO) config);
+            m_type = DataType.load((ConfigRO)config);
         }
 
         @Override
         public void storeAdditionalConfig(final ConfigBaseWO factoryConfig) {
-            m_type.save((ConfigWO) factoryConfig);
+            m_type.save((ConfigWO)factoryConfig);
         }
 
         @Override
@@ -200,7 +201,7 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            IdentityCellConverterFactory other = (IdentityCellConverterFactory) obj;
+            IdentityCellConverterFactory other = (IdentityCellConverterFactory)obj;
             if (m_type == null) {
                 if (other.m_type != null) {
                     return false;
@@ -214,9 +215,9 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
     }
 
     private static class IdentityCellValueProducerFactory extends
-            AbstractCellValueProducerFactory<XMLReadAdapter, DataType, DataCell, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>> {
+        AbstractCellValueProducerFactory<XMLReadAdapter, DataType, DataCell, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>> {
 
-        private DataType m_type;
+        private DataType m_type;//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
 
         IdentityCellValueProducerFactory() {
             m_type = null;
@@ -242,13 +243,14 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
         }
 
         @Override
-        public CellValueProducer<XMLReadAdapter, DataCell, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>> create() {
+        public CellValueProducer<XMLReadAdapter, DataCell, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>>
+            create() {
             return new CellValueProducer<XMLReadAdapter, DataCell, ReadAdapter.ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>>() {
 
                 @Override
                 public DataCell produceCellValue(final XMLReadAdapter source,
-                        final ReadAdapterParams<XMLReadAdapter, XMLReaderConfig> params) throws MappingException {
-                    return (DataCell) source.get(params);
+                    final ReadAdapterParams<XMLReadAdapter, XMLReaderConfig> params) throws MappingException {
+                    return (DataCell)source.get(params);//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
                 }
             };
         }
@@ -256,13 +258,13 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
         @Override
         public void loadAdditionalConfig(final ConfigBaseRO config) throws InvalidSettingsException {
             super.loadAdditionalConfig(config);
-            m_type = DataType.load((ConfigRO) config);
+            m_type = DataType.load((ConfigRO)config);
         }
 
         @Override
         public void storeAdditionalConfig(final ConfigBaseWO factoryConfig) {
             super.storeAdditionalConfig(factoryConfig);
-            m_type.save((ConfigWO) factoryConfig);
+            m_type.save((ConfigWO)factoryConfig);
         }
 
         /**
@@ -287,7 +289,7 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            IdentityCellValueProducerFactory other = (IdentityCellValueProducerFactory) obj;
+            IdentityCellValueProducerFactory other = (IdentityCellValueProducerFactory)obj;
             if (m_type == null) {
                 if (other.m_type != null) {
                     return false;
@@ -301,8 +303,8 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
     }
 
     private static final class CellValueProducerFactoryImplementation<D> implements
-            CellValueProducerFactory<XMLReadAdapter, DataType, D, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>> {
-        private final Class<?> m_destinationType;
+        CellValueProducerFactory<XMLReadAdapter, DataType, D, ReadAdapterParams<XMLReadAdapter, XMLReaderConfig>> {
+        private final Class<?> m_destinationType;//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
 
         private final String m_identifier;
 
@@ -311,7 +313,7 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
         private DataCellToJavaConverter<DataValue, D> m_converter;
 
         private CellValueProducerFactoryImplementation(final Class<?> destinationType, final String identifier,
-                final DataType sourceType, final DataCellToJavaConverter<DataValue, D> converter) {
+            final DataType sourceType, final DataCellToJavaConverter<DataValue, D> converter) {
             m_destinationType = destinationType;
             m_identifier = identifier;
             m_sourceType = sourceType;
@@ -339,8 +341,8 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
 
                 @Override
                 public D produceCellValue(final XMLReadAdapter source,
-                        final ReadAdapterParams<XMLReadAdapter, XMLReaderConfig> params) throws MappingException {
-                    final DataValue value = source.get(params);
+                    final ReadAdapterParams<XMLReadAdapter, XMLReaderConfig> params) throws MappingException {
+                    final DataValue value = source.get(params);//NOSONAR Reusing for XML from org.knime.base.node.preproc.manipulator.mapping.DataTypeProducerRegistry
                     try {
                         return value == null ? null : m_converter.convert(value);
                     } catch (Exception e) {
@@ -358,23 +360,23 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
         for (final DataType sourceType : dataTypes) {
             register(registered, sourceType);
             register(registered, ListCell.getCollectionType(sourceType));
-            // Set cells are not supported in the type mapping framework see 
+            // Set cells are not supported in the type mapping framework see
             // ArrayToCollectionConverterFactory
             // register(registered, SetCell.getCollectionType(sourceType)); //NOSONAR
         }
     }
 
     private static void register(final Set<String> registered, final DataType sourceType) {
-        final Collection<DataCellToJavaConverterFactory<?, ?>> factoriesForSourceType = DataCellToJavaConverterRegistry
-                .getInstance().getFactoriesForSourceType(sourceType);
+        final Collection<DataCellToJavaConverterFactory<?, ?>> factoriesForSourceType =
+            DataCellToJavaConverterRegistry.getInstance().getFactoriesForSourceType(sourceType);
         for (DataCellToJavaConverterFactory<?, ?> factory : factoriesForSourceType) {
             final Class<?> destinationType = factory.getDestinationType();
             final String sourceTypeName = sourceType.toPrettyString();
             final String identifier = sourceTypeName + "->" + destinationType.getName();
             if (registered.add(identifier)) {
-                @SuppressWarnings({ "rawtypes", "unchecked" })
+                @SuppressWarnings({"rawtypes", "unchecked"})
                 final CellValueProducerFactoryImplementation<?> converter = new CellValueProducerFactoryImplementation(
-                        destinationType, identifier, sourceType, factory.create());
+                    destinationType, identifier, sourceType, factory.create());
                 INSTANCE.register(converter);
             }
         }
@@ -388,7 +390,7 @@ final class DataTypeProducerRegistry extends ProducerRegistry<DataType, XMLReadA
     public List<ProductionPath> getAvailableProductionPaths(final DataType dataType) {
         final List<ProductionPath> availableProductionPaths = super.getAvailableProductionPaths(dataType);
         final ProductionPath identityPath = new ProductionPath(new IdentityCellValueProducerFactory(dataType),
-                new IdentityCellConverterFactory(dataType));
+            new IdentityCellConverterFactory(dataType));
         if (availableProductionPaths.isEmpty()) {
             // if we do not have any path we will return the identity path that simply
             // passes the cell through

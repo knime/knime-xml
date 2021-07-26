@@ -223,9 +223,9 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
     /**
      * Register the listeners for the preview. Only when the file changes
      */
-    private void registerPreviewChangeListeners() {
+    private void registerPreviewChangeListeners() {//NOSONAR similar code in other readers
 
-        final DocumentListener documentListener = new DocumentListener() {
+        final DocumentListener documentListener = new DocumentListener() { //NOSONAR similar code in other readers
 
             @Override
             public void removeUpdate(final DocumentEvent e) {
@@ -311,7 +311,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
         panel.add(createReaderOptionPanel(), gbc.incY().build());
         panel.add(createXPathPanel(), gbc.incY().build());
         panel.add(createNamespacePanel(), gbc.incY().build());
-        panel.add(m_pathColumnPanel, gbc.incY().build());
+        panel.add(m_pathColumnPanel, gbc.incY().build()); //NOSONAR similar code in other readers
         gbc.setWeightY(1).resetX().widthRemainder().incY().fillBoth();
         panel.add(createPreview(), gbc.build());
         return panel;
