@@ -152,7 +152,7 @@ final class XMLMultiTableReadFactory implements MultiTableReadFactory<FSPath, XM
         private final XMLReaderConfig m_config;
 
         XMLMultiTableRead(final MultiTableRead<DataType> multiTableRead, final XMLReaderConfig config) {
-            m_multiTableRead = multiTableRead;
+            m_multiTableRead = multiTableRead; //NOSONAR similar code for JSON
             m_config = config;
         }
 

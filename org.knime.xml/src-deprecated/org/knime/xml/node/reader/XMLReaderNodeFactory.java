@@ -58,9 +58,8 @@ import org.knime.core.node.NodeView;
  * @author Heiko Hofer
  * @deprecated
  */
-@Deprecated
-public class XMLReaderNodeFactory extends
-    ContextAwareNodeFactory<XMLReaderNodeModel> {
+@Deprecated(since = "4.5")
+public class XMLReaderNodeFactory extends ContextAwareNodeFactory<XMLReaderNodeModel> {
     /**
      * {@inheritDoc}
      */
@@ -73,8 +72,7 @@ public class XMLReaderNodeFactory extends
      * {@inheritDoc}
      */
     @Override
-    public XMLReaderNodeModel createNodeModel(
-            final NodeCreationContext context) {
+    public XMLReaderNodeModel createNodeModel(final NodeCreationContext context) {
         return new XMLReaderNodeModel(context);
     }
 
@@ -90,8 +88,7 @@ public class XMLReaderNodeFactory extends
      * {@inheritDoc}
      */
     @Override
-    public NodeView<XMLReaderNodeModel> createNodeView(final int viewIndex,
-            final XMLReaderNodeModel nodeModel) {
+    public NodeView<XMLReaderNodeModel> createNodeView(final int viewIndex, final XMLReaderNodeModel nodeModel) {
         return null;
     }
 

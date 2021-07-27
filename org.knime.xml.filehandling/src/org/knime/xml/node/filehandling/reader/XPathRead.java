@@ -104,10 +104,8 @@ final class XPathRead extends XMLRead {
     /**
      * Constructor.
      *
-     * @param path
-     *            the {@link Path} to the file
-     * @param config
-     *            the {@link TableReadConfig} of the node
+     * @param path the {@link Path} to the file
+     * @param config the {@link TableReadConfig} of the node
      * @throws IOException
      * @throws InvalidSettingsException
      * @throws ParserConfigurationException
@@ -152,8 +150,7 @@ final class XPathRead extends XMLRead {
     /**
      * Creates a {@link CompressionAwareCountingInputStream}.
      *
-     * @param path
-     *            the {@link Path} to a file
+     * @param path the {@link Path} to a file
      * @return a {@link CompressionAwareCountingInputStream}
      * @throws IOException
      */
@@ -187,7 +184,7 @@ final class XPathRead extends XMLRead {
         for (var i = 0; i < m_namespacePrefixes.length; i++) {
             if (StringUtils.isBlank(m_namespacePrefixes[i])) {
                 throw new IOException(
-                        "An empty prefix for namespaces is not allowed in XPath. Please define a valid prefix.");
+                    "An empty prefix for namespaces is not allowed in XPath. Please define a valid prefix.");
             }
         }
     }
@@ -208,7 +205,7 @@ final class XPathRead extends XMLRead {
             nsPrefixes.add(m_rootNamespacePrefix);
             getRootNameSpace(namespaces);
             nsContext = new DefaultNamespaceContext(nsPrefixes.toArray(new String[nsPrefixes.size()]),
-                    namespaces.toArray(new String[namespaces.size()]));
+                namespaces.toArray(new String[namespaces.size()]));
         }
         try {
             return new LimitedXPathMatcher(m_xmlReaderConfig.getXPath(), nsContext);
@@ -237,7 +234,7 @@ final class XPathRead extends XMLRead {
 
         // DefaultNamespaceContext does some sanity checking
         final NamespaceContext nsContext = new DefaultNamespaceContext(
-                nsPrefixes.toArray(new String[nsPrefixes.size()]), namespaces.toArray(new String[namespaces.size()]));
+            nsPrefixes.toArray(new String[nsPrefixes.size()]), namespaces.toArray(new String[namespaces.size()]));
         // LimitedXPathMatcher DefaultNamespaceContext does some
         // sanity checking
         try {
@@ -259,7 +256,7 @@ final class XPathRead extends XMLRead {
         factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.TRUE);
-        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.TRUE);
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
 
         XMLStreamReader parser = null;
         try (final var inputStreamTmp = createInputStream()) {
@@ -279,7 +276,7 @@ final class XPathRead extends XMLRead {
     }
 
     private static void extractRootNamespace(final List<String> namespaces, final XMLStreamReader parser)
-            throws XMLStreamException, IOException {
+        throws XMLStreamException, IOException {
 
         while (parser.hasNext()) {
             final int type = parser.getEventType();

@@ -58,22 +58,34 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "4.5")
 public class XMLReaderNodeSettings {
     private static final String FILE_URL = "fileUrl";
+
     private static final String USE_XPATH_FILTER = "useXPathFilter";
+
     private static final String XPATH = "xpath";
+
     private static final String NS_PREFIXES = "nsPrefixes";
+
     private static final String NAMESPACES = "namespaces";
+
     private static final String USE_ROOTS_NS = "useRootsNameSpace";
+
     private static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
 
     private String m_fileURL = null;
+
     private boolean m_useXPathFilter = false;
+
     private String m_xpath = "";
+
     private String[] m_nsPrefixes = new String[0];
+
     private String[] m_namespaces = new String[0];
+
     private boolean m_useRootsNS = true;
+
     private String m_rootsNSPrefix = "dns";
 
     /**
@@ -89,7 +101,6 @@ public class XMLReaderNodeSettings {
     void setFileURL(final String fileURL) {
         m_fileURL = fileURL;
     }
-
 
     /**
      * @return the useXPathFilter
@@ -147,7 +158,6 @@ public class XMLReaderNodeSettings {
         m_namespaces = namespaces;
     }
 
-
     /**
      * @return the useRootsNS
      */
@@ -176,12 +186,13 @@ public class XMLReaderNodeSettings {
         m_rootsNSPrefix = rootsNSPrefix;
     }
 
-    /** Called from dialog when settings are to be loaded.
+    /**
+     * Called from dialog when settings are to be loaded.
+     *
      * @param settings To load from
      * @param inSpec Input spec
      */
-    void loadSettingsDialog(final NodeSettingsRO settings,
-            final DataTableSpec inSpec) {
+    void loadSettingsDialog(final NodeSettingsRO settings, final DataTableSpec inSpec) {
         m_fileURL = settings.getString(FILE_URL, null);
         m_useXPathFilter = settings.getBoolean(USE_XPATH_FILTER, false);
         m_xpath = settings.getString(XPATH, "");
@@ -191,12 +202,13 @@ public class XMLReaderNodeSettings {
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
     }
 
-    /** Called from model when settings are to be loaded.
+    /**
+     * Called from model when settings are to be loaded.
+     *
      * @param settings To load from
      * @throws InvalidSettingsException If settings are invalid.
      */
-    void loadSettingsModel(final NodeSettingsRO settings)
-        throws InvalidSettingsException {
+    void loadSettingsModel(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fileURL = settings.getString(FILE_URL);
         m_useXPathFilter = settings.getBoolean(USE_XPATH_FILTER);
         m_xpath = settings.getString(XPATH);
@@ -207,7 +219,9 @@ public class XMLReaderNodeSettings {
         m_rootsNSPrefix = settings.getString(ROOTS_NS_PREFIX, "dns");
     }
 
-    /** Called from model and dialog to save current settings.
+    /**
+     * Called from model and dialog to save current settings.
+     *
      * @param settings To save to.
      */
     void saveSettings(final NodeSettingsWO settings) {
