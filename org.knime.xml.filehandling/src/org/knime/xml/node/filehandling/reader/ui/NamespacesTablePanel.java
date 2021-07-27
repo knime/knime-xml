@@ -122,7 +122,7 @@ public class NamespacesTablePanel extends JPanel {
         addComponents();
     }
 
-    private void addButtonListeners() {
+    private void addButtonListeners() { //NOSONAR similar code in MongoDB hosts panel
         m_addButton.addActionListener(e -> onAdd());
         m_removeButton.addActionListener(e -> onRemove());
         m_removeAllButton.addActionListener(e -> onRemoveAll());

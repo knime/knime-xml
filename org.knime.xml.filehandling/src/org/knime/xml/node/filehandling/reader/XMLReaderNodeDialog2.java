@@ -58,8 +58,8 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -90,11 +90,12 @@ import org.knime.xml.node.filehandling.reader.ui.NamespacesTablePanel;
 
 /**
  * Node dialog of the XML reader node.
- * 
+ *
  * @author Moditha Hewasinghage, KNIME GmbH, Berlin, Germany
- * 
+ *
  *
  */
+@SuppressWarnings("common-java:DuplicatedBlocks")
 final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLReaderConfig, DataType> {
 
     private static final Long ROW_START = Long.valueOf(0);
@@ -134,7 +135,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
     private final JCheckBox m_useRootsNS;
 
     private final JTextField m_rootNSPrefix;
-    
+
     private final JCheckBox m_failIfNotFound;
 
     private final JLabel m_rootNSprefixLabel = new JLabel("Prefix of root element's namespace: ");
@@ -442,7 +443,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
 
     /**
      * Saves the {@link DefaultTableReadConfig}.
-     * 
+     *
      * @param config
      *            the {@link DefaultTableReadConfig}
      */

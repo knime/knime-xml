@@ -78,7 +78,7 @@ import org.knime.core.node.workflow.FlowVariable.Type;
  * @author Heiko Hofer
  * @deprecated
  */
-@Deprecated
+@Deprecated  (since = "4.5")
 public class XMLReaderNodeDialog extends NodeDialogPane {
     private final FilesHistoryPanel m_url;
     private final JCheckBox m_useXPathFilter;

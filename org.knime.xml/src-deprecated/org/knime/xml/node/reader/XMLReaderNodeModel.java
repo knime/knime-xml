@@ -98,7 +98,7 @@ import org.knime.core.util.FileUtil;
  * @author Heiko Hofer
  * @deprecated
  */
-@Deprecated
+@Deprecated  (since = "4.5")
 public class XMLReaderNodeModel extends NodeModel {
     private final XMLReaderNodeSettings m_settings;
     private LimitedXPathMatcher m_xpathExpr;

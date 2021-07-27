@@ -87,7 +87,7 @@ public class NamespacesTableModel extends AbstractTableModel {
         return m_settings.getNamespaces().size();
     }
 
-    @Override
+    @Override //NOSONAR similar code in hosts panel in MongoDB
     public int getColumnCount() {
         return COLUMN_NAMES.length;
     }
