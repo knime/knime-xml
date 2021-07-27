@@ -90,10 +90,10 @@
             </option>
             <option name="Output column name">Name of the output column</option>
             <option name="XPath Query">
-	            <p>Only nodes of the document, which match this XPath query, will be 
+	            <p>Only nodes of the document which match this XPath query will be 
 	            read. Each matching node is read in a single data cell.</p>
 	            
-	            <p>Note, that XPath requires to explicitly denote namespaces. E.g. to
+	            <p>Note that XPath requires to explicitly denote namespaces. E.g. to
 	            read only the body of a XHTML document you can use the XPath query:
 	            <br/>
 	            <i>/dns:html/dns:body</i>
@@ -103,8 +103,8 @@
 	            
 	            <p>A limited XPath syntax is supported. Only absolute paths to
 	            nodes can be defined. Among the XPath operators the |-Operator
-	            is supported. It can be used to read e.g. the head and the body of 
-	            an XHTML document in single cells:
+	            is supported. It can be used to read for example the head and the body of 
+	            a XHTML document in single cells:
 	            <br/>
 	            <i>/dns:html/dns:head | /dns:html/dns:body</i> </p>
 	        </option>
@@ -120,7 +120,7 @@
             <br/>
             Namespace: <i>http://www.w3.org/1999/xhtml</i>         
         </option>
-        <option name="Incorporate namespace of the root element.">
+        <option name="Incorporate namespace of the root element">
             <p>This option is useful when you do not have the default
             namespace of your document at hand.</p>
             <p>If checked, the namespace of the root element is added to the 
