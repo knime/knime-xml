@@ -126,7 +126,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
     private final JSpinner m_skipRowsSpinner = new JSpinner(
             new SpinnerNumberModel(STEP_SIZE, ROW_START, ROW_END, STEP_SIZE));
 
-    private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("Path");
+    private final SourceIdentifierColumnPanel m_pathColumnPanel = new SourceIdentifierColumnPanel("File path");
 
     private final NamespacesTablePanel m_nsPanel;
 
@@ -181,7 +181,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
         m_failIfNotFound
                 .setToolTipText("When unchecked and path does not match any input, empty table will be generated.");
 
-        m_useXPathFilter = new JCheckBox("Use XPath Filter");
+        m_useXPathFilter = new JCheckBox("Use XPath filter");
         m_useXPathFilter.addActionListener(l -> enableXPathComponents());
 
         m_useXPathFilter.doClick();
@@ -276,7 +276,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
     private JPanel createLimitRowsPanel() {
         final JPanel limitPanel = new JPanel(new GridBagLayout());
         GBCBuilder gbc = createGBCBuilder().fillHorizontal();
-        limitPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Limit Rows"));
+        limitPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Limit rows"));
 
         limitPanel.add(m_skipRowsChecker, gbc.build());
         limitPanel.add(m_skipRowsSpinner, gbc.incX().build());
@@ -345,7 +345,7 @@ final class XMLReaderNodeDialog2 extends AbstractPathTableReaderNodeDialog<XMLRe
     private JPanel createXPathPanel() {
         final JPanel xPathPanel = new JPanel(new GridBagLayout());
         GBCBuilder gbc = createGBCBuilder().anchorLineStart();
-        xPathPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "XPath Query"));
+        xPathPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "XPath query"));
         xPathPanel.add(m_useXPathFilter, gbc.build());
         xPathPanel.add(m_failIfNotFound, gbc.incY().build());
         xPathPanel.add(m_xPath, gbc.incY().setWeightX(1).fillHorizontal().build());
