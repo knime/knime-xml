@@ -89,7 +89,7 @@
                 <i>path flow variable.</i></a>
             </option>
             <option name="Output column name">Name of the output column</option>
-            <option name="XPath Query">
+            <option name="XPath query">
 	            <p>Only nodes of the document which match this XPath query will be 
 	            read. Each matching node is read in a single data cell.</p>
 	            
@@ -114,7 +114,7 @@
             </option>
             <option name="Namespaces">
             The prefixes and the namespaces used in the XPath query. For the
-            example in <b>XPath Query</b> following namespace must be defined:
+            example in <b>XPath query</b> following namespace must be defined:
             <br/>
             Prefix: <i>dns</i>
             <br/>
