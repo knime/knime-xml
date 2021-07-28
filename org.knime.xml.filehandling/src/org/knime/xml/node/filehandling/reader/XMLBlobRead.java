@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 
 import org.knime.core.data.DataValue;
 import org.knime.core.data.xml.XMLCellFactory;
@@ -64,9 +65,9 @@ import org.xml.sax.SAXException;
 /**
  * Class for the XML reader which implements {@link Read} which reads the XML as
  * a single cell (blob).
- * 
+ *
  * @author Moditha Hewasinghage, KNIME GmbH, Berlin, Germany
- * 
+ *
  */
 final class XMLBlobRead extends XMLRead {
 
@@ -94,7 +95,7 @@ final class XMLBlobRead extends XMLRead {
         } else {
             try {
                 return createRandomAccessible(XMLCellFactory.create(m_compressionAwareStream));
-            } catch (ParserConfigurationException | SAXException e) {
+            } catch (ParserConfigurationException | SAXException | XMLStreamException e) {
                 throw new IOException(e.getMessage(), e);
             }
         }
