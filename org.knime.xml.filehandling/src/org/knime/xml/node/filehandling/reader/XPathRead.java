@@ -297,7 +297,7 @@ final class XPathRead extends XMLRead {
         if (m_xpathMatcher.rootMatches()) {
             return XMLCellReaderFactory.createXMLCellReader(m_compressionAwareStream);
         } else {
-            return XMLCellReaderFactory.createXPathXMLCellReader(m_compressionAwareStream, m_xpathMatcher);
+            return XMLCellReaderFactory.createXPathXMLCellReader2(m_compressionAwareStream, m_xpathMatcher);
         }
     }
 
