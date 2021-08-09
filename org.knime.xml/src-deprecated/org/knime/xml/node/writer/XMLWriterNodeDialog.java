@@ -81,7 +81,9 @@ import org.knime.core.util.FileUtil;
  * This is the dialog for the XML writer.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLWriterNodeDialog extends NodeDialogPane {
     private ColumnSelectionComboxBox m_inputColumn;
     private FilesHistoryPanel m_folder;

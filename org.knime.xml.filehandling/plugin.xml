@@ -3,7 +3,17 @@
 <plugin>
 
 <extension point="org.knime.workbench.repository.nodes">
-      <node category-path="/struct-data/xml" factory-class="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2"/>
+      <node 
+            category-path="/struct-data/xml" 
+            factory-class="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2"
+            >
+      </node>
+      <node
+            after="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2"
+            category-path="/struct-data/xml"
+            factory-class="org.knime.xml.node.filehandling.writer.XMLWriterNodeFactory2"
+            >
+      </node>
    </extension>
    <extension point="org.knime.workbench.repository.registeredFileExtensions">
       <FileExtensionMapping NodeFactory="org.knime.xml.node.filehandling.reader.XMLReaderNodeFactory2">
@@ -11,5 +21,4 @@
          <FileExtension extension=".xml.gz"/>
       </FileExtensionMapping>
    </extension>
-   
 </plugin>

@@ -83,7 +83,9 @@ import org.knime.core.util.PathUtils;
  * directory.
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLWriterNodeModel extends NodeModel {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(
             XMLWriterNodeModel.class);
