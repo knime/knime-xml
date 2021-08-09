@@ -55,7 +55,9 @@ import org.knime.core.node.NodeSettingsWO;
 /**
  *
  * @author Heiko Hofer
+ * @deprecated
  */
+@Deprecated
 public class XMLWriterNodeSettings {
     private static final String INPUT_COLUMN = "inputColumn";
     private static final String FOLDER = "folder";

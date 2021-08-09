@@ -1,5 +1,6 @@
 /*
  * ------------------------------------------------------------------------
+ *
  *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
@@ -43,58 +44,27 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   17.12.2010 (hofer): created
-. */
-package org.knime.xml.node.writer;
+ *   26 Jul 2021 (Laurin Siefermann, KNIME GmbH, Konstanz, Germany): created
+ */
+package org.knime.xml.node.filehandling.writer;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.knime.filehandling.core.node.table.writer.AbstractMultiTableWriterNodeDialog;
 
 /**
- * This is the factory for the XML Writer node.
+ * Node dialog of the XML Writer node (new file handling).
  *
- * @author Heiko Hofer
+ * @author Laurin Siefermann, KNIME GmbH, Konstanz, Germany
  */
-public class XMLWriterNodeFactory extends NodeFactory<XMLWriterNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public XMLWriterNodeModel createNodeModel() {
-        return new XMLWriterNodeModel();
-    }
+final class XMLWriterNodeDialog2 extends AbstractMultiTableWriterNodeDialog<XMLWriterNodeConfig> {
 
     /**
-     * {@inheritDoc}
+     * Constructor.
+     *
+     * @param nodeConfig storing the user settings
+     * @param inputTableIdx index of data-table-input-port-group-name
      */
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<XMLWriterNodeModel> createNodeView(final int viewIndex,
-            final XMLWriterNodeModel nodeModel) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new XMLWriterNodeDialog();
+    protected XMLWriterNodeDialog2(final XMLWriterNodeConfig nodeConfig, final int inputTableIdx) {
+        super(nodeConfig, inputTableIdx);
+        createSettingsTab();
     }
 }
