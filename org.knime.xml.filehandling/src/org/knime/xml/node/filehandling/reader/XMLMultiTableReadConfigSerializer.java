@@ -54,7 +54,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.filehandling.core.node.table.reader.config.ConfigSerializer;
+import org.knime.filehandling.core.node.table.ConfigSerializer;
 import org.knime.filehandling.core.node.table.reader.config.DefaultTableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.TableReadConfig;
 import org.knime.filehandling.core.node.table.reader.config.tablespec.ConfigID;
@@ -64,7 +64,7 @@ import org.knime.filehandling.core.util.SettingsUtils;
 
 /**
  * The {@link ConfigSerializer} for the XML reader node.
- * 
+ *
  * @author Moditha Hewasinghage, KNIME GmbH, Berlin, Germany
  */
 enum XMLMultiTableReadConfigSerializer
@@ -104,7 +104,7 @@ enum XMLMultiTableReadConfigSerializer
     private static final String CFG_NAMESPACES = "namespaces";
 
     private static final String CFG_USE_ROOTS_NS = "use_roots_namespace";
-    
+
     private static final String CFG_ROOTS_NS_PREFIX = "roots_name_space_prefix";
 
     private static final String CFG_FAIL_IF_NOT_FOUND = "fail_if_not_found";
