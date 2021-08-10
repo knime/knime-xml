@@ -131,10 +131,10 @@
             root's prefix of <i>dns</i> you can leave
             the <b>Namespaces</b> table empty.</p>     
         </option>
-        <option name="Path column">
-                If checked, the node will append a path column with the provided name to the output table.
-                This column contains for each row which file it was read from.
-                The node will fail if adding the column with the provided name causes a name collision with any of the columns in the read table.
+        <option name="Append file path column">
+                If checked, the node will append a column of type <i>Path</i> with the provided name to the output table.
+                For each row, this column contains the path of the file it was read from. The node will fail if adding
+                the column with the provided name causes a name collision with any of the columns in the read table.
         </option>
         </tab>
         <tab name="Limit Rows">
