@@ -107,6 +107,7 @@ import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.DataAwareNodeDialogPane;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -120,6 +121,8 @@ import org.knime.xml.node.xpath2.ui.SaxHandler;
 import org.knime.xml.node.xpath2.ui.StopParsingException;
 import org.knime.xml.node.xpath2.ui.XMLTreeNode;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXParseException;
+
 
 /**
  * This is the dialog for the XPath node.
@@ -127,6 +130,8 @@ import org.xml.sax.InputSource;
  * @author Tim-Oliver Buchholz, KNIME AG, Zurich, Switzerland
  */
 final class XPathNodeDialog extends DataAwareNodeDialogPane {
+
+    private final static NodeLogger LOGGER =  NodeLogger.getLogger(XPathNodeDialog.class);
 
     /*
      * Configuration Tab.
@@ -793,8 +798,8 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
             SaxHandler handler = new SaxHandler(m_root, noNSSet);
             try {
                 saxParser.parse(new InputSource(new StringReader(xml)), handler);
-            } catch (StopParsingException spe) {
-                // easy
+            } catch (SAXParseException | StopParsingException e) {
+                LOGGER.debug("A SAXException occured while parsing the preview.", e);
             }
             m_allTags = new HashMap<Integer, XMLTreeNode>();
 
