@@ -79,14 +79,5 @@
             path="/struct-data">
       </category>
    </extension>   
-     <extension
-           point="org.knime.workbench.repository.registeredFileExtensions">
-        <FileExtensionMapping
-              NodeFactory="org.knime.xml.node.reader.XMLReaderNodeFactory">
-           <FileExtension
-                 extension=".xml">
-           </FileExtension>
-        </FileExtensionMapping>
-    </extension>
 
 </plugin>
