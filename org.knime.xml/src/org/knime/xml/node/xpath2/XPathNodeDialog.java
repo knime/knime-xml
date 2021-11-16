@@ -115,13 +115,16 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnSelectionComboxBox;
 import org.knime.core.node.util.KeyValuePanel;
+import org.knime.core.util.xml.NoExternalEntityResolver;
 import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
 import org.knime.xml.node.xpath2.ui.NewQueryDialog;
 import org.knime.xml.node.xpath2.ui.SaxHandler;
 import org.knime.xml.node.xpath2.ui.StopParsingException;
 import org.knime.xml.node.xpath2.ui.XMLTreeNode;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 
 
 /**
@@ -796,8 +799,13 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
 
             boolean noNSSet = m_nsPanel.getKeys().length == 0;
             SaxHandler handler = new SaxHandler(m_root, noNSSet);
+            XMLReader reader = saxParser.getXMLReader();
+            reader.setContentHandler(handler);
+            reader.setErrorHandler(handler);
+            // set no-op entity resolver to ignore any 'DOCTYPE' declarations in the xml string
+            reader.setEntityResolver(NoExternalEntityResolver.getInstance());
             try {
-                saxParser.parse(new InputSource(new StringReader(xml)), handler);
+                reader.parse(new InputSource(new StringReader(xml)));
             } catch (SAXParseException | StopParsingException e) {
                 LOGGER.debug("A SAXException occured while parsing the preview.", e);
             }
