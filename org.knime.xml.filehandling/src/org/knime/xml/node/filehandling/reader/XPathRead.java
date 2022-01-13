@@ -120,14 +120,21 @@ final class XPathRead extends XMLRead {
         m_rootNamespacePrefix = m_xmlReaderConfig.getRootNamespacePrefix();
         m_path = path;
 
-        performSanityChecks();
-
-        m_xpathMatcher = createXPathMatcher();
-
+        boolean initSuccessfull = false;
         try {
+            performSanityChecks();
+
+            m_xpathMatcher = createXPathMatcher();
+
             m_reader = createXMLReader();
+
+            initSuccessfull = true;
         } catch (ParserConfigurationException | XMLStreamException e) {
             throw new IOException(e.getMessage(), e);
+        } finally {
+            if (!initSuccessfull) {
+                close();
+            }
         }
     }
 
@@ -304,6 +311,8 @@ final class XPathRead extends XMLRead {
     @Override
     public void close() throws IOException {
         super.close();
-        m_reader.close();
+        if (m_reader != null) {
+            m_reader.close();
+        }
     }
 }
