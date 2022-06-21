@@ -55,8 +55,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.xml.XMLCell;
 import org.knime.core.node.context.NodeCreationConfiguration;
 import org.knime.core.node.context.url.URLConfiguration;
-import org.knime.filehandling.core.connections.FSCategory;
-import org.knime.filehandling.core.connections.FSLocation;
+import org.knime.filehandling.core.connections.FSLocationUtil;
 import org.knime.filehandling.core.connections.FSPath;
 import org.knime.filehandling.core.defaultnodesettings.EnumConfig;
 import org.knime.filehandling.core.defaultnodesettings.filechooser.reader.SettingsModelReaderFileChooser;
@@ -74,9 +73,8 @@ import org.knime.filehandling.core.node.table.reader.type.hierarchy.TypeTester;
 
 /**
  * Implementation of the node factory of the XML Reader node.
- * 
+ *
  * @author Moditha Hewasinghage, KNIME GmbH, Berlin, Germany
- * 
  */
 public class XMLReaderNodeFactory2 extends AbstractTableReaderNodeFactory<XMLReaderConfig, DataType, DataValue> {
 
@@ -105,7 +103,7 @@ public class XMLReaderNodeFactory2 extends AbstractTableReaderNodeFactory<XMLRea
         final Optional<? extends URLConfiguration> urlConfig = nodeCreationConfig.getURLConfig();
         if (urlConfig.isPresent()) {
             settingsModel
-                    .setLocation(new FSLocation(FSCategory.CUSTOM_URL, "1000", urlConfig.get().getUrl().toString()));
+                    .setLocation(FSLocationUtil.createFromURL(urlConfig.get().getUrl().toString()));
         }
         return settingsModel;
     }
