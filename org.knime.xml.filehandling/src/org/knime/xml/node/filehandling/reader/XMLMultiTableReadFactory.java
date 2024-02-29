@@ -78,7 +78,7 @@ import org.knime.filehandling.core.node.table.reader.util.StagedMultiTableRead;
  */
 final class XMLMultiTableReadFactory implements MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> {
 
-    private final MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> m_multiTableReadFactory;
+    private final MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> m_defaultFactory;
 
     private static IllegalArgumentException createNoRowsException() {
         return new IllegalArgumentException("Nothing found for XPath ");
@@ -88,24 +88,33 @@ final class XMLMultiTableReadFactory implements MultiTableReadFactory<FSPath, XM
     public StagedMultiTableRead<FSPath, DataType> create(final SourceGroup<FSPath> sourceGroup,
             final MultiTableReadConfig<XMLReaderConfig, DataType> config, final ExecutionMonitor exec)
             throws IOException {
-        final StagedMultiTableRead<FSPath, DataType> stagedultiTableReadFactory = m_multiTableReadFactory
+        final StagedMultiTableRead<FSPath, DataType> stagedultiTableReadFactory = m_defaultFactory
                 .create(sourceGroup, config, exec);
         return new XMLStagedMultiTableRead(stagedultiTableReadFactory,
                 config.getTableReadConfig().getReaderSpecificConfig());
     }
 
-    XMLMultiTableReadFactory(final MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> multiTableReadFactory) {
-        m_multiTableReadFactory = multiTableReadFactory;
+    XMLMultiTableReadFactory(final MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> defaultFactory) {
+        m_defaultFactory = defaultFactory;
     }
 
     @Override
     public StagedMultiTableRead<FSPath, DataType> createFromConfig(final SourceGroup<FSPath> sourceGroup,
             final MultiTableReadConfig<XMLReaderConfig, DataType> config) {
-        final StagedMultiTableRead<FSPath, DataType> stagedultiTableReadFactory = m_multiTableReadFactory
-                .createFromConfig(sourceGroup, config);
-        return new XMLStagedMultiTableRead(stagedultiTableReadFactory,
+
+        final var defaultRead = m_defaultFactory.createFromConfig(sourceGroup, config);
+        return new XMLStagedMultiTableRead(defaultRead,
                 config.getTableReadConfig().getReaderSpecificConfig());
     }
+
+    @Override
+    public StagedMultiTableRead<FSPath, DataType> createFromConfig(final SourceGroup<FSPath> sourceGroup,
+        final MultiTableReadConfig<XMLReaderConfig, DataType> config, final ExecutionMonitor exec) throws IOException {
+
+        // we are not doing any table spec sanity checks because the table spec is always the same
+        return createFromConfig(sourceGroup, config);
+    }
+
 
     private static final class XMLStagedMultiTableRead implements StagedMultiTableRead<FSPath, DataType> {
 

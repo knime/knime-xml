@@ -90,9 +90,9 @@ public class XMLReaderNodeFactory2 extends AbstractTableReaderNodeFactory<XMLRea
     @Override
     protected MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> createMultiTableReadFactory(
             final GenericTableReader<FSPath, XMLReaderConfig, DataType, DataValue> reader) {
-        final MultiTableReadFactory<FSPath, XMLReaderConfig, DataType> multiTableReadFactory = super.createMultiTableReadFactory(
-                reader);
-        return new XMLMultiTableReadFactory(multiTableReadFactory);
+
+        final var defaultFactory = super.createMultiTableReadFactory(reader);
+        return new XMLMultiTableReadFactory(defaultFactory);
     }
 
     @Override
