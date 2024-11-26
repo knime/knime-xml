@@ -89,6 +89,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.TextAction;
@@ -100,6 +101,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit.SelectWordAction;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.RUndoManager;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
@@ -121,7 +123,6 @@ import org.knime.xml.node.xpath2.ui.NewQueryDialog;
 import org.knime.xml.node.xpath2.ui.SaxHandler;
 import org.knime.xml.node.xpath2.ui.StopParsingException;
 import org.knime.xml.node.xpath2.ui.XMLTreeNode;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
@@ -462,8 +463,35 @@ final class XPathNodeDialog extends DataAwareNodeDialogPane {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("XML-Cell Preview"));
+        m_textfield = new RSyntaxTextArea(m_text) {
+            private static final long serialVersionUID = 1L;
 
-        m_textfield = new RSyntaxTextArea(m_text);
+            // AP-23625: work around memory leak of RUndoManager
+            // (suggested fix no. 2 in https://github.com/bobbylight/RSyntaxTextArea/issues/99, to keep not even a
+            // single unneeded event in memory (might be a lot of XML content!)
+            @Override
+            protected RUndoManager createUndoManager() {
+                // use do-nothing undo manager, since the textfield is read-only and no undo/redo actions are needed
+                return new RUndoManager(m_textfield) {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void undo() {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void redo() {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void undoableEditHappened(final UndoableEditEvent e) {
+                        // do nothing
+                    }
+                };
+            }
+        };
         m_textfield.setDragEnabled(false);
         m_textfield.setEditable(false);
         m_textfield.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
