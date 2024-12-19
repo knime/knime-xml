@@ -4,8 +4,8 @@ Bundle-Name: XML related functionality for KNIME
 Bundle-SymbolicName: org.knime.xml.filehandling; singleton:=true
 Bundle-Version: 5.5.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Require-Bundle: org.knime.core;bundle-version="[5.4.0,6.0.0)",
- org.knime.filehandling.core;bundle-version="[5.4.0,6.0.0)",
+Require-Bundle: org.knime.core;bundle-version="[5.5.0,6.0.0)",
+ org.knime.filehandling.core;bundle-version="[5.5.0,6.0.0)",
  org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
