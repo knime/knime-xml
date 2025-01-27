@@ -4,7 +4,7 @@
 
 	<parent>
 		<groupId>org.knime.maven</groupId>
-		<artifactId>ap.parent</artifactId>
+		<artifactId>ap.parent.ststest</artifactId>
 		<version>5.5.0</version>
 	</parent>
 
