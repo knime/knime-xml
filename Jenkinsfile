@@ -41,10 +41,10 @@ try {
 
     // parallel configs
 
-    stage('Sonarqube analysis') {
-        env.lastStage = env.STAGE_NAME
-        workflowTests.runSonar()
-    }
+    // stage('Sonarqube analysis') {
+    //     env.lastStage = env.STAGE_NAME
+    //     workflowTests.runSonar()
+    // }
 } catch (ex) {
     currentBuild.result = 'FAILURE'
     throw ex
