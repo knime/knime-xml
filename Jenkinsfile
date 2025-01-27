@@ -39,7 +39,7 @@ try {
         }
     ]
 
-    parallel configs
+    // parallel configs
 
     stage('Sonarqube analysis') {
         env.lastStage = env.STAGE_NAME
