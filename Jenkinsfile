@@ -9,8 +9,8 @@ properties([
     ]),
     parameters(workflowTests.getConfigurationsAsParameters() + fsTests.getFSConfigurationsAsParameters()),
     buildDiscarder(logRotator(numToKeepStr: '5')),
-    disableConcurrentBuilds(),
-    discoverGitReferenceBuild(maxCommits: 500, targetBranch: 'DEVOPS-3132-investigate-backstage-tool')
+    disableConcurrentBuilds()
+
 ])
 
 SSHD_IMAGE = "${dockerTools.ECR}/knime/sshd:alpine3.11"
@@ -45,6 +45,9 @@ try {
     stage('Sonarqube analysis') {
         env.lastStage = env.STAGE_NAME
         workflowTests.runSonar()
+    }
+    stage('commit analysis') {
+        discoverGitReferenceBuild maxCommits: 500, targetBranch: 'DEVOPS-3132-investigate-backstage-tool'
     }
 } catch (ex) {
     currentBuild.result = 'FAILURE'
