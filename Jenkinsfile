@@ -10,6 +10,7 @@ properties([
     parameters(workflowTests.getConfigurationsAsParameters() + fsTests.getFSConfigurationsAsParameters()),
     buildDiscarder(logRotator(numToKeepStr: '5')),
     disableConcurrentBuilds()
+    discoverGitReferenceBuild maxCommits: 500, targetBranch: 'DEVOPS-3132-investigate-backstage-tool'
 ])
 
 SSHD_IMAGE = "${dockerTools.ECR}/knime/sshd:alpine3.11"
