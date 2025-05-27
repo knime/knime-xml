@@ -1,5 +1,5 @@
 #!groovy
-def BN = (BRANCH_NAME == 'master' || BRANCH_NAME.startsWith('releases/')) ? BRANCH_NAME : 'releases/2025-07'
+def BN = "DEVOPS-3132-investigate-backstage-tool"
 
 library "knime-pipeline@$BN"
 
@@ -46,9 +46,7 @@ try {
         env.lastStage = env.STAGE_NAME
         workflowTests.runSonar()
     }
-    stage('commit analysis') {
-        discoverGitReferenceBuild maxCommits: 500, targetBranch: 'DEVOPS-3132-investigate-backstage-tool'
-    }
+
 } catch (ex) {
     currentBuild.result = 'FAILURE'
     throw ex
