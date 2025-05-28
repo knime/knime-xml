@@ -19,7 +19,5 @@ try {
 } catch (ex) {
     currentBuild.result = 'FAILURE'
     throw ex
-} finally {
-    notifications.notifyBuild(currentBuild.result)
 }
 /* vim: set shiftwidth=4 expandtab smarttab: */
