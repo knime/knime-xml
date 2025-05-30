@@ -1,5 +1,5 @@
 #!groovy
-def BN = (BRANCH_NAME == 'master' || BRANCH_NAME.startsWith('releases/')) ? BRANCH_NAME : 'releases/2025-07'
+def BN = "DEVOPS-3198-check-for-maven-feature-bran"
 
 library "knime-pipeline@$BN"
 
