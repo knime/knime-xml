@@ -57,19 +57,19 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class ColumnToXMLNodeSettings {
-    private static final String NEW_COLUMN = "newColumn";
-    private static final String ELEMENT_NAME = "elementName";
-    private static final String USE_DATA_BOUND_ELEMENT_NAME =
+    static final String NEW_COLUMN = "newColumn";
+    static final String ELEMENT_NAME = "elementName";
+    static final String USE_DATA_BOUND_ELEMENT_NAME =
         "useDataBoundElementName";
-    private static final String ELEMENT_NAME_COLUMN = "elementNameColumn";
-    private static final String ELEMENT_CONTENT_COLUMN = "elementContentColumn";
-    private static final String REMOVE_SOURCE_COLUMNS = "removeSourceColumns";
-    private static final String DATA_BOUND_ATTRIBUTE_NAMES =
+    static final String ELEMENT_NAME_COLUMN = "elementNameColumn";
+    static final String ELEMENT_CONTENT_COLUMN = "elementContentColumn";
+    static final String REMOVE_SOURCE_COLUMNS = "removeSourceColumns";
+    static final String DATA_BOUND_ATTRIBUTE_NAMES =
         "dataBoundAttributeNames";
-    private static final String DATA_BOUND_ATTRIBUTE_VALUES =
+    static final String DATA_BOUND_ATTRIBUTE_VALUES =
         "dataBoundAttributeColumns";
-    private static final String ATTRIBUTE_NAMES = "attributeNames";
-    private static final String ATTRIBUTE_VALUES = "attributeValues";
+    static final String ATTRIBUTE_NAMES = "attributeNames";
+    static final String ATTRIBUTE_VALUES = "attributeValues";
 
     private String m_newColumn = null;
     private String m_elementName = null;

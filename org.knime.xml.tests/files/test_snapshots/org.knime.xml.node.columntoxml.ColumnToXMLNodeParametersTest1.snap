@@ -1,0 +1,396 @@
+{
+  "data" : {
+    "model" : {
+      "newColumn" : "XML",
+      "elementContentColumn" : {
+        "specialChoice" : "NONE"
+      },
+      "removeSourceColumns" : false,
+      "elementNameType" : "CUSTOM",
+      "elementName" : "cell",
+      "elementNameColumn" : "Cluster Membership",
+      "dataBoundAttributes" : [ ],
+      "customAttributes" : [ ]
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "customAttributes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "title" : "Name",
+                  "description" : "Name of the XML attribute",
+                  "default" : ""
+                },
+                "value" : {
+                  "type" : "string",
+                  "title" : "Value",
+                  "description" : "Static value for the XML attribute",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Custom attributes",
+            "description" : "Attributes added to the XML element can be defined here",
+            "default" : [ ]
+          },
+          "dataBoundAttributes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "columnName" : {
+                  "type" : "string",
+                  "title" : "Value",
+                  "description" : "Column providing the attribute value"
+                },
+                "name" : {
+                  "type" : "string",
+                  "title" : "Name",
+                  "description" : "Name of the XML attribute",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Data bound attributes",
+            "description" : "Attributes added to the XML element with data bound values can be defined here",
+            "default" : [ ]
+          },
+          "elementContentColumn" : {
+            "type" : "object",
+            "properties" : {
+              "regularChoice" : {
+                "type" : "string"
+              },
+              "specialChoice" : {
+                "oneOf" : [ {
+                  "const" : "NONE",
+                  "title" : "None"
+                } ]
+              }
+            },
+            "title" : "Content column",
+            "description" : "Data bound content of the XML element. A column with XML, numeric or string data can be chosen here. In the latter case XML special characters are automatically escaped in order to get valid XML",
+            "default" : {
+              "specialChoice" : "NONE"
+            }
+          },
+          "elementName" : {
+            "type" : "string",
+            "title" : "Custom element name",
+            "description" : "Custom name for the XML element"
+          },
+          "elementNameColumn" : {
+            "type" : "string",
+            "title" : "Data bound element name column",
+            "description" : "Column providing the element name for each row"
+          },
+          "elementNameType" : {
+            "oneOf" : [ {
+              "const" : "CUSTOM",
+              "title" : "Custom name"
+            }, {
+              "const" : "DATA_BOUND",
+              "title" : "Data bound name"
+            } ],
+            "title" : "Element name type",
+            "description" : "Name of the created XML element. A <b>custom name</b> will be equal for every row whereas <b>data bound</b> name takes its value from an input column\n<ul>\n<li><b>Custom name</b>: Use a custom name for all XML elements</li>\n<li><b>Data bound name</b>: Use column values as element names</li>\n</ul>",
+            "default" : "CUSTOM"
+          },
+          "newColumn" : {
+            "type" : "string",
+            "title" : "New column name",
+            "description" : "Name of the new column in the output table"
+          },
+          "removeSourceColumns" : {
+            "type" : "boolean",
+            "title" : "Remove source columns",
+            "description" : "Check when the source columns should not show up in the output table. Source columns are the <b>content column</b> and the columns used for the <b>data bound name</b> and the <b>data bound</b> attributes",
+            "default" : false
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/newColumn",
+      "options" : {
+        "validation" : {
+          "pattern" : {
+            "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+            "parameters" : {
+              "pattern" : ".*\\S.*"
+            }
+          }
+        }
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/elementContentColumn",
+      "options" : {
+        "format" : "singleSelection",
+        "specialChoices" : [ {
+          "id" : "NONE",
+          "text" : "None"
+        } ]
+      },
+      "providedOptions" : [ "possibleValues" ]
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/removeSourceColumns",
+      "options" : {
+        "format" : "checkbox"
+      }
+    }, {
+      "label" : "Element Name",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementNameType",
+        "options" : {
+          "format" : "radio",
+          "radioLayout" : "vertical"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementName",
+        "options" : {
+          "validation" : {
+            "pattern" : {
+              "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+              "parameters" : {
+                "pattern" : ".*\\S.*"
+              }
+            }
+          }
+        },
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/elementNameType",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "CUSTOM"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementNameColumn",
+        "options" : {
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ],
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/elementNameType",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "DATA_BOUND"
+              } ]
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Data Bound Attributes",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/dataBoundAttributes",
+        "options" : {
+          "detail" : [ {
+            "type" : "HorizontalLayout",
+            "elements" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/name",
+              "options" : {
+                "validation" : {
+                  "pattern" : {
+                    "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+                    "parameters" : {
+                      "pattern" : ".*\\S.*"
+                    }
+                  }
+                }
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/columnName",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues" ]
+            } ]
+          } ],
+          "addButtonText" : "Add data bound attribute",
+          "elementLayout" : "HORIZONTAL_SINGLE_LINE"
+        },
+        "providedOptions" : [ "elementDefaultValue" ]
+      } ]
+    }, {
+      "label" : "Custom Attributes",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/customAttributes",
+        "options" : {
+          "detail" : [ {
+            "type" : "HorizontalLayout",
+            "elements" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/name",
+              "options" : {
+                "validation" : {
+                  "pattern" : {
+                    "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+                    "parameters" : {
+                      "pattern" : ".*\\S.*"
+                    }
+                  }
+                }
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/value"
+            } ]
+          } ],
+          "addButtonText" : "Add custom attribute",
+          "elementLayout" : "HORIZONTAL_SINGLE_LINE"
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "newColumn" : {
+            "configKey" : "newColumn"
+          },
+          "elementContentColumn" : {
+            "configPaths" : [ [ "elementContentColumn" ] ]
+          },
+          "removeSourceColumns" : {
+            "configKey" : "removeSourceColumns"
+          },
+          "elementNameType" : {
+            "configPaths" : [ [ "useDataBoundElementName" ] ]
+          },
+          "elementName" : {
+            "configKey" : "elementName"
+          },
+          "elementNameColumn" : {
+            "configKey" : "elementNameColumn"
+          },
+          "dataBoundAttributes" : {
+            "configPaths" : [ [ "dataBoundAttributeNames" ], [ "dataBoundAttributeColumns" ] ]
+          },
+          "customAttributes" : {
+            "configPaths" : [ [ "attributeNames" ], [ "attributeValues" ] ]
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/dataBoundAttributes/items/properties/columnName",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "Cluster Membership",
+        "text" : "Cluster Membership",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "Content Column",
+        "text" : "Content Column",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/dataBoundAttributes",
+    "providedOptionName" : "elementDefaultValue",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : {
+        "name" : "Cluster Membership",
+        "columnName" : "Cluster Membership"
+      }
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/elementContentColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "Cluster Membership",
+        "text" : "Cluster Membership",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "Content Column",
+        "text" : "Content Column",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/elementNameColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "Cluster Membership",
+        "text" : "Cluster Membership",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "Content Column",
+        "text" : "Content Column",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/elementNameColumn" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/dataBoundAttributes"
+    },
+    "dependencies" : [ "#/properties/model/properties/dataBoundAttributes" ]
+  } ]
+}

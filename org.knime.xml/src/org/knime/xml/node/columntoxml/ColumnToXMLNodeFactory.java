@@ -47,54 +47,109 @@
  */
 package org.knime.xml.node.columntoxml;
 
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Map;
+
+import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import org.knime.node.impl.description.PortDescription;
 
 /**
  * This is the factory for the Column to XML node.
  *
  * @author Heiko Hofer
+ * @author Magnus Gohm, KNIME GmbH, Konstanz, Germany
+ * @author AI Migration Pipeline v1.1
  */
-public class ColumnToXMLNodeFactory extends NodeFactory<ColumnToXMLNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
+@SuppressWarnings("restriction")
+public class ColumnToXMLNodeFactory extends NodeFactory<ColumnToXMLNodeModel>
+    implements NodeDialogFactory, KaiNodeInterfaceFactory {
+
     @Override
     public ColumnToXMLNodeModel createNodeModel() {
         return new ColumnToXMLNodeModel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected int getNrNodeViews() {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public NodeView<ColumnToXMLNodeModel> createNodeView(final int viewIndex,
             final ColumnToXMLNodeModel nodeModel) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean hasDialog() {
         return true;
     }
 
+    private static final String NODE_NAME = "Column to XML";
+    private static final String NODE_ICON = "./column2xml.png";
+    private static final String SHORT_DESCRIPTION = "Create an XML column from input data.";
+    private static final String FULL_DESCRIPTION = "Does a row wise conversion of input data to XML. The created XML "
+        + "cells consist of a single XML element with custom name, content and attributes.";
+    private static final List<PortDescription> INPUT_PORTS = List.of(
+            fixedPort("Input Table", "Input table.")
+    );
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(
+            fixedPort("Output Table", "The input table with an additional column containing the XML.")
+    );
+
     /**
-     * {@inheritDoc}
+     * @since 5.9
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new ColumnToXMLNodeDialog();
+    public NodeDialogPane createNodeDialogPane() {
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    }
+
+    /**
+     * @since 5.9
+     */
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, ColumnToXMLNodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription(
+            NODE_NAME,
+            NODE_ICON,
+            INPUT_PORTS,
+            OUTPUT_PORTS,
+            SHORT_DESCRIPTION,
+            FULL_DESCRIPTION,
+            List.of(),
+            ColumnToXMLNodeParameters.class,
+            null,
+            NodeType.Manipulator,
+            List.of(),
+            null
+        );
+    }
+
+    /**
+     * @since 5.9
+     */
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, ColumnToXMLNodeParameters.class));
     }
 }
