@@ -1,0 +1,475 @@
+{
+  "data" : {
+    "model" : {
+      "newColumn" : "XML",
+      "removeSourceColumns" : false,
+      "filterConfiguration" : {
+        "mode" : "MANUAL",
+        "patternFilter" : {
+          "pattern" : "",
+          "isCaseSensitive" : false,
+          "isInverted" : false
+        },
+        "manualFilter" : {
+          "manuallySelected" : [ ],
+          "manuallyDeselected" : [ ],
+          "includeUnknownColumns" : true
+        },
+        "typeFilter" : {
+          "selectedTypes" : [ ],
+          "typeDisplays" : [ ]
+        }
+      },
+      "elementNameType" : "CUSTOM",
+      "elementName" : "row",
+      "dataBoundAttributes" : [ ],
+      "customAttributes" : [ ]
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "customAttributes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "title" : "Name",
+                  "description" : "Attribute name",
+                  "default" : ""
+                },
+                "value" : {
+                  "type" : "string",
+                  "title" : "Value",
+                  "description" : "Attribute value",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Custom attributes",
+            "description" : "Attributes added to the XML element can be defined here",
+            "default" : [ ]
+          },
+          "dataBoundAttributes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "columnName" : {
+                  "type" : "string",
+                  "title" : "Column",
+                  "description" : "Column providing the attribute value",
+                  "default" : ""
+                },
+                "name" : {
+                  "type" : "string",
+                  "title" : "Name",
+                  "description" : "Attribute name",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Data bound attributes",
+            "description" : "Attributes added to the XML element with data bound values can be defined here",
+            "default" : [ ]
+          },
+          "elementName" : {
+            "type" : "string",
+            "title" : "Custom element name",
+            "description" : "Name of the created XML element. A <b>custom name</b> will be equal for every row whereas <b>data bound name</b> takes its value from an input column.",
+            "default" : "row"
+          },
+          "elementNameColumn" : {
+            "type" : "string",
+            "title" : "Data bound element name column",
+            "description" : "Column providing the element name for each row"
+          },
+          "elementNameType" : {
+            "oneOf" : [ {
+              "const" : "CUSTOM",
+              "title" : "Custom name"
+            }, {
+              "const" : "DATA_BOUND",
+              "title" : "Data bound name"
+            } ],
+            "title" : "Element name type",
+            "description" : "Name of the created XML element. A <b>custom name</b> will be equal for every row whereas <b>data bound</b> name takes its value from an input column\n<ul>\n<li><b>Custom name</b>: Use a custom name for all XML elements</li>\n<li><b>Data bound name</b>: Use column values as element names</li>\n</ul>",
+            "default" : "CUSTOM"
+          },
+          "filterConfiguration" : {
+            "type" : "object",
+            "properties" : {
+              "manualFilter" : {
+                "type" : "object",
+                "properties" : {
+                  "includeUnknownColumns" : {
+                    "type" : "boolean",
+                    "default" : false
+                  },
+                  "manuallyDeselected" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "manuallySelected" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  }
+                },
+                "default" : {
+                  "manuallySelected" : [ ],
+                  "manuallyDeselected" : [ ],
+                  "includeUnknownColumns" : false
+                }
+              },
+              "mode" : {
+                "oneOf" : [ {
+                  "const" : "MANUAL",
+                  "title" : "Manual"
+                }, {
+                  "const" : "REGEX",
+                  "title" : "Regex"
+                }, {
+                  "const" : "WILDCARD",
+                  "title" : "Wildcard"
+                }, {
+                  "const" : "TYPE",
+                  "title" : "Type"
+                } ],
+                "default" : "MANUAL"
+              },
+              "patternFilter" : {
+                "type" : "object",
+                "properties" : {
+                  "isCaseSensitive" : {
+                    "type" : "boolean",
+                    "default" : false
+                  },
+                  "isInverted" : {
+                    "type" : "boolean",
+                    "default" : false
+                  },
+                  "pattern" : {
+                    "type" : "string",
+                    "default" : ""
+                  }
+                },
+                "default" : {
+                  "pattern" : "",
+                  "isCaseSensitive" : false,
+                  "isInverted" : false
+                }
+              },
+              "selected" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "typeFilter" : {
+                "type" : "object",
+                "properties" : {
+                  "selectedTypes" : {
+                    "default" : [ ],
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  }
+                },
+                "default" : {
+                  "selectedTypes" : [ ],
+                  "typeDisplays" : [ ]
+                }
+              }
+            },
+            "title" : "XML columns to merge",
+            "description" : "The XML columns in the include list will be merged by this node",
+            "default" : {
+              "mode" : "MANUAL",
+              "patternFilter" : {
+                "pattern" : "",
+                "isCaseSensitive" : false,
+                "isInverted" : false
+              },
+              "manualFilter" : {
+                "manuallySelected" : [ ],
+                "manuallyDeselected" : [ ],
+                "includeUnknownColumns" : true
+              },
+              "typeFilter" : {
+                "selectedTypes" : [ ],
+                "typeDisplays" : [ ]
+              }
+            }
+          },
+          "newColumn" : {
+            "type" : "string",
+            "title" : "New column name",
+            "description" : "Name of the new column in the output table",
+            "default" : "XML"
+          },
+          "removeSourceColumns" : {
+            "type" : "boolean",
+            "title" : "Remove source columns",
+            "description" : "Check when the source columns should not show up in the output table. Source columns are the the columns in the include list and the columns used for the <b>data bound name</b> and the <b>data bound attributes</b>.",
+            "default" : false
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/newColumn"
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/removeSourceColumns",
+      "options" : {
+        "format" : "checkbox"
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/filterConfiguration",
+      "options" : {
+        "format" : "typedStringFilter",
+        "unknownValuesText" : "Any unknown column",
+        "emptyStateLabel" : "No columns in this list.",
+        "hideTypeFilter" : true
+      },
+      "providedOptions" : [ "possibleValues" ]
+    }, {
+      "label" : "Element Name",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementNameType",
+        "options" : {
+          "format" : "radio",
+          "radioLayout" : "vertical"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementName",
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/elementNameType",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "CUSTOM"
+              } ]
+            }
+          }
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/elementNameColumn",
+        "options" : {
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ],
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/elementNameType",
+            "schema" : {
+              "oneOf" : [ {
+                "const" : "DATA_BOUND"
+              } ]
+            }
+          }
+        }
+      } ]
+    }, {
+      "label" : "Data Bound Attributes",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/dataBoundAttributes",
+        "options" : {
+          "detail" : [ {
+            "type" : "HorizontalLayout",
+            "elements" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/name",
+              "options" : {
+                "validation" : {
+                  "pattern" : {
+                    "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+                    "parameters" : {
+                      "pattern" : ".*\\S.*"
+                    }
+                  }
+                }
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/columnName",
+              "options" : {
+                "format" : "dropDown"
+              },
+              "providedOptions" : [ "possibleValues" ]
+            } ]
+          } ],
+          "addButtonText" : "Add data bound attribute",
+          "elementLayout" : "HORIZONTAL_SINGLE_LINE"
+        },
+        "providedOptions" : [ "elementDefaultValue" ]
+      } ]
+    }, {
+      "label" : "Custom Attributes",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/customAttributes",
+        "options" : {
+          "detail" : [ {
+            "type" : "HorizontalLayout",
+            "elements" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/name",
+              "options" : {
+                "validation" : {
+                  "pattern" : {
+                    "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+                    "parameters" : {
+                      "pattern" : ".*\\S.*"
+                    }
+                  }
+                }
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/value"
+            } ]
+          } ],
+          "addButtonText" : "Add custom attribute",
+          "elementLayout" : "HORIZONTAL_SINGLE_LINE"
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "newColumn" : {
+            "configKey" : "newColumn"
+          },
+          "removeSourceColumns" : {
+            "configKey" : "removeSourceColumns"
+          },
+          "filterConfiguration" : {
+            "configPaths" : [ [ "column_filter", "filter-type" ], [ "column_filter", "included_names" ], [ "column_filter", "excluded_names" ], [ "column_filter", "enforce_option" ], [ "column_filter", "name_pattern", "pattern" ], [ "column_filter", "name_pattern", "type" ], [ "column_filter", "name_pattern", "caseSensitive" ], [ "column_filter", "name_pattern", "excludeMatching" ] ]
+          },
+          "elementNameType" : {
+            "configPaths" : [ [ "useDataBoundElementName" ] ]
+          },
+          "elementName" : {
+            "configKey" : "elementName"
+          },
+          "elementNameColumn" : {
+            "configKey" : "elementNameColumn"
+          },
+          "dataBoundAttributes" : {
+            "configPaths" : [ [ "dataBoundAttributeNames" ], [ "dataBoundAttributeColumns" ] ]
+          },
+          "customAttributes" : {
+            "configPaths" : [ [ "attributeNames" ], [ "attributeValues" ] ]
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/dataBoundAttributes/items/properties/columnName",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "XML",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      }, {
+        "id" : "StringColumn",
+        "text" : "StringColumn",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/dataBoundAttributes",
+    "providedOptionName" : "elementDefaultValue",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : {
+        "name" : "XML",
+        "columnName" : "XML"
+      }
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/elementNameColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "XML",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      }, {
+        "id" : "StringColumn",
+        "text" : "StringColumn",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/filterConfiguration",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "XML",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/elementNameColumn" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/dataBoundAttributes"
+    },
+    "dependencies" : [ "#/properties/model/properties/dataBoundAttributes" ]
+  } ]
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <entry key="newColumn" type="xstring" value="XML"/>
+    <entry key="removeSourceColumns" type="xboolean" value="false"/>
+    <config key="column_filter">
+        <entry key="filter-type" type="xstring" value="STANDARD"/>
+        <config key="included_names">
+            <entry key="array-size" type="xint" value="1"/>
+            <entry key="0" type="xstring" value="XML"/>
+        </config>
+        <config key="excluded_names">
+            <entry key="array-size" type="xint" value="0"/>
+        </config>
+        <entry key="enforce_option" type="xstring" value="EnforceExclusion"/>
+        <config key="name_pattern">
+            <entry key="pattern" type="xstring" value=""/>
+            <entry key="caseSensitive" type="xboolean" value="true"/>
+            <entry key="excludeMatching" type="xboolean" value="false"/>
+            <entry key="type" type="xstring" value="Wildcard"/>
+        </config>
+        <config key="datatype">
+            <config key="typelist"/>
+        </config>
+    </config>
+    <entry key="useDataBoundElementName" type="xboolean" value="false"/>
+    <entry key="elementName" type="xstring" value="row"/>
+    <entry key="elementNameColumn" type="xstring" value="XML"/>
+    <config key="dataBoundAttributeNames">
+        <entry key="array-size" type="xint" value="0"/>
+    </config>
+    <config key="dataBoundAttributeColumns">
+        <entry key="array-size" type="xint" value="0"/>
+    </config>
+    <config key="attributeNames">
+        <entry key="array-size" type="xint" value="0"/>
+    </config>
+    <config key="attributeValues">
+        <entry key="array-size" type="xint" value="0"/>
+    </config>
+</config>
