@@ -136,7 +136,7 @@ public class XMLRowCombinerNodeModel extends NodeModel {
         if (null == m_settings.getNewColumn()) {
             // auto-configure
             m_settings.setNewColumn(
-                    DataTableSpec.getUniqueColumnName(inSpecs[0], "XML"));
+                    DataTableSpec.getUniqueColumnName(inSpecs[0], XMLRowCombinerNodeSettings.DEFAULT_NEW_COLUMN));
         }
         if (m_settings.getNewColumn().trim().isEmpty()) {
             throw new InvalidSettingsException("Please set a name for "
@@ -148,7 +148,7 @@ public class XMLRowCombinerNodeModel extends NodeModel {
         // validate element name
         if (null == m_settings.getRootElement()) {
             // auto-configure
-            m_settings.setRootElement("table");
+            m_settings.setRootElement(XMLRowCombinerNodeSettings.DEFAULT_ROOT_ELEMENT);
         }
         if (m_settings.getRootElement().trim().isEmpty()) {
             throw new InvalidSettingsException("Please set a name for "

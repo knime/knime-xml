@@ -47,55 +47,117 @@
 . */
 package org.knime.xml.node.rcombine;
 
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Map;
+
+import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import org.knime.node.impl.description.PortDescription;
 
 /**
  * This is the factory for the XML combine Writer node.
  *
  * @author Heiko Hofer
+ * @author Magnus Gohm, KNIME GmbH, Konstanz, Germany
+ * @author AI Migration Pipeline v1.2
  */
+@SuppressWarnings("restriction")
 public class XMLRowCombinerNodeFactory
-    extends NodeFactory<XMLRowCombinerNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
+    extends NodeFactory<XMLRowCombinerNodeModel> implements NodeDialogFactory, KaiNodeInterfaceFactory {
+
     @Override
     public XMLRowCombinerNodeModel createNodeModel() {
         return new XMLRowCombinerNodeModel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected int getNrNodeViews() {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public NodeView<XMLRowCombinerNodeModel> createNodeView(final int viewIndex,
             final XMLRowCombinerNodeModel nodeModel) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean hasDialog() {
         return true;
     }
 
+    private static final String NODE_NAME = "XML Row Combiner";
+    private static final String NODE_ICON = "./xmlrowcombiner.png";
+    private static final String SHORT_DESCRIPTION = """
+            Concatenates the cells in a XML column.
+            """;
+    private static final String FULL_DESCRIPTION = """
+            Concatenates the cells of an XML column. The root elements children of the created XML cell are the root
+                elements of the source cells.
+            """;
+    private static final List<PortDescription> INPUT_PORTS = List.of(
+            fixedPort("Data Table", """
+                Input table containing at least one XML column.
+                """)
+    );
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(
+            fixedPort("Output Table", """
+                The output table with one XML cell.
+                """)
+    );
+
     /**
-     * {@inheritDoc}
+     * @since 5.9
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new XMLRowCombinerNodeDialog();
+    public NodeDialogPane createNodeDialogPane() {
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
+    }
+
+    /**
+     * @since 5.9
+     */
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, XMLRowCombinerNodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription(
+            NODE_NAME,
+            NODE_ICON,
+            INPUT_PORTS,
+            OUTPUT_PORTS,
+            SHORT_DESCRIPTION,
+            FULL_DESCRIPTION,
+            List.of(),
+            XMLRowCombinerNodeParameters.class,
+            null,
+            NodeType.Manipulator,
+            List.of(),
+            null
+        );
+    }
+
+    /**
+     * @since 5.9
+     */
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, XMLRowCombinerNodeParameters.class));
     }
 }

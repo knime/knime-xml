@@ -1,0 +1,166 @@
+{
+  "data" : {
+    "model" : {
+      "customAttributes" : [ ]
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "customAttributes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "title" : "Name",
+                  "description" : "Attribute name",
+                  "default" : ""
+                },
+                "value" : {
+                  "type" : "string",
+                  "title" : "Value",
+                  "description" : "Attribute value",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Custom attributes",
+            "description" : "Attributes added to the XML element can be defined here",
+            "default" : [ ]
+          },
+          "inputColumn" : {
+            "type" : "string",
+            "title" : "XML column",
+            "description" : "The column containing the XML cells"
+          },
+          "newColumn" : {
+            "type" : "string",
+            "title" : "New column name",
+            "description" : "Name of the new column in the output table"
+          },
+          "rootElement" : {
+            "type" : "string",
+            "title" : "Element name",
+            "description" : "Name of the created XML element"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/inputColumn",
+      "options" : {
+        "format" : "dropDown"
+      },
+      "providedOptions" : [ "possibleValues" ]
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/newColumn",
+      "options" : {
+        "validation" : {
+          "pattern" : {
+            "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+            "parameters" : {
+              "pattern" : ".*\\S.*"
+            }
+          }
+        }
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/rootElement",
+      "options" : {
+        "validation" : {
+          "pattern" : {
+            "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+            "parameters" : {
+              "pattern" : ".*\\S.*"
+            }
+          }
+        }
+      }
+    }, {
+      "label" : "Custom Attributes",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/customAttributes",
+        "options" : {
+          "detail" : [ {
+            "type" : "HorizontalLayout",
+            "elements" : [ {
+              "type" : "Control",
+              "scope" : "#/properties/name",
+              "options" : {
+                "validation" : {
+                  "pattern" : {
+                    "errorMessage" : "The field cannot be blank (it must contain at least one non-whitespace character).",
+                    "parameters" : {
+                      "pattern" : ".*\\S.*"
+                    }
+                  }
+                }
+              }
+            }, {
+              "type" : "Control",
+              "scope" : "#/properties/value"
+            } ]
+          } ],
+          "addButtonText" : "Add custom attribute",
+          "elementLayout" : "HORIZONTAL_SINGLE_LINE"
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "inputColumn" : {
+            "configKey" : "inputColumn"
+          },
+          "newColumn" : {
+            "configKey" : "newColumn"
+          },
+          "rootElement" : {
+            "configKey" : "rootElement"
+          },
+          "customAttributes" : {
+            "configPaths" : [ [ "attributes" ], [ "attributeValues" ] ]
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/inputColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "XML",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/inputColumn", "#/properties/model/properties/newColumn", "#/properties/model/properties/rootElement" ]
+  } ]
+}

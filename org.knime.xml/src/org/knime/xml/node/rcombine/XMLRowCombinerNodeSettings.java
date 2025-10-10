@@ -58,11 +58,13 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 public class XMLRowCombinerNodeSettings {
-    private static final String INPUT_COLUMN = "inputColumn";
-    private static final String NEW_COLUMN = "newColumn";
-    private static final String ROOT_ELEMENT = "rootElement";
-    private static final String ATTRIBUTES = "attributes";
-    private static final String ATTRIBUTE_VALUES = "attributeValues";
+    static final String INPUT_COLUMN = "inputColumn";
+    static final String NEW_COLUMN = "newColumn";
+    static final String ROOT_ELEMENT = "rootElement";
+    static final String ATTRIBUTES = "attributes";
+    static final String ATTRIBUTE_VALUES = "attributeValues";
+    static final String DEFAULT_NEW_COLUMN = "XML";
+    static final String DEFAULT_ROOT_ELEMENT = "table";
 
     private String m_inputColumn = null;
     private String m_newColumn = null;
