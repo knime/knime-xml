@@ -92,21 +92,21 @@ class XMLRowCombinerNodeParameters implements NodeParameters {
     }
 
     @Persist(configKey = XMLRowCombinerNodeSettings.INPUT_COLUMN)
-    @Widget(title = "XML column", description = "The column containing the XML cells")
+    @Widget(title = "Source XML Column", description = "Select the column that contains the XML cells to merge.")
     @ChoicesProvider(XMLColumnProvider.class)
     @ValueProvider(value = InputColumnProvider.class)
     @ValueReference(InputColumnReference.class)
     String m_inputColumn;
 
     @Persist(configKey = XMLRowCombinerNodeSettings.NEW_COLUMN)
-    @Widget(title = "New column name", description = "Name of the new column in the output table")
+    @Widget(title = "Output Column Name", description = "Enter the name of the column that will store the combined XML cell.")
     @TextInputWidget(patternValidation = IsNotBlankValidation.class)
     @ValueProvider(value = NewColumnProvider.class)
     @ValueReference(NewColumnReference.class)
     String m_newColumn;
 
     @Persist(configKey = XMLRowCombinerNodeSettings.ROOT_ELEMENT)
-    @Widget(title = "Element name", description = "Name of the created XML element")
+    @Widget(title = "Root Element Name", description = "Enter the name of the root element used in the combined XML cell.")
     @TextInputWidget(patternValidation = IsNotBlankValidation.class)
     @ValueProvider(value = RootElementProvider.class)
     @ValueReference(RootElementReference.class)
@@ -114,8 +114,8 @@ class XMLRowCombinerNodeParameters implements NodeParameters {
 
     @Persistor(CustomAttributesPersistor.class)
     @Layout(CustomAttributesSection.class)
-    @Widget(title = "Custom attributes", description = "Attributes added to the XML element can be defined here")
-    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add custom attribute")
+    @Widget(title = "Custom Attributes", description = "Define the attributes you want to add to the root XML element.")
+    @ArrayWidget(elementLayout = ElementLayout.HORIZONTAL_SINGLE_LINE, addButtonText = "Add attribute")
     NameValuePairSettings[] m_customAttributes = new NameValuePairSettings[0];
 
     static final class InputColumnReference implements ParameterReference<String> {

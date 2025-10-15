@@ -32,24 +32,24 @@
                 }
               }
             },
-            "title" : "Custom attributes",
-            "description" : "Attributes added to the XML element can be defined here",
+            "title" : "Custom Attributes",
+            "description" : "Define the attributes you want to add to the root XML element.",
             "default" : [ ]
           },
           "inputColumn" : {
             "type" : "string",
-            "title" : "XML column",
-            "description" : "The column containing the XML cells"
+            "title" : "Source XML Column",
+            "description" : "Select the column that contains the XML cells to merge."
           },
           "newColumn" : {
             "type" : "string",
-            "title" : "New column name",
-            "description" : "Name of the new column in the output table"
+            "title" : "Output Column Name",
+            "description" : "Enter the name of the column that will store the combined XML cell."
           },
           "rootElement" : {
             "type" : "string",
-            "title" : "Element name",
-            "description" : "Name of the created XML element"
+            "title" : "Root Element Name",
+            "description" : "Enter the name of the root element used in the combined XML cell."
           }
         }
       }
@@ -116,7 +116,7 @@
               "scope" : "#/properties/value"
             } ]
           } ],
-          "addButtonText" : "Add custom attribute",
+          "addButtonText" : "Add attribute",
           "elementLayout" : "HORIZONTAL_SINGLE_LINE"
         }
       } ]

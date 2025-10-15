@@ -102,20 +102,20 @@ public class XMLRowCombinerNodeFactory
     private static final String NODE_NAME = "XML Row Combiner";
     private static final String NODE_ICON = "./xmlrowcombiner.png";
     private static final String SHORT_DESCRIPTION = """
-            Concatenates the cells in a XML column.
+            Combines all cells from a selected XML column into a single XML value.
             """;
     private static final String FULL_DESCRIPTION = """
-            Concatenates the cells of an XML column. The root elements children of the created XML cell are the root
-                elements of the source cells.
+            Merges the XML cells from the chosen column into one XML cell. The child elements of the new root element
+                reproduce the root elements from the source cells in order.
             """;
     private static final List<PortDescription> INPUT_PORTS = List.of(
             fixedPort("Data Table", """
-                Input table containing at least one XML column.
+                Input table that includes at least one XML column to combine.
                 """)
     );
     private static final List<PortDescription> OUTPUT_PORTS = List.of(
             fixedPort("Output Table", """
-                The output table with one XML cell.
+                Output table containing a single XML cell assembled from the selected column.
                 """)
     );
 
