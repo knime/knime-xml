@@ -63,6 +63,7 @@ import org.knime.core.data.xml.XMLValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.node.parameters.widget.choices.Label;
 import org.knime.xml.node.xpath2.ui.XPathNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -75,37 +76,37 @@ public class XPathNodeSettings {
     /**
      * Config key for the xml input column.
      */
-    private static final String INPUT_COLUMN = "inputColumn";
+    static final String INPUT_COLUMN = "inputColumn";
 
     /**
      * Config key for the remove xml input column option.
      */
-    private static final String REMOVE_INPUT_COLUMN = "removeInputColumn";
+    static final String REMOVE_INPUT_COLUMN = "removeInputColumn";
 
     /**
      * Config key for the name space prefixes.
      */
-    private static final String NS_PREFIXES = "nsPrefixes";
+    static final String NS_PREFIXES = "nsPrefixes";
 
     /**
      * Config key for the namespaces.
      */
-    private static final String NAMESPACES = "namespaces";
+    static final String NAMESPACES = "namespaces";
 
     /**
      * Config key for the use root namespace option.
      */
-    private static final String USE_ROOTS_NS = "useRootsNameSpace";
+    static final String USE_ROOTS_NS = "useRootsNameSpace";
 
     /**
      * Config key for the root namespace.
      */
-    private static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
+    static final String ROOTS_NS_PREFIX = "rootsNameSpacePrefix";
 
     /**
      * Config key for the number of xpath queries.
      */
-    private static final String NUMBER_OF_QUERIES = "numberOfQueries";
+    static final String NUMBER_OF_QUERIES = "numberOfQueries";
 
     /**
      * This enum holds all possible output types for XPath 1.0.
@@ -131,25 +132,39 @@ public class XPathNodeSettings {
      * @author Tim-Oliver Buchholz
      */
     public enum XPathMultiColOption {
-        /**
-         * Create a single cell of the selected type. If a tag appears more than once, take only the first appearance.
-         */
-        SingleCell,
+            /**
+             * Create a single cell of the selected type. If a tag appears more than once, take only the first
+             * appearance.
+             */
+            @Label(value = "Single Cell", description = "Create a single cell of the selected type. "
+                + "If a tag appears more than once, take only the first appearance.")
+            SingleCell,
 
-        /**
-         * Create a collection cell of the selected type. Add all appearances of this tag to the collection.
-         */
-        CollectionCell,
+            /**
+             * Create a collection cell of the selected type. Add all appearances of this tag to the collection.
+             */
+            @Label(value = "Collection Cell", description = "Creates a collection cell of the selected type."
+                + " Add all appearances of this tag to the collection.")
+            CollectionCell,
 
-        /**
-         * Create for each appearance of this tag a new SingleCell (a new column).
-         */
-        MultipleColumns,
+            /**
+             * Create for each appearance of this tag a new SingleCell (a new column).
+             */
+            @Label(value = "Multiple Columns",
+                description = "When the output column name is <i>Fixed</i> further columns are added "
+                    + "only if a row contains multiple values for the XPath query." //
+                    + "<br/>" //
+                    + "When column names are extracted <i>From XML Attribute</i>, "
+                    + "each extracted new column is inserted in alphabetical order. "
+                    + "If a column name is not found in a row a missing cell will be inserted.")
+            MultipleColumns,
 
-        /**
-         * Create a collection from all query results and ungroup it. Add for each item a new row.
-         */
-        UngroupToRows
+            /**
+             * Create a collection from all query results and ungroup it. Add for each item a new row.
+             */
+            @Label(value = "Multiple Rows",
+                description = "This option creates a collection cell of the selected type followed by an ungroup.")
+            UngroupToRows
     }
 
     /**
