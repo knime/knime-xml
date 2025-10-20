@@ -1,0 +1,627 @@
+{
+  "data" : {
+    "model" : {
+      "inputColumn" : "xml",
+      "removeSourceColumn" : false,
+      "outputSettings" : [ {
+        "columnNameMode" : "ATTRIBUTE",
+        "columnName" : "null",
+        "xpathQueryColumnName" : "/sec",
+        "xpathQuery" : "/xml/first",
+        "returnType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "missingCellOnEmptyString" : false,
+        "infinityNanHandling" : "DEFAULT_NUMBER",
+        "defaultNumberOnInfOrNaN" : 0,
+        "xmlFragmentName" : "fragment",
+        "multiTagOption" : "MultipleColumns"
+      }, {
+        "columnNameMode" : "FIXED",
+        "columnName" : "constant_name",
+        "xpathQueryColumnName" : "name",
+        "xpathQuery" : "/*",
+        "returnType" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "missingCellOnEmptyString" : false,
+        "infinityNanHandling" : "MISSING_CELL",
+        "defaultNumberOnInfOrNaN" : 0,
+        "xmlFragmentName" : "my_fragment",
+        "multiTagOption" : "CollectionCell"
+      } ],
+      "namespaceSettings" : [ {
+        "prefix" : "pre",
+        "namespace" : "some_namespace"
+      } ],
+      "useRootsNamespace" : true,
+      "rootsNamespacePrefix" : "dns"
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "inputColumn" : {
+            "type" : "string",
+            "title" : "XML column",
+            "description" : "The column containing the XML cells.",
+            "default" : "xml"
+          },
+          "namespaceSettings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "namespace" : {
+                  "type" : "string",
+                  "title" : "Namespace",
+                  "description" : "The namespace URI.",
+                  "default" : ""
+                },
+                "prefix" : {
+                  "type" : "string",
+                  "title" : "Prefix",
+                  "description" : "The namespace prefix.",
+                  "default" : ""
+                }
+              }
+            },
+            "title" : "Namespaces",
+            "description" : "    The prefixes and the namespaces used in the XPath query. For the\n    example when querying XHTML documents with the XPath Query:<br/>\n    <i>//pre:h1</i><br/>\n    the following namespace must be defined:\n    <br/>\n    Prefix: <i>pre</i>\n    <br/>\n    Namespace: <i>http://www.w3.org/1999/xhtml</i>\n    <br/>\n    <b>Note:</b> The namespaces are collected automatically.\n",
+            "default" : [ ]
+          },
+          "outputSettings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "columnName" : {
+                  "type" : "string",
+                  "title" : "Column name",
+                  "description" : "The name for the output column.",
+                  "default" : "XML - XPATH"
+                },
+                "columnNameMode" : {
+                  "oneOf" : [ {
+                    "const" : "FIXED",
+                    "title" : "Fixed"
+                  }, {
+                    "const" : "ATTRIBUTE",
+                    "title" : "From XML Attribute"
+                  } ],
+                  "title" : "Column name mode",
+                  "description" : "Define how the output column name is determined.\n<ul>\n<li><b>Fixed</b>: Define the new column name manually.</li>\n<li><b>From XML Attribute</b>: Use a second XPath query relative to the value query. If this extraction is expected to yield multiple column names, choose 'Multiple Columns' within <i>Mulitple tag options</i> below to output all encountered names as columns in alphabetical order.</li>\n</ul>",
+                  "default" : "FIXED"
+                },
+                "defaultNumberOnInfOrNaN" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "title" : "Default number on NaN/Infinity",
+                  "description" : "The default number to return when the XPath result is Infinity or NaN.",
+                  "default" : 0
+                },
+                "infinityNanHandling" : {
+                  "oneOf" : [ {
+                    "const" : "MISSING_CELL",
+                    "title" : "Missing cell"
+                  }, {
+                    "const" : "DEFAULT_NUMBER",
+                    "title" : "Default number"
+                  } ],
+                  "title" : "Return NaN/Infinity as",
+                  "description" : "Define how Infinity or NaN results are handled.\n<ul>\n<li><b>Missing cell</b>: Return a missing cell.</li>\n<li><b>Default number</b>: Return the configured default number.</li>\n</ul>",
+                  "default" : "MISSING_CELL"
+                },
+                "missingCellOnEmptyString" : {
+                  "type" : "boolean",
+                  "title" : "Return missing cell on empty string",
+                  "description" : "If checked, an empty string result will be treated as missing value.",
+                  "default" : false
+                },
+                "multiTagOption" : {
+                  "oneOf" : [ {
+                    "const" : "SingleCell",
+                    "title" : "Single Cell"
+                  }, {
+                    "const" : "CollectionCell",
+                    "title" : "Collection Cell"
+                  }, {
+                    "const" : "MultipleColumns",
+                    "title" : "Multiple Columns"
+                  }, {
+                    "const" : "UngroupToRows",
+                    "title" : "Multiple Rows"
+                  } ],
+                  "title" : "Multiple tag options",
+                  "description" : "Define how to handle the situation when multiple values or column names are extracted.\n<ul>\n<li><b>Single Cell</b>: Create a single cell of the selected type. If a tag appears more than once, take only the first appearance.</li>\n<li><b>Collection Cell</b>: Creates a collection cell of the selected type. Add all appearances of this tag to the collection.</li>\n<li><b>Multiple Columns</b>: When the output column name is <i>Fixed</i> further columns are added only if a row contains multiple values for the XPath query.<br/>When column names are extracted <i>From XML Attribute</i>, each extracted new column is inserted in alphabetical order. If a column name is not found in a row a missing cell will be inserted.</li>\n<li><b>Multiple Rows</b>: This option creates a collection cell of the selected type followed by an ungroup.</li>\n</ul>",
+                  "default" : "SingleCell"
+                },
+                "returnType" : {
+                  "type" : "string",
+                  "title" : "Output type",
+                  "description" : "Choose the KNIME type to which the return value of your XPath query should be matched.",
+                  "default" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}"
+                },
+                "xmlFragmentName" : {
+                  "type" : "string",
+                  "title" : "XML fragment name",
+                  "description" : "The name of the XML fragment to be used as the root element of the XML output.",
+                  "default" : "fragment"
+                },
+                "xpathOutput" : {
+                  "oneOf" : [ {
+                    "const" : "Boolean",
+                    "title" : "Boolean"
+                  }, {
+                    "const" : "Double",
+                    "title" : "Double"
+                  }, {
+                    "const" : "Integer",
+                    "title" : "Integer"
+                  }, {
+                    "const" : "String",
+                    "title" : "String"
+                  }, {
+                    "const" : "Node",
+                    "title" : "Node"
+                  } ],
+                  "default" : "String"
+                },
+                "xpathQuery" : {
+                  "type" : "string",
+                  "title" : "XPath value query",
+                  "description" : "Define the XPath query here. The syntax is detailed in the node description.",
+                  "default" : "/*"
+                },
+                "xpathQueryColumnName" : {
+                  "type" : "string",
+                  "title" : "Column name XPath (relative to value query)",
+                  "description" : "The XPath query to extract the column name from the XML input.",
+                  "default" : "name"
+                }
+              }
+            },
+            "title" : "Output columns",
+            "description" : "Configure the XPaths used to extract data from the input column.",
+            "default" : [ ]
+          },
+          "removeSourceColumn" : {
+            "type" : "boolean",
+            "title" : "Remove source column",
+            "description" : "When checked, the source column will be removed.",
+            "default" : false
+          },
+          "rootsNamespacePrefix" : {
+            "type" : "string",
+            "title" : "Prefix of root's namespace",
+            "description" : "<p>Define a prefix for the root namespace in case it is incorporated.</p><p>For the example of XHTML documents the namespace of the root element is http://www.w3.org/1999/xhtml so that with the root's prefix of <i>pre</i> you can leavethe <b>Namespaces</b> table empty.</p>",
+            "default" : "dns"
+          },
+          "useRootsNamespace" : {
+            "type" : "boolean",
+            "title" : "Incorporate namespace of the root element",
+            "description" : "<p>This option is useful when you do not have the default\nnamespace of your document at hand.</p>\n<p>If checked, the namespace of the root element is added to the\n<b>Namespaces</b> table during runtime.\n</p>\n",
+            "default" : true
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "label" : "Input",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/inputColumn",
+        "options" : {
+          "format" : "dropDown"
+        },
+        "providedOptions" : [ "possibleValues" ]
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/removeSourceColumn",
+        "options" : {
+          "format" : "checkbox"
+        }
+      } ]
+    }, {
+      "label" : "Outputs",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputSettings",
+        "options" : {
+          "detail" : [ {
+            "type" : "Control",
+            "scope" : "#/properties/columnNameMode",
+            "options" : {
+              "format" : "valueSwitch"
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/columnName",
+            "options" : {
+              "validation" : {
+                "pattern" : {
+                  "errorMessage" : "The string must start and end with a non-whitespace character.",
+                  "parameters" : {
+                    "pattern" : "\\S(.*\\S)?"
+                  }
+                }
+              }
+            },
+            "rule" : {
+              "effect" : "HIDE",
+              "condition" : {
+                "scope" : "#/properties/columnNameMode",
+                "schema" : {
+                  "oneOf" : [ {
+                    "const" : "ATTRIBUTE"
+                  } ]
+                }
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/xpathQueryColumnName",
+            "rule" : {
+              "effect" : "SHOW",
+              "condition" : {
+                "scope" : "#/properties/columnNameMode",
+                "schema" : {
+                  "oneOf" : [ {
+                    "const" : "ATTRIBUTE"
+                  } ]
+                }
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/xpathQuery"
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/returnType",
+            "options" : {
+              "format" : "dropDown"
+            },
+            "providedOptions" : [ "possibleValues", "possibleValues" ]
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/missingCellOnEmptyString",
+            "options" : {
+              "format" : "checkbox"
+            },
+            "rule" : {
+              "effect" : "SHOW",
+              "condition" : {
+                "scope" : "#/properties/xpathOutput",
+                "schema" : {
+                  "oneOf" : [ {
+                    "const" : "String"
+                  } ]
+                }
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/infinityNanHandling",
+            "options" : {
+              "format" : "valueSwitch"
+            },
+            "rule" : {
+              "effect" : "SHOW",
+              "condition" : {
+                "scope" : "#/properties/xpathOutput",
+                "schema" : {
+                  "oneOf" : [ {
+                    "const" : "Integer"
+                  } ]
+                }
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/defaultNumberOnInfOrNaN",
+            "options" : {
+              "validation" : {
+                "max" : {
+                  "errorMessage" : "The value must not exceed 2147483647.",
+                  "parameters" : {
+                    "isExclusive" : false,
+                    "max" : 2.147483647E9
+                  }
+                },
+                "min" : {
+                  "errorMessage" : "The value must be at least -2147483648.",
+                  "parameters" : {
+                    "isExclusive" : false,
+                    "min" : -2.147483648E9
+                  }
+                }
+              }
+            },
+            "rule" : {
+              "effect" : "SHOW",
+              "condition" : {
+                "type" : "AND",
+                "conditions" : [ {
+                  "scope" : "#/properties/xpathOutput",
+                  "schema" : {
+                    "oneOf" : [ {
+                      "const" : "Integer"
+                    } ]
+                  }
+                }, {
+                  "scope" : "#/properties/infinityNanHandling",
+                  "schema" : {
+                    "oneOf" : [ {
+                      "const" : "DEFAULT_NUMBER"
+                    } ]
+                  }
+                } ]
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/xmlFragmentName",
+            "rule" : {
+              "effect" : "SHOW",
+              "condition" : {
+                "scope" : "#/properties/xpathOutput",
+                "schema" : {
+                  "oneOf" : [ {
+                    "const" : "Node"
+                  } ]
+                }
+              }
+            }
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/multiTagOption"
+          } ],
+          "addButtonText" : "Add XPath",
+          "arrayElementTitle" : "XPath"
+        }
+      } ]
+    }, {
+      "label" : "Namespaces",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/namespaceSettings",
+        "options" : {
+          "detail" : [ {
+            "type" : "Control",
+            "scope" : "#/properties/prefix",
+            "options" : {
+              "placeholder" : "e.g., pre",
+              "validation" : {
+                "minLength" : {
+                  "errorMessage" : "The field cannot be empty (it must contain at least one character).",
+                  "parameters" : {
+                    "minLength" : 1
+                  }
+                }
+              }
+            },
+            "providedOptions" : [ "validation.pattern" ]
+          }, {
+            "type" : "Control",
+            "scope" : "#/properties/namespace",
+            "options" : {
+              "placeholder" : "e.g., http://www.w3.org/1999/xhtml"
+            }
+          } ],
+          "addButtonText" : "Add Namespace",
+          "arrayElementTitle" : "Namespace"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/useRootsNamespace",
+        "options" : {
+          "format" : "checkbox"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/rootsNamespacePrefix",
+        "rule" : {
+          "effect" : "SHOW",
+          "condition" : {
+            "scope" : "#/properties/model/properties/useRootsNamespace",
+            "schema" : {
+              "const" : true
+            }
+          }
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "inputColumn" : {
+            "configKey" : "inputColumn"
+          },
+          "removeSourceColumn" : {
+            "configKey" : "removeInputColumn"
+          },
+          "outputSettings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "columnNameMode" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "useAttributeForColName${array_index}" ] ]
+                },
+                "columnName" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "newColumn${array_index}" ] ]
+                },
+                "xpathQueryColumnName" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "attributeForColName${array_index}" ] ]
+                },
+                "xpathQuery" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "xpath${array_index}" ] ]
+                },
+                "returnType" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "returnType${array_index}" ] ]
+                },
+                "xpathOutput" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ ]
+                },
+                "missingCellOnEmptyString" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "missingCellOnEmptyString${array_index}" ] ]
+                },
+                "infinityNanHandling" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "missingCellOnInfinityNaN${array_index}" ] ]
+                },
+                "defaultNumberOnInfOrNaN" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "defaultNumber${array_index}" ] ]
+                },
+                "xmlFragmentName" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "xmlFragmentName${array_index}" ] ]
+                },
+                "multiTagOption" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "multiTagOption${array_index}" ] ]
+                }
+              }
+            }
+          },
+          "namespaceSettings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "prefix" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "nsPrefixes" ] ]
+                },
+                "namespace" : {
+                  "route" : [ "..", ".." ],
+                  "configPaths" : [ [ "namespaces" ] ]
+                }
+              }
+            }
+          },
+          "useRootsNamespace" : {
+            "configKey" : "useRootsNameSpace"
+          },
+          "rootsNamespacePrefix" : {
+            "configKey" : "rootsNameSpacePrefix"
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/inputColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "xml",
+        "text" : "xml",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/outputSettings/items/properties/returnType",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.BooleanCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Boolean",
+        "type" : {
+          "id" : "org.knime.core.data.BooleanValue",
+          "text" : "Boolean"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.DoubleCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Float)",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.IntCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "Number (Integer)",
+        "type" : {
+          "id" : "org.knime.core.data.IntValue",
+          "text" : "Number (Integer)"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.def.StringCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "String",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "{\"name\":\"serialized_data_type_settings\",\"value\":{\"dataType\":{\"type\":\"tree\",\"value\":{\"cell_class\":{\"type\":\"string\",\"value\":\"org.knime.core.data.xml.XMLCell\"},\"is_null\":{\"type\":\"boolean\",\"value\":false}}}}}",
+        "text" : "XML",
+        "type" : {
+          "id" : "org.knime.core.data.xml.XMLValue",
+          "text" : "XML"
+        }
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/outputSettings/items/properties/xpathOutput",
+    "values" : [ {
+      "indices" : [ 0 ],
+      "value" : "String"
+    }, {
+      "indices" : [ 1 ],
+      "value" : "Node"
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "id" : "after-open-dialog"
+    },
+    "triggerInitially" : true,
+    "dependencies" : [ "#/properties/model/properties/namespaceSettings", "#/properties/model/properties/outputSettings/items/properties/xpathQuery", "#/properties/model/properties/rootsNamespacePrefix", "#/properties/model/properties/useRootsNamespace" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/namespaceSettings"
+    },
+    "dependencies" : [ "#/properties/model/properties/namespaceSettings", "#/properties/model/properties/outputSettings/items/properties/xpathQuery", "#/properties/model/properties/rootsNamespacePrefix", "#/properties/model/properties/useRootsNamespace" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/outputSettings/items/properties/returnType"
+    },
+    "dependencies" : [ "#/properties/model/properties/outputSettings/items/properties/returnType" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/outputSettings/items/properties/xpathQuery"
+    },
+    "dependencies" : [ "#/properties/model/properties/namespaceSettings", "#/properties/model/properties/outputSettings/items/properties/xpathQuery", "#/properties/model/properties/rootsNamespacePrefix", "#/properties/model/properties/useRootsNamespace" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/rootsNamespacePrefix"
+    },
+    "dependencies" : [ "#/properties/model/properties/namespaceSettings", "#/properties/model/properties/outputSettings/items/properties/xpathQuery", "#/properties/model/properties/rootsNamespacePrefix", "#/properties/model/properties/useRootsNamespace" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/useRootsNamespace"
+    },
+    "dependencies" : [ "#/properties/model/properties/namespaceSettings", "#/properties/model/properties/outputSettings/items/properties/xpathQuery", "#/properties/model/properties/rootsNamespacePrefix", "#/properties/model/properties/useRootsNamespace" ]
+  } ]
+}

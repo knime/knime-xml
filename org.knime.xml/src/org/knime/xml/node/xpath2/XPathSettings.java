@@ -71,29 +71,29 @@ import org.knime.xml.node.xpath2.XPathNodeSettings.XPathOutput;
  */
 public class XPathSettings {
 
-    private static final String NEW_COLUMN = "newColumn";
+    static final String NEW_COLUMN = "newColumn";
 
-    private static final String XPATH_QUERY = "xpath";
+    static final String XPATH_QUERY = "xpath";
 
-    private static final String RETURN_TYPE = "returnType";
+    static final String RETURN_TYPE = "returnType";
 
-    private static final String MISSING_CELL_ON_EMPTY_STRING = "missingCellOnEmptyString";
+    static final String MISSING_CELL_ON_EMPTY_STRING = "missingCellOnEmptyString";
 
-    private static final String MISSING_CELL_ON_INF_OR_NAN = "missingCellOnInfinityNaN";
+    static final String MISSING_CELL_ON_INF_OR_NAN = "missingCellOnInfinityNaN";
 
-    private static final String VALUE_ON_INF_OR_NAN = "valueOnInfinityOrNaN";
+    static final String VALUE_ON_INF_OR_NAN = "valueOnInfinityOrNaN";
 
-    private static final String DEFAULT_NUMBER = "defaultNumber";
+    static final String DEFAULT_NUMBER = "defaultNumber";
 
-    private static final String MISSING_CELL_ON_EMPTY_SET = "missingCellOnEmptySet";
+    static final String MISSING_CELL_ON_EMPTY_SET = "missingCellOnEmptySet";
 
-    private static final String XML_FRAGMENT_NAME = "xmlFragmentName";
+    static final String XML_FRAGMENT_NAME = "xmlFragmentName";
 
-    private static final String MULTI_TAG_OPTION = "multiTagOption";
+    static final String MULTI_TAG_OPTION = "multiTagOption";
 
-    private static final String ATTRIBUTE_FOR_COL_NAME = "attributeForColName";
+    static final String ATTRIBUTE_FOR_COL_NAME = "attributeForColName";
 
-    private static final String USE_ATTRIBUTE_FOR_COL_NAME = "useAttributeForColName";
+    static final String USE_ATTRIBUTE_FOR_COL_NAME = "useAttributeForColName";
 
     private String m_xmlFragmentName = "fragment";
 
@@ -120,7 +120,6 @@ public class XPathSettings {
     private String m_attributeForColName = "name";
 
     private int m_currentColumnIndex = 0;
-
 
     private List<String> m_colNameMap = new ArrayList<String>();
 
@@ -166,13 +165,16 @@ public class XPathSettings {
      * @return absolute query for column name
      */
     public String buildXPathForColNames(final String query) {
+        return buildXPathForColNames(query, m_attributeForColName);
+    }
+
+    static String buildXPathForColNames(final String query, String attributeForColName) {
         String q = query;
         int pos = q.indexOf('@');
         if (pos != -1) {
             q = q.substring(0, pos);
         }
 
-        String attributeForColName = m_attributeForColName;
         while (attributeForColName.startsWith("..")) {
             q = q.substring(0, q.lastIndexOf('/'));
             attributeForColName = attributeForColName.substring(3);
@@ -520,15 +522,19 @@ public class XPathSettings {
      * @return DataType of this XPath query or null if no type matches
      */
     public DataType getDataCellType() {
-        if (m_type.equals(XPathOutput.Boolean)) {
+        return xPathOutputToDataType(m_type);
+    }
+
+    static DataType xPathOutputToDataType(final XPathOutput type) {
+        if (type.equals(XPathOutput.Boolean)) {
             return BooleanCell.TYPE;
-        } else if (m_type.equals(XPathOutput.Double)) {
+        } else if (type.equals(XPathOutput.Double)) {
             return DoubleCell.TYPE;
-        } else if (m_type.equals(XPathOutput.Integer)) {
+        } else if (type.equals(XPathOutput.Integer)) {
             return IntCell.TYPE;
-        } else if (m_type.equals(XPathOutput.String)) {
+        } else if (type.equals(XPathOutput.String)) {
             return StringCell.TYPE;
-        } else if (m_type.equals(XPathOutput.Node)) {
+        } else if (type.equals(XPathOutput.Node)) {
             return XMLCell.TYPE;
         } else {
             return null;

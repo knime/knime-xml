@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="test">
+    <entry key="inputColumn" type="xstring" value="xml"/>
+    <entry key="removeInputColumn" type="xboolean" value="false"/>
+    <entry key="numberOfQueries" type="xint" value="2"/>
+    <entry key="newColumn0" type="xstring" value="null"/>
+    <entry key="useAttributeForColName0" type="xboolean" value="true"/>
+    <entry key="attributeForColName0" type="xstring" value="/sec"/>
+    <entry key="xpath0" type="xstring" value="/xml/first"/>
+    <entry key="returnType0" type="xstring" value="String"/>
+    <entry key="missingCellOnEmptySet0" type="xboolean" value="true"/>
+    <entry key="missingCellOnEmptyString0" type="xboolean" value="false"/>
+    <entry key="valueOnInfinityOrNaN0" type="xboolean" value="true"/>
+    <entry key="missingCellOnInfinityNaN0" type="xboolean" value="false"/>
+    <entry key="defaultNumber0" type="xint" value="0"/>
+    <entry key="xmlFragmentName0" type="xstring" value="fragment"/>
+    <entry key="multiTagOption0" type="xstring" value="MultipleColumns"/>
+    <entry key="newColumn1" type="xstring" value="constant_name"/>
+    <entry key="useAttributeForColName1" type="xboolean" value="false"/>
+    <entry key="attributeForColName1" type="xstring" value="name"/>
+    <entry key="xpath1" type="xstring" value="/*"/>
+    <entry key="returnType1" type="xstring" value="Node"/>
+    <entry key="missingCellOnEmptySet1" type="xboolean" value="true"/>
+    <entry key="missingCellOnEmptyString1" type="xboolean" value="false"/>
+    <entry key="valueOnInfinityOrNaN1" type="xboolean" value="false"/>
+    <entry key="missingCellOnInfinityNaN1" type="xboolean" value="true"/>
+    <entry key="defaultNumber1" type="xint" value="0"/>
+    <entry key="xmlFragmentName1" type="xstring" value="my_fragment"/>
+    <entry key="multiTagOption1" type="xstring" value="CollectionCell"/>
+    <config key="nsPrefixes">
+        <entry key="array-size" type="xint" value="1"/>
+        <entry key="0" type="xstring" value="pre"/>
+    </config>
+    <config key="namespaces">
+        <entry key="array-size" type="xint" value="1"/>
+        <entry key="0" type="xstring" value="some_namespace"/>
+    </config>
+    <entry key="useRootsNameSpace" type="xboolean" value="true"/>
+    <entry key="rootsNameSpacePrefix" type="xstring" value="dns"/>
+</config>
