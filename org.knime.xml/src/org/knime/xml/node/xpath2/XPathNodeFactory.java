@@ -127,9 +127,7 @@ public class XPathNodeFactory extends NodeFactory<XPathNodeModel>
 
     private static final String NODE_ICON = "./xpath.png";
 
-    private static final String SHORT_DESCRIPTION = """
-            Performs XPath queries on a XML column.
-            """;
+    private static final String SHORT_DESCRIPTION = "Performs XPath queries on a XML column.";
 
     private static final String FULL_DESCRIPTION = """
             The node takes the XML Documents of the selected column and performs XPath queries on them. The node
@@ -160,13 +158,11 @@ public class XPathNodeFactory extends NodeFactory<XPathNodeModel>
                 tag option'.</p>
             """;
 
-    private static final List<PortDescription> INPUT_PORTS = List.of(fixedPort("Input Table", """
-            Input table containing at least one XML column.
-            """));
+    private static final List<PortDescription> INPUT_PORTS =
+        List.of(fixedPort("Input Table", "Input table containing at least one XML column."));
 
-    private static final List<PortDescription> OUTPUT_PORTS = List.of(fixedPort("Output Table", """
-            The input table with additional columns containing the result of the XPath queries.
-            """));
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(fixedPort("Output Table",
+        "The input table with additional columns containing the result of the XPath queries."));
 
     private static final List<String> KEYWORDS = List.of( //
         "xml parse" //
@@ -211,6 +207,6 @@ public class XPathNodeFactory extends NodeFactory<XPathNodeModel>
         if (XPATH_WEBUI_DIALOG) {
             return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, XPathNodeParameters.class));
         }
-        throw new UnsupportedOperationException("KAI interface not available when WebUI dialog is disabled");
+        throw new UnsupportedOperationException("KAI interface not available when WebUI dialog is disabled"); // TODO are we sure this is caught properly?
     }
 }

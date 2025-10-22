@@ -48,7 +48,6 @@ package org.knime.xml.node.xpath2;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -88,7 +87,6 @@ import org.knime.node.parameters.updates.ParameterReference;
 import org.knime.node.parameters.updates.StateProvider;
 import org.knime.node.parameters.updates.ValueProvider;
 import org.knime.node.parameters.updates.ValueReference;
-import org.knime.node.parameters.updates.legacy.ColumnNameAutoGuessValueProvider;
 import org.knime.node.parameters.updates.util.BooleanReference;
 import org.knime.node.parameters.widget.choices.ChoicesProvider;
 import org.knime.node.parameters.widget.choices.DataTypeChoicesProvider;
@@ -120,16 +118,14 @@ class XPathNodeParameters implements NodeParameters {
 
     XPathNodeParameters(final NodeParametersInput input) {
         // Auto-select the first XML column if available
-        var tableSpec = input.getInTableSpec(0);
-        if (tableSpec.isPresent()) {
-            m_inputColumn = ColumnSelectionUtil.getFirstCompatibleColumn(tableSpec.get(), XMLValue.class)
-                .map(DataColumnSpec::getName).orElse(null);
-        }
+        // Currently, this does not do anything, since the default comes from the model and the node does auto-configure
+        // in XPathNodeModel#configure, but once we migrate the model, this is where the default will come from.
+        m_inputColumn = ColumnSelectionUtil.getFirstCompatibleColumnOfFirstPort(input, XMLValue.class)
+            .map(DataColumnSpec::getName).orElse(null);
     }
 
     @Section(title = "Input")
     interface InputSection {
-
     }
 
     @Section(title = "Outputs")
@@ -143,23 +139,9 @@ class XPathNodeParameters implements NodeParameters {
     @Widget(title = "XML column", description = "The column containing the XML cells.")
     @ChoicesProvider(XMLColumnsProvider.class)
     @ValueReference(InputColumnRef.class)
-    @ValueProvider(LoadFirstXMLColumnIfNoneSelected.class)
     @Layout(InputSection.class)
     @Persist(configKey = XPathNodeSettings.INPUT_COLUMN)
     String m_inputColumn;
-
-    static final class LoadFirstXMLColumnIfNoneSelected extends ColumnNameAutoGuessValueProvider {
-
-        LoadFirstXMLColumnIfNoneSelected() {
-            super(InputColumnRef.class);
-        }
-
-        @Override
-        protected Optional<DataColumnSpec> autoGuessColumn(final NodeParametersInput parametersInput) {
-            return ColumnSelectionUtil.getFirstCompatibleColumnOfFirstPort(parametersInput, XMLValue.class);
-        }
-
-    }
 
     static final class XMLColumnsProvider extends CompatibleColumnsProvider {
         XMLColumnsProvider() {
@@ -173,9 +155,7 @@ class XPathNodeParameters implements NodeParameters {
     boolean m_removeSourceColumn;
 
     @Layout(OutputSection.class)
-    @Widget(title = "Output columns", description = """
-            Configure the XPaths used to extract data from the input column.
-            """)
+    @Widget(title = "Output columns", description = "Configure the XPaths used to extract data from the input column.")
     @ArrayWidget(addButtonText = "Add XPath", elementTitle = "XPath")
     @PersistArray(AppendIndexArrayPersistor.class)
     XPathOutputSetting[] m_outputSettings = new XPathOutputSetting[0];
@@ -208,7 +188,7 @@ class XPathNodeParameters implements NodeParameters {
         static abstract class XPathSettingsFieldPersistor<T>
             implements ElementFieldPersistor<T, Integer, XPathSettings> {
 
-            String m_configKeyWithoutIndex;
+            final String m_configKeyWithoutIndex;
 
             XPathSettingsFieldPersistor(final String configKeyWithoutIndex) {
                 m_configKeyWithoutIndex = configKeyWithoutIndex;
@@ -288,7 +268,7 @@ class XPathNodeParameters implements NodeParameters {
         @TextInputWidget(patternValidation = ColumnNameValidation.class)
         @Widget(title = "Column name", description = "The name for the output column.")
         @Effect(predicate = ColumnNameMode.IsAttribute.class, type = EffectType.HIDE)
-        String m_columnName = "XML - XPATH";
+        String m_columnName = "XML - XPATH"; // see auto-congure in XPathNodeSettings#loadSettingsDialog
 
         static final class ColumnNamePersistor extends XPathSettingsFieldPersistor<String> {
 
@@ -310,9 +290,8 @@ class XPathNodeParameters implements NodeParameters {
         }
 
         @PersistArrayElement(XPathQueryColumnNamePersistor.class)
-        @Widget(title = "Column name XPath (relative to value query)", description = """
-                The XPath query to extract the column name from the XML input.
-                """)
+        @Widget(title = "Column name XPath (relative to value query)",
+            description = "The XPath query to extract the column name from the XML input.")
         @Effect(predicate = ColumnNameMode.IsAttribute.class, type = EffectType.SHOW)
         @CustomValidation(XPathQueryColumnNameValidation.class)
         String m_xpathQueryColumnName = "name";
@@ -816,7 +795,6 @@ class XPathNodeParameters implements NodeParameters {
                 final var rootNSPrefix = m_rootNamespacePrefix.get();
                 if (!useRootNS) {
                     return null;
-
                 }
                 return new PatternValidation() {
 
@@ -932,7 +910,7 @@ class XPathNodeParameters implements NodeParameters {
 
         }
 
-        XPathFactory factory = XPathFactory.newInstance();
+        final XPathFactory factory = XPathFactory.newInstance();
 
         XPath initializeXPath() {
             XPath xpath = factory.newXPath();
@@ -945,6 +923,7 @@ class XPathNodeParameters implements NodeParameters {
                 final var extendedPrefixes = Arrays.copyOf(prefixes, prefixes.length + 1);
                 final var extendedUris = Arrays.copyOf(uris, uris.length + 1);
                 extendedPrefixes[extendedPrefixes.length - 1] = rootPrefix;
+                // dummy suffices, since this is not used on XPath compilation
                 extendedUris[extendedUris.length - 1] = "dummyRootNamespaceURI";
                 prefixes = extendedPrefixes;
                 uris = extendedUris;
